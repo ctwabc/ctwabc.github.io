@@ -29,15 +29,15 @@
 <meta property="og:site_name" content="ctwabc&#39;s Blog">
 <meta property="og:description" content="CSRF（Cross-site request forgery）跨站请求伪造：攻击者诱导受害者进入第三方网站，在第三方网站中，向被攻击网站发送跨站请求。利用受害者在被攻击网站已经获取的注册凭证，绕过后台的用户验证，达到冒充用户对被攻击的网站执行某项操作的目的。&#x2F;&#x2F;那现实中的例子来举的话，像跟在别人后面进学校一个典型的CSRF攻击有着如下的流程：  受害者登录 a.com，并保留">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://ctwabc.github.io/images/csrf.png">
+<meta property="og:image" content="http://ctwabc.github.io/2026/06/09/csrf/csrf.png">
 <meta property="article:published_time" content="2026-06-09T09:42:43.000Z">
-<meta property="article:modified_time" content="2026-06-09T15:53:49.888Z">
+<meta property="article:modified_time" content="2026-06-10T03:10:40.997Z">
 <meta property="article:author" content="ctwabc">
 <meta property="article:tag" content="CSRF">
 <meta property="article:tag" content="Web安全">
 <meta property="article:tag" content="前端安全">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://ctwabc.github.io/images/csrf.png">
+<meta name="twitter:image" content="http://ctwabc.github.io/2026/06/09/csrf/csrf.png">
 
 <link rel="canonical" href="http://ctwabc.github.io/2026/06/09/csrf/">
 
@@ -220,10 +220,16 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2026-06-09 17:42:43 / 修改时间：23:53:49" itemprop="dateCreated datePublished" datetime="2026-06-09T17:42:43+08:00">2026-06-09</time>
+              <time title="创建时间：2026-06-09 17:42:43" itemprop="dateCreated datePublished" datetime="2026-06-09T17:42:43+08:00">2026-06-09</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-06-10 11:10:40" itemprop="dateModified" datetime="2026-06-10T11:10:40+08:00">2026-06-10</time>
+              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="far fa-folder"></i>
@@ -254,10 +260,10 @@
 <li>a.com 以受害者的名义执行了 act&#x3D;xx。</li>
 <li>攻击完成，攻击者在受害者不知情的情况下，冒充受害者，让 a.com 执行了自己定义的操作。</li>
 </ul>
-<p>这个第三方网站就是自己配置的恶意网站。<br><img src="/./images/csrf.png" alt="我的本地截图"><br>差不多就是这样的。也就是第三方网站像目标网站发送请求。<br>把自己想干的事情通过参数穿过去就好了。</p>
-<p>如果对方后端只接受json数据，那怎么传呢？<br>json数据长这样<br>{<br>“name”: “WebGoat”,<br>“email”: “<a href="mailto:&#x77;&#x65;&#98;&#x67;&#x6f;&#97;&#x74;&#64;&#x77;&#101;&#98;&#x67;&#x6f;&#97;&#116;&#x2e;&#111;&#114;&#103;">webgoat@webgoat.org</a>“,<br>“content”: “WebGoat is the best!!”<br>}</p>
+<p>这个第三方网站就是自己配置的恶意网站。<br><img src="/2026/06/09/csrf/csrf.png" alt="我的本地截图"><br>差不多就是这样的。也就是第三方网站像目标网站发送请求。<br>把自己想干的事情通过参数穿过去就好了。</p>
+<p>如果对方后端只接受json数据，那怎么传呢？<br>json数据长这样<br>{<br>“name”: “WebGoat”,<br>“email”: “<a href="mailto:&#x77;&#x65;&#98;&#103;&#111;&#97;&#x74;&#64;&#x77;&#101;&#x62;&#x67;&#x6f;&#97;&#x74;&#x2e;&#x6f;&#x72;&#103;">webgoat@webgoat.org</a>“,<br>“content”: “WebGoat is the best!!”<br>}</p>
 <p>普通的 HTML <form> 表单提交时，默认的数据格式是 application&#x2F;x-www-form-urlencoded（即 key1&#x3D;value1&amp;key2&#x3D;value2）。如果你在表单里老老实实写 <input name="name" value="WebGoat">，后端一收到，发现不是标准的 JSON 格式，就会直接报 415 Unsupported Media Type 错误并拒绝处理。<br>也就是说上面的input标签里的会变成name&#x3D;WebGoat，很显然这不是我们想要。<br>但是，我们可以调整一下我们的数据。举个例子:<br><input name= ' {"name": "WebGoat", "email": "webgoat@webgoat.org", "content": "WebGoat is the best!!", "ignore_me":" ' value='test"}' type='hidden'></p>
-<p>{“name”: “WebGoat”, “email”: “<a href="mailto:&#119;&#101;&#98;&#103;&#x6f;&#x61;&#116;&#64;&#x77;&#101;&#x62;&#x67;&#111;&#x61;&#116;&#x2e;&#111;&#x72;&#103;">webgoat@webgoat.org</a>“, “content”: “WebGoat is the best!!”, “ignore_me”:”这是一部分<br>test”}这是一部分<br>通过&#x3D;拼接<br>{“name”: “WebGoat”, “email”: “<a href="mailto:&#x77;&#x65;&#98;&#103;&#111;&#97;&#x74;&#64;&#119;&#101;&#x62;&#x67;&#x6f;&#x61;&#x74;&#46;&#111;&#x72;&#103;">webgoat@webgoat.org</a>“, “content”: “WebGoat is the best!!”, “ignore_me”:”&#x3D;test”}<br>可以看到我们传过去的数据成为json格式了<br>单引号和双引号是同级的，他看到是‘开始的会以’结束。</p>
+<p>{“name”: “WebGoat”, “email”: “<a href="mailto:&#x77;&#x65;&#98;&#x67;&#111;&#x61;&#x74;&#x40;&#x77;&#101;&#98;&#x67;&#x6f;&#97;&#x74;&#46;&#111;&#114;&#103;">webgoat@webgoat.org</a>“, “content”: “WebGoat is the best!!”, “ignore_me”:”这是一部分<br>test”}这是一部分<br>通过&#x3D;拼接<br>{“name”: “WebGoat”, “email”: “<a href="mailto:&#x77;&#x65;&#x62;&#103;&#111;&#x61;&#116;&#64;&#x77;&#x65;&#98;&#103;&#x6f;&#x61;&#116;&#x2e;&#111;&#114;&#x67;">webgoat@webgoat.org</a>“, “content”: “WebGoat is the best!!”, “ignore_me”:”&#x3D;test”}<br>可以看到我们传过去的数据成为json格式了<br>单引号和双引号是同级的，他看到是‘开始的会以’结束。</p>
 
     </div>
 
@@ -369,7 +375,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">2</span>
+          <span class="site-state-item-count">3</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -378,7 +384,7 @@
         <span class="site-state-item-name">分类</span>
       </div>
       <div class="site-state-item site-state-tags">
-        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-count">6</span>
         <span class="site-state-item-name">标签</span>
       </div>
   </nav>
