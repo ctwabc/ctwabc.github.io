@@ -206,7 +206,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2026-06-10 09:21:37 / 修改时间：11:16:52" itemprop="dateCreated datePublished" datetime="2026-06-10T09:21:37+08:00">2026-06-10</time>
+              <time title="创建时间：2026-06-10 09:21:37 / 修改时间：14:19:12" itemprop="dateCreated datePublished" datetime="2026-06-10T09:21:37+08:00">2026-06-10</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -282,6 +282,8 @@
 <p>可以想到用XXE执行SSRF</p>
 <p>把url地址改成内网地址不就是SSRF吗。</p>
 <p>至于在内网当中的ip是什么，端口是什么，可以通过爆破来解决。</p>
+<p>参考文章: </p>
+<p><a target="_blank" rel="noopener" href="https://drun1baby.top/2022/04/19/%E4%BB%8E0%E5%88%B01%E5%AE%8C%E5%85%A8%E6%8E%8C%E6%8F%A1XXE/">https://drun1baby.top/2022/04/19/%E4%BB%8E0%E5%88%B01%E5%AE%8C%E5%85%A8%E6%8E%8C%E6%8F%A1XXE/</a></p>
 
       
     </div>
@@ -324,10 +326,16 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2026-06-09 18:40:15 / 修改时间：23:46:25" itemprop="dateCreated datePublished" datetime="2026-06-09T18:40:15+08:00">2026-06-09</time>
+              <time title="创建时间：2026-06-09 18:40:15" itemprop="dateCreated datePublished" datetime="2026-06-09T18:40:15+08:00">2026-06-09</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-06-10 14:27:07" itemprop="dateModified" datetime="2026-06-10T14:27:07+08:00">2026-06-10</time>
+              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="far fa-folder"></i>
@@ -350,6 +358,9 @@
 
       
           <p>SSRF是一种攻击模式。<br>我觉得就是让对方的服务器当代理，访问内网中的服务器。<br>正常情况下，对方内网中不让外网访问的服务器是访问不了的，但是web服务器啥的肯定可以访问，而这个web服务器是否可以畅通无阻的与内网当中的各种服务器交流呢。在可以交流的前提下，这个web服务器有ssrf漏洞的话，就可以让攻击者访问到内网中的其他服务器了。</p>
+<p>写的比较短以后进行补充。</p>
+<p>参考文章:</p>
+<p><a target="_blank" rel="noopener" href="https://drun1baby.top/2022/05/16/%E4%BB%8E0%E5%88%B01%E5%AE%8C%E5%85%A8%E6%8E%8C%E6%8F%A1SSRF/">https://drun1baby.top/2022/05/16/%E4%BB%8E0%E5%88%B01%E5%AE%8C%E5%85%A8%E6%8E%8C%E6%8F%A1SSRF/</a></p>
 
       
     </div>
@@ -400,7 +411,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2026-06-10 11:10:40" itemprop="dateModified" datetime="2026-06-10T11:10:40+08:00">2026-06-10</time>
+                <time title="修改时间：2026-06-10 14:30:47" itemprop="dateModified" datetime="2026-06-10T14:30:47+08:00">2026-06-10</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -433,9 +444,12 @@
 <li>攻击完成，攻击者在受害者不知情的情况下，冒充受害者，让 a.com 执行了自己定义的操作。</li>
 </ul>
 <p>这个第三方网站就是自己配置的恶意网站。<br><img src="/2026/06/09/csrf/csrf.png" alt="我的本地截图"><br>差不多就是这样的。也就是第三方网站像目标网站发送请求。<br>把自己想干的事情通过参数穿过去就好了。</p>
-<p>如果对方后端只接受json数据，那怎么传呢？<br>json数据长这样<br>{<br>“name”: “WebGoat”,<br>“email”: “<a href="mailto:&#x77;&#101;&#x62;&#103;&#111;&#97;&#x74;&#x40;&#119;&#101;&#x62;&#103;&#111;&#97;&#116;&#x2e;&#111;&#114;&#103;">webgoat@webgoat.org</a>“,<br>“content”: “WebGoat is the best!!”<br>}</p>
-<p>普通的 HTML <form> 表单提交时，默认的数据格式是 application&#x2F;x-www-form-urlencoded（即 key1&#x3D;value1&amp;key2&#x3D;value2）。如果你在表单里老老实实写 <input name="name" value="WebGoat">，后端一收到，发现不是标准的 JSON 格式，就会直接报 415 Unsupported Media Type 错误并拒绝处理。<br>也就是说上面的input标签里的会变成name&#x3D;WebGoat，很显然这不是我们想要。<br>但是，我们可以调整一下我们的数据。举个例子:<br><input name= ' {"name": "WebGoat", "email": "webgoat@webgoat.org", "content": "WebGoat is the best!!", "ignore_me":" ' value='test"}' type='hidden'></p>
-<p>{“name”: “WebGoat”, “email”: “<a href="mailto:&#119;&#x65;&#98;&#103;&#x6f;&#97;&#x74;&#64;&#119;&#101;&#x62;&#103;&#111;&#97;&#116;&#46;&#111;&#x72;&#103;">webgoat@webgoat.org</a>“, “content”: “WebGoat is the best!!”, “ignore_me”:”这是一部分<br>test”}这是一部分<br>通过&#x3D;拼接<br>{“name”: “WebGoat”, “email”: “<a href="mailto:&#x77;&#101;&#98;&#x67;&#x6f;&#97;&#x74;&#64;&#119;&#101;&#x62;&#x67;&#x6f;&#97;&#x74;&#46;&#x6f;&#114;&#x67;">webgoat@webgoat.org</a>“, “content”: “WebGoat is the best!!”, “ignore_me”:”&#x3D;test”}<br>可以看到我们传过去的数据成为json格式了<br>单引号和双引号是同级的，他看到是‘开始的会以’结束。</p>
+<p>如果对方后端只接受json数据，那怎么传呢？<br>json数据长这样<br>{<br>“name”: “WebGoat”,<br>“email”: “<a href="mailto:&#x77;&#x65;&#98;&#103;&#111;&#x61;&#x74;&#x40;&#x77;&#x65;&#98;&#103;&#x6f;&#97;&#116;&#x2e;&#111;&#114;&#x67;">webgoat@webgoat.org</a>“,<br>“content”: “WebGoat is the best!!”<br>}</p>
+<p>普通的 HTML <form> 表单提交时，默认的数据格式是 application&#x2F;x-www-form-urlencoded（即 key1&#x3D;value1&amp;key2&#x3D;value2）。如果你在表单里老老实实写 <code>&lt;input name=&quot;name&quot; value=&quot;WebGoat&quot;&gt;</code>，后端一收到，发现不是标准的 JSON 格式，就会直接报 415 Unsupported Media Type 错误并拒绝处理。<br>也就是说上面的input标签里的会变成name&#x3D;WebGoat，很显然这不是我们想要。<br>但是，我们可以调整一下我们的数据。举个例子:<br><input name= ' {"name": "WebGoat", "email": "webgoat@webgoat.org", "content": "WebGoat is the best!!", "ignore_me":" ' value='test"}' type='hidden'></p>
+<p>{“name”: “WebGoat”, “email”: “<a href="mailto:&#x77;&#101;&#98;&#x67;&#111;&#x61;&#x74;&#x40;&#x77;&#101;&#x62;&#103;&#111;&#x61;&#116;&#x2e;&#x6f;&#114;&#x67;">webgoat@webgoat.org</a>“, “content”: “WebGoat is the best!!”, “ignore_me”:”这是一部分<br>test”}这是一部分<br>通过&#x3D;拼接<br>{“name”: “WebGoat”, “email”: “<a href="mailto:&#119;&#x65;&#98;&#103;&#111;&#97;&#x74;&#x40;&#x77;&#x65;&#98;&#103;&#x6f;&#97;&#x74;&#x2e;&#x6f;&#114;&#x67;">webgoat@webgoat.org</a>“, “content”: “WebGoat is the best!!”, “ignore_me”:”&#x3D;test”}<br>可以看到我们传过去的数据成为json格式了<br>单引号和双引号是同级的，他看到是‘开始的会以’结束。</p>
+<p>参考文章:</p>
+<p><a target="_blank" rel="noopener" href="https://drun1baby.top/2022/05/08/%E4%BB%8E0%E5%88%B01%E5%AE%8C%E5%85%A8%E6%8E%8C%E6%8F%A1CSRF/">https://drun1baby.top/2022/05/08/%E4%BB%8E0%E5%88%B01%E5%AE%8C%E5%85%A8%E6%8E%8C%E6%8F%A1CSRF/</a></p>
+<p>不定时会进行补充</p>
 
       
     </div>
