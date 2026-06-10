@@ -22,18 +22,23 @@
     var CONFIG = {"hostname":"ctwabc.github.io","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":true,"color":"#4A90D9","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
-  <meta name="description" content="学习笔记">
-<meta property="og:type" content="website">
-<meta property="og:title" content="ctwabc&#39;s Blog">
-<meta property="og:url" content="http://ctwabc.github.io/tags/%E5%89%8D%E7%AB%AF%E5%AE%89%E5%85%A8/index.html">
+  <meta name="description" content="防火墙规避 以下使用的是Nmap  控制MAC,IP,端口进行规避 1.利用诱饵，将自己的IP与其他IP混杂在一起 -D DECOY_IP1,DECOY_IP2,ME 2.随机诱饵, -D RND,RND,ME 3.HTTP&#x2F;SOCK4代理 –proxies PROXY_URL 4.伪造源MAC地址 –spoof-mac MAC_ADDRESS 5.伪造源IP地址 -S IP_ADDRE">
+<meta property="og:type" content="article">
+<meta property="og:title" content="FireWall">
+<meta property="og:url" content="http://ctwabc.github.io/2026/06/10/FireWall/index.html">
 <meta property="og:site_name" content="ctwabc&#39;s Blog">
-<meta property="og:description" content="学习笔记">
+<meta property="og:description" content="防火墙规避 以下使用的是Nmap  控制MAC,IP,端口进行规避 1.利用诱饵，将自己的IP与其他IP混杂在一起 -D DECOY_IP1,DECOY_IP2,ME 2.随机诱饵, -D RND,RND,ME 3.HTTP&#x2F;SOCK4代理 –proxies PROXY_URL 4.伪造源MAC地址 –spoof-mac MAC_ADDRESS 5.伪造源IP地址 -S IP_ADDRE">
 <meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://ctwabc.github.io/2026/06/10/FireWall/firewall1.png">
+<meta property="og:image" content="http://ctwabc.github.io/2026/06/10/FireWall/firewall2.png">
+<meta property="article:published_time" content="2026-06-10T06:42:54.000Z">
+<meta property="article:modified_time" content="2026-06-10T09:02:26.860Z">
 <meta property="article:author" content="ctwabc">
 <meta property="article:tag" content="Web安全">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://ctwabc.github.io/2026/06/10/FireWall/firewall1.png">
 
-<link rel="canonical" href="http://ctwabc.github.io/tags/%E5%89%8D%E7%AB%AF%E5%AE%89%E5%85%A8/">
+<link rel="canonical" href="http://ctwabc.github.io/2026/06/10/FireWall/">
 
 
 <script id="page-configurations">
@@ -41,7 +46,7 @@
   CONFIG.page = {
     sidebar: "",
     isHome : false,
-    isPost : false,
+    isPost : true,
     lang   : 'zh-CN'
   };
 </script>
@@ -74,7 +79,7 @@
 <meta property="og:image" content="https://github.com/ctwabc.png">
 <meta name="twitter:card" content="summary">
 
-  <title>标签: 前端安全 | ctwabc's Blog</title>
+  <title>FireWall | ctwabc's Blog</title>
   
 
 
@@ -175,51 +180,134 @@
         <div class="content-wrap">
           
 
-          <div class="content tag">
+          <div class="content post posts-expand">
             
 
+    
   
   
-  
-  <div class="post-block">
-    <div class="posts-collapse">
-      <div class="collection-title">
-        <h2 class="collection-header">前端安全
-          <small>标签</small>
-        </h2>
-      </div>
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://ctwabc.github.io/2026/06/10/FireWall/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://github.com/ctwabc.png">
+      <meta itemprop="name" content="ctwabc">
+      <meta itemprop="description" content="学习笔记">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="ctwabc's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          FireWall<a href="https://github.com/user-name/repo-name/tree/branch-name/subdirectory-name_posts/FireWall.md" class="post-edit-link" title="编辑" rel="noopener" target="_blank"><i class="fa fa-pencil-alt"></i></a>
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2026-06-10 14:42:54 / 修改时间：17:02:26" itemprop="dateCreated datePublished" datetime="2026-06-10T14:42:54+08:00">2026-06-10</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
 
       
-    <div class="collection-year">
-      <span class="collection-header">2026</span>
+        <h3 id="防火墙规避"><a href="#防火墙规避" class="headerlink" title="防火墙规避"></a>防火墙规避</h3><blockquote>
+<p>以下使用的是Nmap</p>
+</blockquote>
+<p><em><strong>控制MAC,IP,端口进行规避</strong></em></p>
+<p>1.利用诱饵，将自己的IP与其他IP混杂在一起 -D DECOY_IP1,DECOY_IP2,ME</p>
+<p>2.随机诱饵, -D RND,RND,ME</p>
+<p>3.HTTP&#x2F;SOCK4代理 –proxies PROXY_URL</p>
+<p>4.伪造源MAC地址 –spoof-mac MAC_ADDRESS</p>
+<p>5.伪造源IP地址 -S IP_ADDRESS</p>
+<p>6.使用特定的端口号 -g PORT_NUM 或者 –source-port PORT_NUM       </p>
+<p><em><strong>强制分片，MTU，数据长度</strong></em></p>
+<blockquote>
+<p>⚠️  <strong>注意: 分的数据都是数据体的部分，例如IP数据包，由IP首部和传输的数据部分组成，分成8字节只是将传输的数据部分分成8字节，因为没有IP首部就没办法传了。一下1、2、3、4都是如此</strong></p>
+</blockquote>
+<p>1.将IP数据分片成8字节 -f</p>
+<p>2.将IP数据分片成16字节 -ff</p>
+<p>3.使用给定的MTU对数据包进行分片 –mtu VALUE</p>
+<p>4.指定数据包长度 –data-length NUM</p>
+<p><em><strong>修改报头字段进行规避</strong></em></p>
+<p>1.设置IP的ttl –ttl VALUE</p>
+<p>2.发送带有特定IP Options的数据包 –ip-options OPTIONS</p>
+<p>3.发送带有错误TCP&#x2F;UDP校验和的数据包 –badsum</p>
+<p><img src="/2026/06/10/FireWall/firewall1.png" alt="IP头部"></p>
+<p>也就是修改Time to Live和Options</p>
+<p><img src="/2026/06/10/FireWall/firewall2.png" alt="TCP头部"></p>
+<p>改的Checksum</p>
+<p><em><strong>利用端口跳跃</strong></em></p>
+<blockquote>
+<p>我是在tryhackme上学的这部分，没太看懂，下面这个是我文AI知道的。</p>
+</blockquote>
+<p>这是在控制了对方的服务器的情况下，防止因为频繁的流量交流被防火墙检测到。</p>
+<p>端口跳跃就是在防火墙允许的端口间频繁切换(时间很短)，从而防止长时间在固定端口上交流。</p>
+<p>有两种方式</p>
+<p>1.基于时间&#x2F;算法同步</p>
+<p>通信的两端共享一个<strong>密钥</strong>和<strong>时间同步算法</strong>。算法决定“在第 1 毫秒用 5001 端口，第 2 毫秒用 6234 端口，第 3 毫秒用 4012 端口….</p>
+<p>2.敲暗号</p>
+<p>服务端的所有端口默认全部<strong>死死关闭</strong>，防火墙对其显示为 <code>Filtered</code></p>
+<p>客户端在建立真正连接前，必须先向服务端一连串指定的端口发送特定序列的探测包。</p>
+<p>例如暗号是：先踩一下 <code>1111</code>，再踩一下 <code>9999</code>，最后踩一下 <code>5555</code>。</p>
+<p>服务端的内核态（或敲门守护进程）一旦捕捉到这个特定序列的“暗号”，就会临时为这个特定的客户端 IP 开启真正的通信端口。通信完后，立刻再度关闭。也就是说我放进去的后门可以看到流量被拒绝了，一看到一串的特定流量被拒绝了就打开端口。</p>
+<p><em><strong>利用端口隧道</strong></em></p>
+<p>还是控制了对方的服务器的情况下。我想要吧流量送到对方的另一台服务器上，或者是这台受控机器的另一个端口(我们的流量没有办法直接传过去，防火墙挡掉了)。防火墙阻止来自不信任网络的80端口流量，但是8008的流量并未被阻止。我们可以把流量发到受控机器的8008端口，再让他把流量转发给另一个机器或端口。</p>
+<p>后续可能会进行补充</p>
+<p>参考文章:<a target="_blank" rel="noopener" href="https://tryhackme.com/room/redteamfirewalls">https://tryhackme.com/room/redteamfirewalls</a></p>
+
     </div>
 
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
+    
+    
+    
+<div style="margin-top: 48px; padding-top: 24px; border-top: 1px solid rgba(128,128,128,0.15); text-align: center; color: #999; font-size: 0.88em;">
+  <p>感谢阅读 🙏 如果这篇文章对你有帮助，欢迎分享给更多人。</p>
+</div>
 
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2026-06-09T17:42:43+08:00"
-              content="2026-06-09">
-          06-09
-        </time>
-      </div>
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
 
-      <div class="post-title">
-          <a class="post-title-link" href="/2026/06/09/csrf/" itemprop="url">
-            <span itemprop="name">CSRF 跨站请求伪造详解</span>
-          </a>
-      </div>
-
-    </header>
-  </article>
-
-    </div>
   </div>
-  
-  
-  
+</div>
 
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2026/06/10/XXE/" rel="prev" title="学习XXE">
+      <i class="fa fa-chevron-left"></i> 学习XXE
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
   
 
 
@@ -272,6 +360,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%98%B2%E7%81%AB%E5%A2%99%E8%A7%84%E9%81%BF"><span class="nav-number">1.</span> <span class="nav-text">防火墙规避</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
