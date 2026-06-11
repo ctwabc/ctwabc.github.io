@@ -181,6 +181,93 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://ctwabc.github.io/2026/06/11/shiro550/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://github.com/ctwabc.png">
+      <meta itemprop="name" content="ctwabc">
+      <meta itemprop="description" content="学习笔记">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="ctwabc's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2026/06/11/shiro550/" class="post-title-link" itemprop="url">Shiro550</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2026-06-11 20:24:59 / 修改时间：22:58:39" itemprop="dateCreated datePublished" datetime="2026-06-11T20:24:59+08:00">2026-06-11</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p><em><strong>流程分析</strong></em></p>
+<p>登录以后会发一个Cookie给我们，这样下一次就会把Cookie发过去，免去登陆。</p>
+<p>看一下Cookie处理方法</p>
+<p><img src="/2026/06/11/shiro550/shiro1.png" alt="截图"></p>
+<p>从HTTP请求中获取Cookie，然后Base64解码。</p>
+<p>找一下谁调用了这个方法</p>
+<p><img src="/2026/06/11/shiro550/shiro2.png" alt="截图"></p>
+<p>可以看到接收到解码以后的Cookie,要将它转换成认证信息。跟进</p>
+<p><img src="/2026/06/11/shiro550/shiro3.png" alt="截图"></p>
+<p>解码完以后解密，解密完了然后反序列话。线看一下反序列化。</p>
+<p><img src="/2026/06/11/shiro550/shiro4.png" alt="截图"></p>
+<p>可以看到他调用的是原生的反序列化，也就是说调用传过来的序列化对象的readObject方法。如果有用一些有反序列化漏洞的依赖的话就可以利用了(CC什么的)。</p>
+<p>看一下解密部分</p>
+<p><img src="/2026/06/11/shiro550/shiro5.png" alt="截图"></p>
+<p>获取解密服务，然后解密。跟进</p>
+<p><img src="/2026/06/11/shiro550/shiro6.png" alt="截图"></p>
+<p>可以看到是个接口，关注点是两个参数，第一个参数是密文，第二个参数是密钥。既然如此就要关注getDecryptionCipherkey()这个方法了。</p>
+<p><img src="/2026/06/11/shiro550/shiro7.png" alt="截图"></p>
+<p><img src="/2026/06/11/shiro550/shiro8.png" alt="截图"></p>
+<p>得找一下谁设置了decryptionCipherKey</p>
+<p><img src="/2026/06/11/shiro550/shiro9.png" alt="截图"></p>
+<p>找一下谁调用了这个方法</p>
+<p><img src="/2026/06/11/shiro550/shiro10.png" alt="截图"></p>
+<p>再找一下谁掉用了这个方法</p>
+<p><img src="/2026/06/11/shiro550/shiro11.png" alt="截图"></p>
+<p><img src="/2026/06/11/shiro550/shiro12.png" alt="截图"></p>
+<p>可以看到他这个密钥是不变的常量，这个密钥我们是可以拿到的，我们这不都看到了吗，复制粘贴就行。</p>
+<p>有了密钥就可以把序列化的字节码加密，给到shiro以后shiro就会反序列化了。</p>
+<p>推荐视频: <a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV1iF411b7bD/?spm_id_from=333.1387.upload.video_card.click&vd_source=c4cebc18d34b17376b1b2a473da11100">https://www.bilibili.com/video/BV1iF411b7bD/?spm_id_from=333.1387.upload.video_card.click&amp;vd_source=c4cebc18d34b17376b1b2a473da11100</a></p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="http://ctwabc.github.io/2026/06/11/paddingoracle/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1109,7 +1196,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">8</span>
+          <span class="site-state-item-count">9</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
