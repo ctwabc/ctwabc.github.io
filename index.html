@@ -181,6 +181,161 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://ctwabc.github.io/2026/06/10/waf/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://github.com/ctwabc.png">
+      <meta itemprop="name" content="ctwabc">
+      <meta itemprop="description" content="学习笔记">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="ctwabc's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2026/06/10/waf/" class="post-title-link" itemprop="url">WAF</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2026-06-10 20:32:07" itemprop="dateCreated datePublished" datetime="2026-06-10T20:32:07+08:00">2026-06-10</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-06-11 15:23:08" itemprop="dateModified" datetime="2026-06-11T15:23:08+08:00">2026-06-11</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="Web-Application-Firewall-WAF"><a href="#Web-Application-Firewall-WAF" class="headerlink" title="Web Application Firewall(WAF)"></a>Web Application Firewall(WAF)</h2><p><em><strong>用途</strong></em></p>
+<p>检查HTTP(S)流量，包括入站和出站流量，检测出有恶意意图的流量。主要解决OWASP Top 10 Web安全问题。</p>
+<p><em><strong>检查</strong></em></p>
+<p>无论怎么样肯定得知道有没有WAF吧。下面我列举一些检查是否有WAF的方法</p>
+<p>一些WAF在HTTP标头中的形式</p>
+<p>server: cloudflare	Cloudflare</p>
+<p>X-Sucuri-ID	Sucuri</p>
+<p>X-CDN: Imperva	Incapsula&#x2F;Imperva</p>
+<p>Akami-Origin-Hop: 2	Akamai</p>
+<p>X-F5-Application: ASM	F5 Advanced WAF</p>
+<p>检测方法1: 很简单就是看HTTP标头 curl -I <a target="_blank" rel="noopener" href="https://example.com/">https://example.com</a></p>
+<p>检测方法2: ‘ OR ‘1’&#x3D;’1 – 是很典型的sql注入，可以想到是个WAF就会对他进行处理，而我们要做的就是这样的sql注入，然后看他的反应。</p>
+<p>例如 curl -I <a target="_blank" rel="noopener" href="https://example.com/q=1">https://example.com/q=1</a>‘ %20OR%20‘1’&#x3D;‘1 对空格编码</p>
+<p>如果返回的是 HTTP&#x2F;1.1 403 Forbidden这样的说明有WAF</p>
+<table>
+<thead>
+<tr>
+<th>回复</th>
+<th align="left">意思</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>403 Forbidden 空白页</td>
+<td align="left">经典的WAF块</td>
+</tr>
+<tr>
+<td>406 Not Acceptable</td>
+<td align="left">ModSecurity CRS中的常见情况</td>
+</tr>
+<tr>
+<td>自定义 HTML页面，显示“拒绝访问”</td>
+<td align="left">厂商特定(例如 Fortinet,Barracuda)</td>
+</tr>
+<tr>
+<td>响应延迟(&gt;500ms)</td>
+<td align="left">WAF开销</td>
+</tr>
+<tr>
+<td>与正常搜索一样</td>
+<td align="left">可能没有WAF</td>
+</tr>
+</tbody></table>
+<p>检测方法3: 用工具wafw00f</p>
+<p>wafw00f <a target="_blank" rel="noopener" href="https://example.com/">https://example.com</a></p>
+<p>用nmap </p>
+<p>Nmap -p 80,443 –script http-waf-fingerprint target_IP</p>
+<p>tryhackme说是wafw00f更好</p>
+<p><em><strong>类型</strong></em></p>
+<p>1.基于特征的</p>
+<p>将数据包与已知的恶意特征码列表进行比较，有效性取决于恶意特征码数据库。</p>
+<p>规避方法</p>
+<p>编码: 跟我上面写的sql注入一样，编码空格啥的</p>
+<p>大小写: uNiOn sELeCt 像这样</p>
+<p>插入注释: 插入注释</p>
+<p>更换语法: 1’ and sleep(5) –	1’ and if(1&#x3D;1, sleep(5), 1) –</p>
+<p>优点: 低误报率(误报率就是将正常流量识别为恶意流量)，易于编写和理解，检测速度快</p>
+<p>缺点: 难以识别混淆手段(上述规避方法)，无法检测零日攻击，需要不断更新</p>
+<p>2.检测行为</p>
+<p>经过训练的引擎，建立一个正常基线，偏离了这个基线就是不正常的流量。</p>
+<p>优点: 可以防止零日漏洞，用简单的编码方式更难绕过，随着时间推移适应应用程序逻辑</p>
+<p>缺点: 误报率高，需要培训期，计算成本高昂</p>
+<p><em><strong>局限性</strong></em></p>
+<p>WAF不理解应用程序逻辑</p>
+<p>以IDOR漏洞举例，GET &#x2F;api&#x2F;user&#x2F;123 我们把123改成124是恶意行为但是WAF不会拦截。因为&#x2F;api&#x2F;user&#x2F;124本身是很正常的，他变得不安全是因为访问这个地址的人的身份。</p>
+<p>授权绕过: 例如&#x2F;admin,无需管理员权限就可以访问</p>
+<p>静态条件和重放攻击</p>
+<p>加密流量也不行，加密了所以看不到流量了。</p>
+<p>客户端攻击难以察觉，例如给予DOM的XSS攻击，这个是传客户端攻击，流量不会到服务器。</p>
+<p>错误的配置引入新的攻击面</p>
+<p>占据资源，需要考虑性能</p>
+<p><em><strong>Version 3.3.5 of OWASP CRS</strong></em></p>
+<p>相关文章: <a target="_blank" rel="noopener" href="https://github.com/coreruleset/coreruleset/issues/2512">https://github.com/coreruleset/coreruleset/issues/2512</a></p>
+<p>有XSS漏洞</p>
+<p>让javascript:关键字生效</p>
+<p><code>jav&amp;#x0D;ascript:</code></p>
+<p>让<code>:</code>生效</p>
+<p><code>jav&amp;#x0D;ascript&amp;colon;</code></p>
+<p>可以使用Unicode进行编码，对一些函数进行混淆。</p>
+<p>对eval(),atom()进行混淆</p>
+<p><code>\u0065val()</code></p>
+<p><code>\u0061tob()</code></p>
+<p>综上使用方法<code>&lt;a href=jav&amp;#x0D;ascript&amp;colon;\u0065val(\u0061tob(&quot;Base64编码的字符串&quot;));&gt;xxx&lt;/a&gt;</code></p>
+<p>说明:</p>
+<p>Javascript:开头时，会直接在当前页面的上下文中，把冒号后面的内容当作javascript代码来执行</p>
+<p><code>&amp;#x0D;</code>,<code>&amp;colon;</code>是html实体编码</p>
+<p>eval()将接收到的字符串当作javascript代码来执行</p>
+<p>atob(): 将一段经过Base64编码的字符串，解码为原始的二进制字符串。</p>
+<p>总之就是把药执行的代码进行Base64编码然后放进去就好了。</p>
+<p>参考文章: <a target="_blank" rel="noopener" href="https://tryhackme.com/room/wafintroduction">https://tryhackme.com/room/wafintroduction</a></p>
+<p><a target="_blank" rel="noopener" href="https://tryhackme.com/room/wafexploitationtechniques">https://tryhackme.com/room/wafexploitationtechniques</a></p>
+<p> <a target="_blank" rel="noopener" href="https://github.com/coreruleset/coreruleset/issues/2512">https://github.com/coreruleset/coreruleset/issues/2512</a></p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="http://ctwabc.github.io/2026/06/10/FireWall/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -635,7 +790,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">4</span>
+          <span class="site-state-item-count">5</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
