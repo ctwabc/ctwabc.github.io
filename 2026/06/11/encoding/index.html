@@ -22,18 +22,20 @@
     var CONFIG = {"hostname":"ctwabc.github.io","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":true,"color":"#4A90D9","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
-  <meta name="description" content="学习笔记">
-<meta property="og:type" content="website">
-<meta property="og:title" content="ctwabc&#39;s Blog">
-<meta property="og:url" content="http://ctwabc.github.io/archives/index.html">
+  <meta name="description" content="为什么要编码 为了区分特殊字符在特定情况下的意思不同，例如HTML中的&lt;他是一个标签的开始，但也可以是小于的意思，为了区分就会使用编码，像这样&amp;lt;，编码以后就是字面意思了。 用编码绕过 例如我们想要绕过WAF，就sql注入代码进行编码，WAF看到的是编码后的字面量，WAF没有识别出来，到了服务器又将这个编码给解码了，将解码后的拼接以后将sql语句进行解析。编码和解码是相对应的，如">
+<meta property="og:type" content="article">
+<meta property="og:title" content="编码">
+<meta property="og:url" content="http://ctwabc.github.io/2026/06/11/encoding/index.html">
 <meta property="og:site_name" content="ctwabc&#39;s Blog">
-<meta property="og:description" content="学习笔记">
+<meta property="og:description" content="为什么要编码 为了区分特殊字符在特定情况下的意思不同，例如HTML中的&lt;他是一个标签的开始，但也可以是小于的意思，为了区分就会使用编码，像这样&amp;lt;，编码以后就是字面意思了。 用编码绕过 例如我们想要绕过WAF，就sql注入代码进行编码，WAF看到的是编码后的字面量，WAF没有识别出来，到了服务器又将这个编码给解码了，将解码后的拼接以后将sql语句进行解析。编码和解码是相对应的，如">
 <meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-06-11T08:20:00.000Z">
+<meta property="article:modified_time" content="2026-06-11T09:14:39.453Z">
 <meta property="article:author" content="ctwabc">
 <meta property="article:tag" content="Web安全">
 <meta name="twitter:card" content="summary">
 
-<link rel="canonical" href="http://ctwabc.github.io/archives/">
+<link rel="canonical" href="http://ctwabc.github.io/2026/06/11/encoding/">
 
 
 <script id="page-configurations">
@@ -41,7 +43,7 @@
   CONFIG.page = {
     sidebar: "",
     isHome : false,
-    isPost : false,
+    isPost : true,
     lang   : 'zh-CN'
   };
 </script>
@@ -74,7 +76,7 @@
 <meta property="og:image" content="https://github.com/ctwabc.png">
 <meta name="twitter:card" content="summary">
 
-  <title>归档 | ctwabc's Blog</title>
+  <title>编码 | ctwabc's Blog</title>
   
 
 
@@ -175,150 +177,94 @@
         <div class="content-wrap">
           
 
-          <div class="content archive">
+          <div class="content post posts-expand">
             
 
+    
   
   
-  
-  <div class="post-block">
-    <div class="posts-collapse">
-      <div class="collection-title">
-        <span class="collection-header">嗯..! 目前共计 6 篇日志。 继续努力。</span>
-      </div>
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://ctwabc.github.io/2026/06/11/encoding/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://github.com/ctwabc.png">
+      <meta itemprop="name" content="ctwabc">
+      <meta itemprop="description" content="学习笔记">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="ctwabc's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          编码<a href="https://github.com/user-name/repo-name/tree/branch-name/subdirectory-name_posts/encoding.md" class="post-edit-link" title="编辑" rel="noopener" target="_blank"><i class="fa fa-pencil-alt"></i></a>
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2026-06-11 16:20:00 / 修改时间：17:14:39" itemprop="dateCreated datePublished" datetime="2026-06-11T16:20:00+08:00">2026-06-11</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
 
       
-    <div class="collection-year">
-      <span class="collection-header">2026</span>
-    </div>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2026-06-11T16:20:00+08:00"
-              content="2026-06-11">
-          06-11
-        </time>
-      </div>
-
-      <div class="post-title">
-          <a class="post-title-link" href="/2026/06/11/encoding/" itemprop="url">
-            <span itemprop="name">编码</span>
-          </a>
-      </div>
-
-    </header>
-  </article>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2026-06-10T20:32:07+08:00"
-              content="2026-06-10">
-          06-10
-        </time>
-      </div>
-
-      <div class="post-title">
-          <a class="post-title-link" href="/2026/06/10/waf/" itemprop="url">
-            <span itemprop="name">WAF</span>
-          </a>
-      </div>
-
-    </header>
-  </article>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2026-06-10T14:42:54+08:00"
-              content="2026-06-10">
-          06-10
-        </time>
-      </div>
-
-      <div class="post-title">
-          <a class="post-title-link" href="/2026/06/10/FireWall/" itemprop="url">
-            <span itemprop="name">FireWall</span>
-          </a>
-      </div>
-
-    </header>
-  </article>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2026-06-10T09:21:37+08:00"
-              content="2026-06-10">
-          06-10
-        </time>
-      </div>
-
-      <div class="post-title">
-          <a class="post-title-link" href="/2026/06/10/XXE/" itemprop="url">
-            <span itemprop="name">学习XXE</span>
-          </a>
-      </div>
-
-    </header>
-  </article>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2026-06-09T18:40:15+08:00"
-              content="2026-06-09">
-          06-09
-        </time>
-      </div>
-
-      <div class="post-title">
-          <a class="post-title-link" href="/2026/06/09/ssrf/" itemprop="url">
-            <span itemprop="name">SSRF 服务端请求伪造</span>
-          </a>
-      </div>
-
-    </header>
-  </article>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2026-06-09T17:42:43+08:00"
-              content="2026-06-09">
-          06-09
-        </time>
-      </div>
-
-      <div class="post-title">
-          <a class="post-title-link" href="/2026/06/09/csrf/" itemprop="url">
-            <span itemprop="name">CSRF 跨站请求伪造详解</span>
-          </a>
-      </div>
-
-    </header>
-  </article>
-
+        <p><em><strong>为什么要编码</strong></em></p>
+<p>为了区分特殊字符在特定情况下的意思不同，例如HTML中的<code>&lt;</code>他是一个标签的开始，但也可以是小于的意思，为了区分就会使用编码，像这样<code>&amp;lt;</code>，编码以后就是字面意思了。</p>
+<p><em><strong>用编码绕过</strong></em></p>
+<p>例如我们想要绕过WAF，就sql注入代码进行编码，WAF看到的是编码后的字面量，WAF没有识别出来，到了服务器又将这个编码给解码了，将解码后的拼接以后将sql语句进行解析。编码和解码是相对应的，如果我们编码以后的数据不被解码就没办法发挥了。</p>
 
     </div>
+
+    
+    
+    
+<div style="margin-top: 48px; padding-top: 24px; border-top: 1px solid rgba(128,128,128,0.15); text-align: center; color: #999; font-size: 0.88em;">
+  <p>感谢阅读 🙏 如果这篇文章对你有帮助，欢迎分享给更多人。</p>
+</div>
+
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+
   </div>
-  
-  
-  
+</div>
 
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2026/06/10/waf/" rel="prev" title="WAF">
+      <i class="fa fa-chevron-left"></i> WAF
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
   
 
 
