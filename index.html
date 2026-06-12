@@ -181,6 +181,104 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://ctwabc.github.io/2026/06/12/tomcatcl/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://github.com/ctwabc.png">
+      <meta itemprop="name" content="ctwabc">
+      <meta itemprop="description" content="学习笔记">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="ctwabc's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2026/06/12/tomcatcl/" class="post-title-link" itemprop="url">Tomcat类加载</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2026-06-12 17:06:32" itemprop="dateCreated datePublished" datetime="2026-06-12T17:06:32+08:00">2026-06-12</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-06-13 00:20:42" itemprop="dateModified" datetime="2026-06-13T00:20:42+08:00">2026-06-13</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <blockquote>
+<p>写这个主要是因为，在Shiro550中利用CC链的时候涉及到不能使用数组的问题。</p>
+</blockquote>
+<p>Shiro550中使用的是原生的反序列化，但是有一处需要注意。</p>
+<p><img src="/2026/06/12/tomcatcl/tomcatcl1.png" alt="截图"></p>
+<p>new的时候用的是ClassResolvingObjectInputStream()。</p>
+<p>我们来看一下这个类</p>
+<p><img src="/2026/06/12/tomcatcl/tomcatcl2.png" alt="截图"></p>
+<p>他只重写了一个方法，而这个方法在反序列化的途中是必定会调用的，就是因为这个不能使用数组。</p>
+<p>我们先看一下Tomcat的类加载器</p>
+<p><img src="/2026/06/12/tomcatcl/tomcatcl3.jpg" alt="截图"></p>
+<p>WebAppClassloader交给BootstrapClassloader，BootstrapClassloader没找到直接给到WebAppClassloader</p>
+<p><img src="/2026/06/12/tomcatcl/tomcatcl4.png" alt="截图"></p>
+<p>用这个类加载器，跟进</p>
+<p><img src="/2026/06/12/tomcatcl/tomcatcl5.png" alt="截图"></p>
+<p>这里就是loadClass的核心逻辑了。检查tomcat缓存里有没有类。</p>
+<p><img src="/2026/06/12/tomcatcl/tomcatcl6.png" alt="截图"></p>
+<p>检查jdk缓存里有没有。然后使用ExtClassloader(BootstrapClassloader没办法直接获得，就得让Ext帮忙代劳了，因为根据双亲委派会交给Bootstrap)</p>
+<p><img src="/2026/06/12/tomcatcl/tomcatcl7.png" alt="截图"></p>
+<p>这里就是tomcat的类加载器工作的部分了。到这个findclass里面，总的来说他干的跟URLClassLoader的findclass一样。我们看一下</p>
+<p><img src="/2026/06/12/tomcatcl/tomcatcl8.png" alt="截图"></p>
+<p>这是findclass，然后会走到findclassinternal</p>
+<p><img src="/2026/06/12/tomcatcl/tomcatcl9.png" alt="截图"></p>
+<p>看注释，干的事情跟URLClassloader一样。</p>
+<p><img src="/2026/06/12/tomcatcl/tomcatcl10.png" alt="截图"></p>
+<p>最后调用defineclass。</p>
+<p>问题出在找不到路径。</p>
+<p>transformer传过去的时候长这样[Lorg.apache.commons.collections.Transformer; findclass将.换成&#x2F;加.class。没有这样的路径，他没有对[L做处理。</p>
+<p>jdk原生的类加载是对这种情况是做了处理的，而且forname是支持[L这种格式的，但是shiro走的是ClassUtils.forname，不是class.forname。</p>
+<p><img src="/2026/06/12/tomcatcl/tomcatcl11.png" alt="截图"></p>
+<p><img src="/2026/06/12/tomcatcl/tomcatcl12.png" alt="截图"></p>
+<p>可以看到他们都用了Class.forname，所以说这种数组类不能加载的情况要发生，还得是使用的类加载器得是webappclasloader这种情况。</p>
+<p>推荐视频: <a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV1dq4y1B76x/?spm_id_from=333.1387.upload.video_card.click&vd_source=c4cebc18d34b17376b1b2a473da11100">https://www.bilibili.com/video/BV1dq4y1B76x/?spm_id_from=333.1387.upload.video_card.click&amp;vd_source=c4cebc18d34b17376b1b2a473da11100</a></p>
+<p>参考文章:<a target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/article/2449663">https://cloud.tencent.com/developer/article/2449663</a></p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="http://ctwabc.github.io/2026/06/12/loadclass/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -206,7 +304,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2026-06-12 14:19:41 / 修改时间：16:46:24" itemprop="dateCreated datePublished" datetime="2026-06-12T14:19:41+08:00">2026-06-12</time>
+              <time title="创建时间：2026-06-12 14:19:41 / 修改时间：17:05:57" itemprop="dateCreated datePublished" datetime="2026-06-12T14:19:41+08:00">2026-06-12</time>
             </span>
 
           
@@ -229,10 +327,10 @@
 <h4 id="ExtensionClassLoader（扩展类加载器）"><a href="#ExtensionClassLoader（扩展类加载器）" class="headerlink" title="ExtensionClassLoader（扩展类加载器）"></a><strong>ExtensionClassLoader（扩展类加载器）</strong></h4><p>扩展类加载器由sun.misc.Launcher $ExtClassLoader实现，负责加载JRE的扩展目录，lib&#x2F;ext或者由java.ext.dirs系统属性指定的目录中的JAR包的类。由Java语言实现，父类加载器为null。</p>
 <h4 id="App-ClassLoader（应用类加载器）"><a href="#App-ClassLoader（应用类加载器）" class="headerlink" title="App ClassLoader（应用类加载器）"></a><strong>App ClassLoader（应用类加载器）</strong></h4><p>由sun.misc.Launcher $App-ClassLoader实现负，记载classpath中指定的jar包以及目录中class， 程序员一般会直接使用这个类加载器，如果程序员没有定义自己的类加载器，就作为应用程序的默认加载器。</p>
 <h4 id="User-ClassLoader（自定义类加载器）"><a href="#User-ClassLoader（自定义类加载器）" class="headerlink" title="User ClassLoader（自定义类加载器）"></a><strong>User ClassLoader（自定义类加载器）</strong></h4><p>大家开发的时候其实绝大多数都是使用应用类加载器，针对一些应用类加载器不能满足的情况下，可以考虑使用自定义类加载器，来满足实际开发的业务要求。</p>
+<p><em><strong>从这开始具体分析一下</strong></em></p>
 <p><img src="/2026/06/12/loadclass/loadclass2.png" alt="截图"></p>
-<p>从这开始具体分析一下</p>
 <p><img src="/2026/06/12/loadclass/loadclass3.png" alt="截图"></p>
-<p>我们使用的ClassLoader是Appclassloader，根据双亲委派就得给父类，委托请求了。</p>
+<p>我们使用的ClassLoader是Appclassloader，根据双亲委派就得给父类委托请求了。</p>
 <p>ucp.knownToNoExist(name)是说，这个类我已经知道不存在了不用找了。我们现在要加载的这个类是我们自己定义的已存在类。走到父类的loadClass()。</p>
 <p><img src="/2026/06/12/loadclass/loadclass4.png" alt="截图"></p>
 <p>这个是双亲委派的核心方法，先检查这个类是否已经加载过了，没有加载的话检查是否有父类加载器，如果有父类加载器则调用父类加载器的loadclass()，BootstrapClassloader使用c&#x2F;c++写的所以不能用 parent !&#x3D; null检查，所以单独整了一个分支。在BootstrapClassloader里没有找到，交给ExtClassloader，没有找到，交给AppClassloader，走到findClass()。</p>
@@ -1130,97 +1228,11 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://ctwabc.github.io/2026/06/09/csrf/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="https://github.com/ctwabc.png">
-      <meta itemprop="name" content="ctwabc">
-      <meta itemprop="description" content="学习笔记">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="ctwabc's Blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2026/06/09/csrf/" class="post-title-link" itemprop="url">CSRF 跨站请求伪造详解</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2026-06-09 17:42:43" itemprop="dateCreated datePublished" datetime="2026-06-09T17:42:43+08:00">2026-06-09</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2026-06-10 14:30:47" itemprop="dateModified" datetime="2026-06-10T14:30:47+08:00">2026-06-10</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Web%E5%AE%89%E5%85%A8/" itemprop="url" rel="index"><span itemprop="name">Web安全</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>CSRF（Cross-site request forgery）跨站请求伪造：攻击者诱导受害者进入第三方网站，在第三方网站中，向被攻击网站发送跨站请求。利用受害者在被攻击网站已经获取的注册凭证，绕过后台的用户验证，达到冒充用户对被攻击的网站执行某项操作的目的。<br>&#x2F;&#x2F;那现实中的例子来举的话，像跟在别人后面进学校<br>一个典型的CSRF攻击有着如下的流程：</p>
-<ul>
-<li>受害者登录 a.com，并保留了登录凭证（Cookie）。</li>
-<li>攻击者引诱受害者访问了 b.com。</li>
-<li>b.com 向 a.com 发送了一个请求：a.com&#x2F;act&#x3D;xx。浏览器会默认携带 a.com 的 Cookie。（从来没有获得过这个Cookie，这是对方的浏览器自动发送的）</li>
-<li>a.com 接收到请求后，对请求进行验证，并确认是受害者的凭证，误以为是受害者自己发送的请求。</li>
-<li>a.com 以受害者的名义执行了 act&#x3D;xx。</li>
-<li>攻击完成，攻击者在受害者不知情的情况下，冒充受害者，让 a.com 执行了自己定义的操作。</li>
-</ul>
-<p>这个第三方网站就是自己配置的恶意网站。<br><img src="/2026/06/09/csrf/csrf.png" alt="我的本地截图"><br>差不多就是这样的。也就是第三方网站像目标网站发送请求。<br>把自己想干的事情通过参数穿过去就好了。</p>
-<p>如果对方后端只接受json数据，那怎么传呢？<br>json数据长这样<br>{<br>“name”: “WebGoat”,<br>“email”: “<a href="mailto:&#x77;&#x65;&#98;&#103;&#111;&#x61;&#x74;&#x40;&#x77;&#x65;&#98;&#103;&#x6f;&#97;&#116;&#x2e;&#111;&#114;&#x67;">webgoat@webgoat.org</a>“,<br>“content”: “WebGoat is the best!!”<br>}</p>
-<p>普通的 HTML <form> 表单提交时，默认的数据格式是 application&#x2F;x-www-form-urlencoded（即 key1&#x3D;value1&amp;key2&#x3D;value2）。如果你在表单里老老实实写 <code>&lt;input name=&quot;name&quot; value=&quot;WebGoat&quot;&gt;</code>，后端一收到，发现不是标准的 JSON 格式，就会直接报 415 Unsupported Media Type 错误并拒绝处理。<br>也就是说上面的input标签里的会变成name&#x3D;WebGoat，很显然这不是我们想要。<br>但是，我们可以调整一下我们的数据。举个例子:<br><input name= ' {"name": "WebGoat", "email": "webgoat@webgoat.org", "content": "WebGoat is the best!!", "ignore_me":" ' value='test"}' type='hidden'></p>
-<p>{“name”: “WebGoat”, “email”: “<a href="mailto:&#x77;&#101;&#98;&#x67;&#111;&#x61;&#x74;&#x40;&#x77;&#101;&#x62;&#103;&#111;&#x61;&#116;&#x2e;&#x6f;&#114;&#x67;">webgoat@webgoat.org</a>“, “content”: “WebGoat is the best!!”, “ignore_me”:”这是一部分<br>test”}这是一部分<br>通过&#x3D;拼接<br>{“name”: “WebGoat”, “email”: “<a href="mailto:&#119;&#x65;&#98;&#103;&#111;&#97;&#x74;&#x40;&#x77;&#x65;&#98;&#103;&#x6f;&#97;&#x74;&#x2e;&#x6f;&#114;&#x67;">webgoat@webgoat.org</a>“, “content”: “WebGoat is the best!!”, “ignore_me”:”&#x3D;test”}<br>可以看到我们传过去的数据成为json格式了<br>单引号和双引号是同级的，他看到是‘开始的会以’结束。</p>
-<p>参考文章:</p>
-<p><a target="_blank" rel="noopener" href="https://drun1baby.top/2022/05/08/%E4%BB%8E0%E5%88%B01%E5%AE%8C%E5%85%A8%E6%8E%8C%E6%8F%A1CSRF/">https://drun1baby.top/2022/05/08/%E4%BB%8E0%E5%88%B01%E5%AE%8C%E5%85%A8%E6%8E%8C%E6%8F%A1CSRF/</a></p>
-<p>不定时会进行补充</p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
+  <nav class="pagination">
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
+  </nav>
 
 
 
@@ -1287,7 +1299,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">10</span>
+          <span class="site-state-item-count">11</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>

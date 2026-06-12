@@ -22,20 +22,33 @@
     var CONFIG = {"hostname":"ctwabc.github.io","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":true,"color":"#4A90D9","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
-  <meta name="description" content="在分组加密算法中会进行分组。他的分组机制是这样子的，假如每一个分组的大小是8字节，将原文按8字节分组，这样就会有两种情况，一是能整除，二是没发整除。 1.能整除: 能整除的时候也是会进行填充的，他会在最后再整一个分组添满0x08。 2.不能整除: 显然最后一个分组不够，会对最后一个分组填充，缺一个补一个0x01，缺两个补两个0x02以此类推。 分完组以后就是加密了。 加密过程: 第一个分组与初始向">
+  <meta name="description" content="写这个主要是因为，在Shiro550中利用CC链的时候涉及到不能使用数组的问题。  Shiro550中使用的是原生的反序列化，但是有一处需要注意。  new的时候用的是ClassResolvingObjectInputStream()。 我们来看一下这个类  他只重写了一个方法，而这个方法在反序列化的途中是必定会调用的，就是因为这个不能使用数组。 我们先看一下Tomcat的类加载器  WebAp">
 <meta property="og:type" content="article">
-<meta property="og:title" content="paddingoracle">
-<meta property="og:url" content="http://ctwabc.github.io/2026/06/11/paddingoracle/index.html">
+<meta property="og:title" content="Tomcat类加载">
+<meta property="og:url" content="http://ctwabc.github.io/2026/06/12/tomcatcl/index.html">
 <meta property="og:site_name" content="ctwabc&#39;s Blog">
-<meta property="og:description" content="在分组加密算法中会进行分组。他的分组机制是这样子的，假如每一个分组的大小是8字节，将原文按8字节分组，这样就会有两种情况，一是能整除，二是没发整除。 1.能整除: 能整除的时候也是会进行填充的，他会在最后再整一个分组添满0x08。 2.不能整除: 显然最后一个分组不够，会对最后一个分组填充，缺一个补一个0x01，缺两个补两个0x02以此类推。 分完组以后就是加密了。 加密过程: 第一个分组与初始向">
+<meta property="og:description" content="写这个主要是因为，在Shiro550中利用CC链的时候涉及到不能使用数组的问题。  Shiro550中使用的是原生的反序列化，但是有一处需要注意。  new的时候用的是ClassResolvingObjectInputStream()。 我们来看一下这个类  他只重写了一个方法，而这个方法在反序列化的途中是必定会调用的，就是因为这个不能使用数组。 我们先看一下Tomcat的类加载器  WebAp">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2026-06-11T11:59:15.000Z">
-<meta property="article:modified_time" content="2026-06-11T12:24:41.782Z">
+<meta property="og:image" content="http://ctwabc.github.io/2026/06/12/tomcatcl/tomcatcl1.png">
+<meta property="og:image" content="http://ctwabc.github.io/2026/06/12/tomcatcl/tomcatcl2.png">
+<meta property="og:image" content="http://ctwabc.github.io/2026/06/12/tomcatcl/tomcatcl3.jpg">
+<meta property="og:image" content="http://ctwabc.github.io/2026/06/12/tomcatcl/tomcatcl4.png">
+<meta property="og:image" content="http://ctwabc.github.io/2026/06/12/tomcatcl/tomcatcl5.png">
+<meta property="og:image" content="http://ctwabc.github.io/2026/06/12/tomcatcl/tomcatcl6.png">
+<meta property="og:image" content="http://ctwabc.github.io/2026/06/12/tomcatcl/tomcatcl7.png">
+<meta property="og:image" content="http://ctwabc.github.io/2026/06/12/tomcatcl/tomcatcl8.png">
+<meta property="og:image" content="http://ctwabc.github.io/2026/06/12/tomcatcl/tomcatcl9.png">
+<meta property="og:image" content="http://ctwabc.github.io/2026/06/12/tomcatcl/tomcatcl10.png">
+<meta property="og:image" content="http://ctwabc.github.io/2026/06/12/tomcatcl/tomcatcl11.png">
+<meta property="og:image" content="http://ctwabc.github.io/2026/06/12/tomcatcl/tomcatcl12.png">
+<meta property="article:published_time" content="2026-06-12T09:06:32.000Z">
+<meta property="article:modified_time" content="2026-06-12T16:20:42.655Z">
 <meta property="article:author" content="ctwabc">
 <meta property="article:tag" content="Web安全">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://ctwabc.github.io/2026/06/12/tomcatcl/tomcatcl1.png">
 
-<link rel="canonical" href="http://ctwabc.github.io/2026/06/11/paddingoracle/">
+<link rel="canonical" href="http://ctwabc.github.io/2026/06/12/tomcatcl/">
 
 
 <script id="page-configurations">
@@ -76,7 +89,7 @@
 <meta property="og:image" content="https://github.com/ctwabc.png">
 <meta name="twitter:card" content="summary">
 
-  <title>paddingoracle | ctwabc's Blog</title>
+  <title>Tomcat类加载 | ctwabc's Blog</title>
   
 
 
@@ -184,7 +197,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://ctwabc.github.io/2026/06/11/paddingoracle/">
+    <link itemprop="mainEntityOfPage" href="http://ctwabc.github.io/2026/06/12/tomcatcl/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="https://github.com/ctwabc.png">
@@ -197,7 +210,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          paddingoracle<a href="https://github.com/user-name/repo-name/tree/branch-name/subdirectory-name_posts/paddingoracle.md" class="post-edit-link" title="编辑" rel="noopener" target="_blank"><i class="fa fa-pencil-alt"></i></a>
+          Tomcat类加载<a href="https://github.com/user-name/repo-name/tree/branch-name/subdirectory-name_posts/tomcatcl.md" class="post-edit-link" title="编辑" rel="noopener" target="_blank"><i class="fa fa-pencil-alt"></i></a>
         </h1>
 
         <div class="post-meta">
@@ -206,10 +219,16 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2026-06-11 19:59:15 / 修改时间：20:24:41" itemprop="dateCreated datePublished" datetime="2026-06-11T19:59:15+08:00">2026-06-11</time>
+              <time title="创建时间：2026-06-12 17:06:32" itemprop="dateCreated datePublished" datetime="2026-06-12T17:06:32+08:00">2026-06-12</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-06-13 00:20:42" itemprop="dateModified" datetime="2026-06-13T00:20:42+08:00">2026-06-13</time>
+              </span>
 
           
 
@@ -222,27 +241,40 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <p>在分组加密算法中会进行分组。他的分组机制是这样子的，假如每一个分组的大小是8字节，将原文按8字节分组，这样就会有两种情况，一是能整除，二是没发整除。</p>
-<p>1.能整除: 能整除的时候也是会进行填充的，他会在最后再整一个分组添满0x08。</p>
-<p>2.不能整除: 显然最后一个分组不够，会对最后一个分组填充，缺一个补一个0x01，缺两个补两个0x02以此类推。</p>
-<p>分完组以后就是加密了。</p>
-<p>加密过程: 第一个分组与初始向量进行异或运算，将中间值使用密钥加密。第二个分组与第一个分组的加密密文进行异或运算，然后将中间值使用密钥加密。第三个分组与第二个分组的加密密文进行异或运算，然后将中间值使用密钥加密。以此类推。</p>
-<p>解密过程: 第一组密文使用密钥解密获得中间值，将中间值与初始向量进行异或运算获得第一组明文。第二组密文使用密钥解密获得中间值，将中间值与第一组密文进行异或运算获得第二组明文。第三组密文使用密钥解密获得中间值，将中间值与第二组密文进行异或运算获得第三组明文。以此类推。</p>
-<p>这个漏洞的目的是，能否在不获得密钥的情况下，明文是自己想要的。</p>
-<p>利用的是发送的密文解密以后，服务器的响应会有所不同。</p>
-<p>比如:收到有效密文的时候，响应200</p>
-<p>收到无效密文的时候，响应500</p>
-<p>收到一个有效密文，但是解密为无效值时，显示自定义错误信息。</p>
-<p>有点像sql盲注。</p>
-<p>这个密文解密以后，是否有效是看最后一个分组的最后一个字节。我们知道最后一个分组的最后一个字节只可能是0x01-0x08所以，所以检查最后一个字节是不是在这个范围内就可以了，同时还得满足0x01这种字节数数的数量跟他的值相匹配。</p>
-<p>初始向量和字节码是我们可以控制的</p>
-<p>漏洞利用: 最后一组密文用密钥解密后的中间值与上一组的密文进行异或运算后会得到明文，而这个明文是最后一组所以他的最后一个字节只可能是0x01-0x08，如果不是，服务器返回回来的是自定义信息错误，所以我们可以反复修改最后一组的上一组密文，直到解密后的最后一组明文是0x01这时服务器返回的消息是不同，这样我们就知道，此时的密文与中间值进行异或运算获得的是0x01，这样就能逆推出中间值的最后一个字节。以此类推知道推出所有中间值。所以说我们每次发密文和一个初始向量，爆破出中间值。</p>
-<p>这种方式我们可以进行这些操作: 1.我获得了密文，我想要将其破解。我可以发送初始向量以及一组密文，最后一组是有填充数据的，我们可以用最后一组密文。</p>
-<p>利用漏洞我们就知道了，最后一组密文的明文了。最后一组的上一组密文是没有填充数据的，既然如此就添加一个填充数据不就行了吗。我们发送的的是初始向量一组密文，所以说这一组密文是最后一组密文，必然有填充数据，但由于我们是截取的他没有填充数据这会有问题嘛？并没有。因为本质上我们想要的是中间值。我把所有分组的中间值给求出来以后，每一个中间值与上一组的密文进行异或运算就求出来明文了。所以说依然利用漏洞，让最后一个字节的解出来的明文成为0x01，以此类推，最后我们就知道明文是什么了。</p>
-<ol>
-<li>我想要构造合法的密文。我现在有我希望在服务器端解出来的明文。我么使用一组任意的8字节的字节码和初始向量一起发过去，爆破出中间值，知道了中间值就可以通过调整初始向量让他异或以后变成我想要的明文。将这个初始向量作为密文和一个初始向量发过去，爆破中间值，获得中间值调整初始向量。以此类推。</li>
-</ol>
-<p>参考文章: <a target="_blank" rel="noopener" href="https://goodapple.top/2022/01/06/6db157fde87a6bae/">https://goodapple.top/2022/01/06/6db157fde87a6bae/</a></p>
+        <blockquote>
+<p>写这个主要是因为，在Shiro550中利用CC链的时候涉及到不能使用数组的问题。</p>
+</blockquote>
+<p>Shiro550中使用的是原生的反序列化，但是有一处需要注意。</p>
+<p><img src="/2026/06/12/tomcatcl/tomcatcl1.png" alt="截图"></p>
+<p>new的时候用的是ClassResolvingObjectInputStream()。</p>
+<p>我们来看一下这个类</p>
+<p><img src="/2026/06/12/tomcatcl/tomcatcl2.png" alt="截图"></p>
+<p>他只重写了一个方法，而这个方法在反序列化的途中是必定会调用的，就是因为这个不能使用数组。</p>
+<p>我们先看一下Tomcat的类加载器</p>
+<p><img src="/2026/06/12/tomcatcl/tomcatcl3.jpg" alt="截图"></p>
+<p>WebAppClassloader交给BootstrapClassloader，BootstrapClassloader没找到直接给到WebAppClassloader</p>
+<p><img src="/2026/06/12/tomcatcl/tomcatcl4.png" alt="截图"></p>
+<p>用这个类加载器，跟进</p>
+<p><img src="/2026/06/12/tomcatcl/tomcatcl5.png" alt="截图"></p>
+<p>这里就是loadClass的核心逻辑了。检查tomcat缓存里有没有类。</p>
+<p><img src="/2026/06/12/tomcatcl/tomcatcl6.png" alt="截图"></p>
+<p>检查jdk缓存里有没有。然后使用ExtClassloader(BootstrapClassloader没办法直接获得，就得让Ext帮忙代劳了，因为根据双亲委派会交给Bootstrap)</p>
+<p><img src="/2026/06/12/tomcatcl/tomcatcl7.png" alt="截图"></p>
+<p>这里就是tomcat的类加载器工作的部分了。到这个findclass里面，总的来说他干的跟URLClassLoader的findclass一样。我们看一下</p>
+<p><img src="/2026/06/12/tomcatcl/tomcatcl8.png" alt="截图"></p>
+<p>这是findclass，然后会走到findclassinternal</p>
+<p><img src="/2026/06/12/tomcatcl/tomcatcl9.png" alt="截图"></p>
+<p>看注释，干的事情跟URLClassloader一样。</p>
+<p><img src="/2026/06/12/tomcatcl/tomcatcl10.png" alt="截图"></p>
+<p>最后调用defineclass。</p>
+<p>问题出在找不到路径。</p>
+<p>transformer传过去的时候长这样[Lorg.apache.commons.collections.Transformer; findclass将.换成&#x2F;加.class。没有这样的路径，他没有对[L做处理。</p>
+<p>jdk原生的类加载是对这种情况是做了处理的，而且forname是支持[L这种格式的，但是shiro走的是ClassUtils.forname，不是class.forname。</p>
+<p><img src="/2026/06/12/tomcatcl/tomcatcl11.png" alt="截图"></p>
+<p><img src="/2026/06/12/tomcatcl/tomcatcl12.png" alt="截图"></p>
+<p>可以看到他们都用了Class.forname，所以说这种数组类不能加载的情况要发生，还得是使用的类加载器得是webappclasloader这种情况。</p>
+<p>推荐视频: <a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV1dq4y1B76x/?spm_id_from=333.1387.upload.video_card.click&vd_source=c4cebc18d34b17376b1b2a473da11100">https://www.bilibili.com/video/BV1dq4y1B76x/?spm_id_from=333.1387.upload.video_card.click&amp;vd_source=c4cebc18d34b17376b1b2a473da11100</a></p>
+<p>参考文章:<a target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/article/2449663">https://cloud.tencent.com/developer/article/2449663</a></p>
 
     </div>
 
@@ -272,13 +304,10 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/2026/06/11/sql/" rel="prev" title="sql">
-      <i class="fa fa-chevron-left"></i> sql
+    <a href="/2026/06/12/loadclass/" rel="prev" title="Java类加载">
+      <i class="fa fa-chevron-left"></i> Java类加载
     </a></div>
-      <div class="post-nav-item">
-    <a href="/2026/06/11/shiro550/" rel="next" title="Shiro550">
-      Shiro550 <i class="fa fa-chevron-right"></i>
-    </a></div>
+      <div class="post-nav-item"></div>
     </div>
       </footer>
     
