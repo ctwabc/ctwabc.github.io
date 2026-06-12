@@ -181,6 +181,97 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://ctwabc.github.io/2026/06/12/loadclass/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://github.com/ctwabc.png">
+      <meta itemprop="name" content="ctwabc">
+      <meta itemprop="description" content="学习笔记">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="ctwabc's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2026/06/12/loadclass/" class="post-title-link" itemprop="url">Java类加载</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2026-06-12 14:19:41 / 修改时间：16:46:24" itemprop="dateCreated datePublished" datetime="2026-06-12T14:19:41+08:00">2026-06-12</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p><em><strong>双亲委派</strong></em></p>
+<p>当一个类加载器收到某个类加载请求时，该类加载器首先会把请求委派给父类加载器。每个类加载器都是如此，它会先委托父类加载器在自己的搜索范围内找不到对应的类时，该类加载器才会尝试自己去加载。</p>
+<p><img src="/2026/06/12/loadclass/loadclass1.png" alt="截图"></p>
+<p>先从下往上走到最顶部，然后再往下走。从最顶部开始谁把类给加载了，就结束了。</p>
+<p>这个父类是逻辑上的父类，他们之间是没有继承关系的。</p>
+<h4 id="Bootstrap-ClassLoader-（启动类加载器）"><a href="#Bootstrap-ClassLoader-（启动类加载器）" class="headerlink" title="Bootstrap ClassLoader （启动类加载器）"></a><strong>Bootstrap ClassLoader （启动类加载器）</strong></h4><p>启动类加载器负责加载$JAVA_HOME中jre&#x2F;lib&#x2F;rt.jar里面所有的class，由c++实现，不是classLoader子类</p>
+<h4 id="ExtensionClassLoader（扩展类加载器）"><a href="#ExtensionClassLoader（扩展类加载器）" class="headerlink" title="ExtensionClassLoader（扩展类加载器）"></a><strong>ExtensionClassLoader（扩展类加载器）</strong></h4><p>扩展类加载器由sun.misc.Launcher $ExtClassLoader实现，负责加载JRE的扩展目录，lib&#x2F;ext或者由java.ext.dirs系统属性指定的目录中的JAR包的类。由Java语言实现，父类加载器为null。</p>
+<h4 id="App-ClassLoader（应用类加载器）"><a href="#App-ClassLoader（应用类加载器）" class="headerlink" title="App ClassLoader（应用类加载器）"></a><strong>App ClassLoader（应用类加载器）</strong></h4><p>由sun.misc.Launcher $App-ClassLoader实现负，记载classpath中指定的jar包以及目录中class， 程序员一般会直接使用这个类加载器，如果程序员没有定义自己的类加载器，就作为应用程序的默认加载器。</p>
+<h4 id="User-ClassLoader（自定义类加载器）"><a href="#User-ClassLoader（自定义类加载器）" class="headerlink" title="User ClassLoader（自定义类加载器）"></a><strong>User ClassLoader（自定义类加载器）</strong></h4><p>大家开发的时候其实绝大多数都是使用应用类加载器，针对一些应用类加载器不能满足的情况下，可以考虑使用自定义类加载器，来满足实际开发的业务要求。</p>
+<p><img src="/2026/06/12/loadclass/loadclass2.png" alt="截图"></p>
+<p>从这开始具体分析一下</p>
+<p><img src="/2026/06/12/loadclass/loadclass3.png" alt="截图"></p>
+<p>我们使用的ClassLoader是Appclassloader，根据双亲委派就得给父类，委托请求了。</p>
+<p>ucp.knownToNoExist(name)是说，这个类我已经知道不存在了不用找了。我们现在要加载的这个类是我们自己定义的已存在类。走到父类的loadClass()。</p>
+<p><img src="/2026/06/12/loadclass/loadclass4.png" alt="截图"></p>
+<p>这个是双亲委派的核心方法，先检查这个类是否已经加载过了，没有加载的话检查是否有父类加载器，如果有父类加载器则调用父类加载器的loadclass()，BootstrapClassloader使用c&#x2F;c++写的所以不能用 parent !&#x3D; null检查，所以单独整了一个分支。在BootstrapClassloader里没有找到，交给ExtClassloader，没有找到，交给AppClassloader，走到findClass()。</p>
+<blockquote>
+<p>Ext和App都是一样的，Ext也是走的findClass()，流程相同无非没找到类。</p>
+</blockquote>
+<p><img src="/2026/06/12/loadclass/loadclass6.png" alt="截图"></p>
+<p>为什么会到这个URLClassloader呢？</p>
+<p>URLClassLoader是Ext和App的继承关系的父类，而他们两没有findclass()方法，所以就用上父类的了。</p>
+<p>寻找方式就是路径+类名</p>
+<p>主要是这个defineClass，找到了以后有defineclass来加载</p>
+<p><img src="/2026/06/12/loadclass/loadclass7.png" alt="截图"></p>
+<p>点着defineclass()一直进去就行，这个defineClass1就会把字节码给加载了。</p>
+<p><img src="/2026/06/12/loadclass/loadclass8.png"></p>
+<p>可以看到是native方法。</p>
+<p>以上就是全部流程。</p>
+<p>最底层就是defineclass，再上层一点就是URLClassloader，创建URLClassloader的时候可以传路径过去，也就是ucp。调用loadclass，走到findclass时他会从路径中查找，能查到，最后就走到defineclass了。这个路径是可以解析不同协议的，例如:file,http,jar</p>
+<p>推荐视频:<a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV16h411z7o9/?p=4&spm_id_from=333.1387.top_right_bar_window_history.content.click&vd_source=c4cebc18d34b17376b1b2a473da11100">https://www.bilibili.com/video/BV16h411z7o9/?p=4&amp;spm_id_from=333.1387.top_right_bar_window_history.content.click&amp;vd_source=c4cebc18d34b17376b1b2a473da11100</a></p>
+<p>参考文章:<a target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/article/2009648">https://cloud.tencent.com/developer/article/2009648</a></p>
+<p><a target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/article/2009645">https://cloud.tencent.com/developer/article/2009645</a></p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="http://ctwabc.github.io/2026/06/11/shiro550/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1196,7 +1287,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">9</span>
+          <span class="site-state-item-count">10</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
