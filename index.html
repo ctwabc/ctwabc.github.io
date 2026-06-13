@@ -181,6 +181,79 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://ctwabc.github.io/2026/06/13/shiro721/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://github.com/ctwabc.png">
+      <meta itemprop="name" content="ctwabc">
+      <meta itemprop="description" content="学习笔记">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="ctwabc's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2026/06/13/shiro721/" class="post-title-link" itemprop="url">shiro721</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2026-06-13 13:06:15 / 修改时间：13:30:59" itemprop="dateCreated datePublished" datetime="2026-06-13T13:06:15+08:00">2026-06-13</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>Shiro721的密钥修复成了随机生成的了，也就是说没有办法获得密钥了。</p>
+<p>我们对比一下shiro550和shiro721的代码。</p>
+<p>shiro721</p>
+<p><img src="/2026/06/13/shiro721/shiro1.png" alt="截图"></p>
+<p>shiro550</p>
+<p><img src="/2026/06/13/shiro721/shiro2.png" alt="截图"></p>
+<p>明显可以看出来，密钥的设置变了。</p>
+<p>下面我们看一下shiro721中是怎么设置密钥的。</p>
+<p><img src="/2026/06/13/shiro721/shiro3.png" alt="截图"></p>
+<p>有一个密钥生成器对象，然后将这个对象初始化，然后生成密钥。看一下密钥生成部分</p>
+<p><img src="/2026/06/13/shiro721/shiro4.png" alt="截图"></p>
+<p>总的来说就是使用engineGenerateKey()，我们看一下</p>
+<p><img src="/2026/06/13/shiro721/shiro5.png" alt="截图"></p>
+<p>可以看到密钥变成随机生成的了。</p>
+<p>Shiro721的漏洞就是可以进行Padding Oracle Attack。</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="http://ctwabc.github.io/2026/06/12/tomcatcl/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -393,10 +466,16 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2026-06-11 20:24:59 / 修改时间：22:58:39" itemprop="dateCreated datePublished" datetime="2026-06-11T20:24:59+08:00">2026-06-11</time>
+              <time title="创建时间：2026-06-11 20:24:59" itemprop="dateCreated datePublished" datetime="2026-06-11T20:24:59+08:00">2026-06-11</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-06-13 14:22:23" itemprop="dateModified" datetime="2026-06-13T14:22:23+08:00">2026-06-13</time>
+              </span>
 
           
 
@@ -437,6 +516,21 @@
 <p><img src="/2026/06/11/shiro550/shiro12.png" alt="截图"></p>
 <p>可以看到他这个密钥是不变的常量，这个密钥我们是可以拿到的，我们这不都看到了吗，复制粘贴就行。</p>
 <p>有了密钥就可以把序列化的字节码加密，给到shiro以后shiro就会反序列化了。</p>
+<p>下面看一下Cookie是怎么设置的</p>
+<p>我们在登陆的时候点了Remember me的时候，看一下代码是怎么执行的。</p>
+<p><img src="/2026/06/11/shiro550/shiro15.png" alt="截图"></p>
+<p>登陆成功时先进行forgetIdentity()，我们看一下forgetIdentity()</p>
+<p><img src="/2026/06/11/shiro550/shiro16.png" alt="截图"></p>
+<p><img src="/2026/06/11/shiro550/shiro17.png" alt="截图"></p>
+<p>总之就是在登陆的时候先把，残留的cookie给删了。发送一个有效期为零的DeleteMe Cookie，这样浏览器收到以后就会删除Cookie了。</p>
+<p><img src="/2026/06/11/shiro550/shiro13.png" alt="截图"></p>
+<p>把残留的Cookie删了以后，就是再整一个这个身份的cookie了。我们看一下convertPrincipalsToBytes()方法。</p>
+<p><img src="/2026/06/11/shiro550/shiro18.png" alt="截图"></p>
+<p><img src="/2026/06/11/shiro550/shiro19.png" alt="截图"></p>
+<p>这个方法做的事情就是把身份信息序列化，然后加密，密钥的获取跟解密一样。</p>
+<p>最后就是设置Cookie啦</p>
+<p><img src="/2026/06/11/shiro550/shiro14.png" alt="截图"></p>
+<p>就是对传过来的字节数字Base64编码，然后设置</p>
 <p>推荐视频: <a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV1iF411b7bD/?spm_id_from=333.1387.upload.video_card.click&vd_source=c4cebc18d34b17376b1b2a473da11100">https://www.bilibili.com/video/BV1iF411b7bD/?spm_id_from=333.1387.upload.video_card.click&amp;vd_source=c4cebc18d34b17376b1b2a473da11100</a></p>
 
       
@@ -1151,83 +1245,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://ctwabc.github.io/2026/06/09/ssrf/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="https://github.com/ctwabc.png">
-      <meta itemprop="name" content="ctwabc">
-      <meta itemprop="description" content="学习笔记">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="ctwabc's Blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2026/06/09/ssrf/" class="post-title-link" itemprop="url">SSRF 服务端请求伪造</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2026-06-09 18:40:15" itemprop="dateCreated datePublished" datetime="2026-06-09T18:40:15+08:00">2026-06-09</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2026-06-10 14:27:07" itemprop="dateModified" datetime="2026-06-10T14:27:07+08:00">2026-06-10</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Web%E5%AE%89%E5%85%A8/" itemprop="url" rel="index"><span itemprop="name">Web安全</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>SSRF是一种攻击模式。<br>我觉得就是让对方的服务器当代理，访问内网中的服务器。<br>正常情况下，对方内网中不让外网访问的服务器是访问不了的，但是web服务器啥的肯定可以访问，而这个web服务器是否可以畅通无阻的与内网当中的各种服务器交流呢。在可以交流的前提下，这个web服务器有ssrf漏洞的话，就可以让攻击者访问到内网中的其他服务器了。</p>
-<p>写的比较短以后进行补充。</p>
-<p>参考文章:</p>
-<p><a target="_blank" rel="noopener" href="https://drun1baby.top/2022/05/16/%E4%BB%8E0%E5%88%B01%E5%AE%8C%E5%85%A8%E6%8E%8C%E6%8F%A1SSRF/">https://drun1baby.top/2022/05/16/%E4%BB%8E0%E5%88%B01%E5%AE%8C%E5%85%A8%E6%8E%8C%E6%8F%A1SSRF/</a></p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1299,7 +1316,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">11</span>
+          <span class="site-state-item-count">12</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
