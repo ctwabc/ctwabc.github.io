@@ -181,7 +181,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://ctwabc.github.io/2026/06/09/ssrf/">
+    <link itemprop="mainEntityOfPage" href="http://ctwabc.github.io/2026/06/11/sql/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="https://github.com/ctwabc.png">
@@ -195,7 +195,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2026/06/09/ssrf/" class="post-title-link" itemprop="url">SSRF 服务端请求伪造</a>
+            <a href="/2026/06/11/sql/" class="post-title-link" itemprop="url">sql</a>
         </h2>
 
         <div class="post-meta">
@@ -205,24 +205,15 @@
               </span>
               <span class="post-meta-item-text">发表于</span>
 
-              <time title="创建时间：2026-06-09 18:40:15" itemprop="dateCreated datePublished" datetime="2026-06-09T18:40:15+08:00">2026-06-09</time>
+              <time title="创建时间：2026-06-11 19:12:54" itemprop="dateCreated datePublished" datetime="2026-06-11T19:12:54+08:00">2026-06-11</time>
             </span>
               <span class="post-meta-item">
                 <span class="post-meta-item-icon">
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2026-06-10 14:27:07" itemprop="dateModified" datetime="2026-06-10T14:27:07+08:00">2026-06-10</time>
+                <time title="修改时间：2026-06-14 00:36:17" itemprop="dateModified" datetime="2026-06-14T00:36:17+08:00">2026-06-14</time>
               </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Web%E5%AE%89%E5%85%A8/" itemprop="url" rel="index"><span itemprop="name">Web安全</span></a>
-                </span>
-            </span>
 
           
 
@@ -235,11 +226,15 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <p>SSRF是一种攻击模式。<br>我觉得就是让对方的服务器当代理，访问内网中的服务器。<br>正常情况下，对方内网中不让外网访问的服务器是访问不了的，但是web服务器啥的肯定可以访问，而这个web服务器是否可以畅通无阻的与内网当中的各种服务器交流呢。在可以交流的前提下，这个web服务器有ssrf漏洞的话，就可以让攻击者访问到内网中的其他服务器了。</p>
-<p>写的比较短以后进行补充。</p>
-<p>参考文章:</p>
-<p><a target="_blank" rel="noopener" href="https://drun1baby.top/2022/05/16/%E4%BB%8E0%E5%88%B01%E5%AE%8C%E5%85%A8%E6%8E%8C%E6%8F%A1SSRF/">https://drun1baby.top/2022/05/16/%E4%BB%8E0%E5%88%B01%E5%AE%8C%E5%85%A8%E6%8E%8C%E6%8F%A1SSRF/</a></p>
-
+          <p>总的来说就是字符串的拼接字符串</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2026/06/11/sql/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
@@ -258,7 +253,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://ctwabc.github.io/2026/06/09/csrf/">
+    <link itemprop="mainEntityOfPage" href="http://ctwabc.github.io/2026/06/11/encoding/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="https://github.com/ctwabc.png">
@@ -272,7 +267,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2026/06/09/csrf/" class="post-title-link" itemprop="url">CSRF 跨站请求伪造详解</a>
+            <a href="/2026/06/11/encoding/" class="post-title-link" itemprop="url">编码</a>
         </h2>
 
         <div class="post-meta">
@@ -282,14 +277,233 @@
               </span>
               <span class="post-meta-item-text">发表于</span>
 
-              <time title="创建时间：2026-06-09 17:42:43" itemprop="dateCreated datePublished" datetime="2026-06-09T17:42:43+08:00">2026-06-09</time>
+              <time title="创建时间：2026-06-11 16:20:00" itemprop="dateCreated datePublished" datetime="2026-06-11T16:20:00+08:00">2026-06-11</time>
             </span>
               <span class="post-meta-item">
                 <span class="post-meta-item-icon">
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2026-06-10 14:30:47" itemprop="dateModified" datetime="2026-06-10T14:30:47+08:00">2026-06-10</time>
+                <time title="修改时间：2026-06-14 00:36:17" itemprop="dateModified" datetime="2026-06-14T00:36:17+08:00">2026-06-14</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p><em><strong>为什么要编码</strong></em></p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2026/06/11/encoding/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://ctwabc.github.io/2026/06/10/waf/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://github.com/ctwabc.png">
+      <meta itemprop="name" content="ctwabc">
+      <meta itemprop="description" content="学习笔记">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="ctwabc's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2026/06/10/waf/" class="post-title-link" itemprop="url">WAF</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2026-06-10 20:32:07" itemprop="dateCreated datePublished" datetime="2026-06-10T20:32:07+08:00">2026-06-10</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-06-14 00:36:17" itemprop="dateModified" datetime="2026-06-14T00:36:17+08:00">2026-06-14</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="Web-Application-Firewall-WAF"><a href="#Web-Application-Firewall-WAF" class="headerlink" title="Web Application Firewall(WAF)"></a>Web Application Firewall(WAF)</h2><p><em><strong>用途</strong></em></p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2026/06/10/waf/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://ctwabc.github.io/2026/06/10/FireWall/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://github.com/ctwabc.png">
+      <meta itemprop="name" content="ctwabc">
+      <meta itemprop="description" content="学习笔记">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="ctwabc's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2026/06/10/FireWall/" class="post-title-link" itemprop="url">FireWall</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2026-06-10 14:42:54" itemprop="dateCreated datePublished" datetime="2026-06-10T14:42:54+08:00">2026-06-10</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-06-14 00:36:17" itemprop="dateModified" datetime="2026-06-14T00:36:17+08:00">2026-06-14</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h3 id="防火墙规避"><a href="#防火墙规避" class="headerlink" title="防火墙规避"></a>防火墙规避</h3><blockquote>
+<p>以下使用的是Nmap</p>
+</blockquote>
+<p><em><strong>控制MAC,IP,端口进行规避</strong></em></p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2026/06/10/FireWall/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://ctwabc.github.io/2026/06/10/XXE/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://github.com/ctwabc.png">
+      <meta itemprop="name" content="ctwabc">
+      <meta itemprop="description" content="学习笔记">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="ctwabc's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2026/06/10/XXE/" class="post-title-link" itemprop="url">学习XXE</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2026-06-10 09:21:37" itemprop="dateCreated datePublished" datetime="2026-06-10T09:21:37+08:00">2026-06-10</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-06-14 00:36:17" itemprop="dateModified" datetime="2026-06-14T00:36:17+08:00">2026-06-14</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -312,23 +526,15 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <p>CSRF（Cross-site request forgery）跨站请求伪造：攻击者诱导受害者进入第三方网站，在第三方网站中，向被攻击网站发送跨站请求。利用受害者在被攻击网站已经获取的注册凭证，绕过后台的用户验证，达到冒充用户对被攻击的网站执行某项操作的目的。<br>&#x2F;&#x2F;那现实中的例子来举的话，像跟在别人后面进学校<br>一个典型的CSRF攻击有着如下的流程：</p>
-<ul>
-<li>受害者登录 a.com，并保留了登录凭证（Cookie）。</li>
-<li>攻击者引诱受害者访问了 b.com。</li>
-<li>b.com 向 a.com 发送了一个请求：a.com&#x2F;act&#x3D;xx。浏览器会默认携带 a.com 的 Cookie。（从来没有获得过这个Cookie，这是对方的浏览器自动发送的）</li>
-<li>a.com 接收到请求后，对请求进行验证，并确认是受害者的凭证，误以为是受害者自己发送的请求。</li>
-<li>a.com 以受害者的名义执行了 act&#x3D;xx。</li>
-<li>攻击完成，攻击者在受害者不知情的情况下，冒充受害者，让 a.com 执行了自己定义的操作。</li>
-</ul>
-<p>这个第三方网站就是自己配置的恶意网站。<br><img src="/2026/06/09/csrf/csrf.png" alt="我的本地截图"><br>差不多就是这样的。也就是第三方网站像目标网站发送请求。<br>把自己想干的事情通过参数穿过去就好了。</p>
-<p>如果对方后端只接受json数据，那怎么传呢？<br>json数据长这样<br>{<br>“name”: “WebGoat”,<br>“email”: “<a href="mailto:&#x77;&#x65;&#98;&#103;&#111;&#x61;&#x74;&#x40;&#x77;&#x65;&#98;&#103;&#x6f;&#97;&#116;&#x2e;&#111;&#114;&#x67;">webgoat@webgoat.org</a>“,<br>“content”: “WebGoat is the best!!”<br>}</p>
-<p>普通的 HTML <form> 表单提交时，默认的数据格式是 application&#x2F;x-www-form-urlencoded（即 key1&#x3D;value1&amp;key2&#x3D;value2）。如果你在表单里老老实实写 <code>&lt;input name=&quot;name&quot; value=&quot;WebGoat&quot;&gt;</code>，后端一收到，发现不是标准的 JSON 格式，就会直接报 415 Unsupported Media Type 错误并拒绝处理。<br>也就是说上面的input标签里的会变成name&#x3D;WebGoat，很显然这不是我们想要。<br>但是，我们可以调整一下我们的数据。举个例子:<br><input name= ' {"name": "WebGoat", "email": "webgoat@webgoat.org", "content": "WebGoat is the best!!", "ignore_me":" ' value='test"}' type='hidden'></p>
-<p>{“name”: “WebGoat”, “email”: “<a href="mailto:&#x77;&#101;&#98;&#x67;&#111;&#x61;&#x74;&#x40;&#x77;&#101;&#x62;&#103;&#111;&#x61;&#116;&#x2e;&#x6f;&#114;&#x67;">webgoat@webgoat.org</a>“, “content”: “WebGoat is the best!!”, “ignore_me”:”这是一部分<br>test”}这是一部分<br>通过&#x3D;拼接<br>{“name”: “WebGoat”, “email”: “<a href="mailto:&#119;&#x65;&#98;&#103;&#111;&#97;&#x74;&#x40;&#x77;&#x65;&#98;&#103;&#x6f;&#97;&#x74;&#x2e;&#x6f;&#114;&#x67;">webgoat@webgoat.org</a>“, “content”: “WebGoat is the best!!”, “ignore_me”:”&#x3D;test”}<br>可以看到我们传过去的数据成为json格式了<br>单引号和双引号是同级的，他看到是‘开始的会以’结束。</p>
-<p>参考文章:</p>
-<p><a target="_blank" rel="noopener" href="https://drun1baby.top/2022/05/08/%E4%BB%8E0%E5%88%B01%E5%AE%8C%E5%85%A8%E6%8E%8C%E6%8F%A1CSRF/">https://drun1baby.top/2022/05/08/%E4%BB%8E0%E5%88%B01%E5%AE%8C%E5%85%A8%E6%8E%8C%E6%8F%A1CSRF/</a></p>
-<p>不定时会进行补充</p>
-
+          <p><em>XML external entity injection</em></p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2026/06/10/XXE/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
@@ -346,7 +552,7 @@
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><span class="page-number current">2</span>
+    <a class="extend prev" rel="prev" href="/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><a class="extend next" rel="next" href="/page/3/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
   </nav>
 
 

