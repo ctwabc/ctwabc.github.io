@@ -181,6 +181,217 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://ctwabc.github.io/2026/06/14/rmi/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://github.com/ctwabc.png">
+      <meta itemprop="name" content="ctwabc">
+      <meta itemprop="description" content="学习笔记">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="ctwabc's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2026/06/14/rmi/" class="post-title-link" itemprop="url">rmi</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2026-06-14 19:46:36" itemprop="dateCreated datePublished" datetime="2026-06-14T19:46:36+08:00">2026-06-14</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-06-16 18:05:54" itemprop="dateModified" datetime="2026-06-16T18:05:54+08:00">2026-06-16</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p><img src="/2026/06/14/rmi/rmi1.png" alt="截图"></p>
+<p>RMI就是有客户端，服务端。客户端想要使用服务端的对象，RMI就帮助实现了这点。远程对象一直是在服务端运行的。客户端要调用，就要经过网络，那就需要解决ip，端口，指定的对象。</p>
+<p>这样就需要在客户端解决网络请求，为了掩盖在网络上的一些细节，所以使用了代理（stub），在每一次的对象调用中，stub解决网络上的问题。对应的为了解包就用了skeleton（很多版本的registry还在使用skeleton，但是远程服务可以说是不用skeleton了）。服务端的远程对象存储在表中，这个表在jvm里，每一个对象会有对应的stub，这个stub存储在注册表。客户端会从注册表获取想要的stub，通过stub调用远程对象。</p>
+<p>注册表本身也是一个远程对象。也就是说我们在客户端上用registry的lookup方法就是远程方法调用。既然是远程方法调用，那不就需要stub吗，我们怎么获取stub呢？想要获取stub就需要使用注册表，想要获得使用注册表就需要stub，这好像是个没有办法解决的问题。为了解决这个问题，rmi使用了一种方法，那就是在本地构建注册表的stub。通过提供注册表的ip和端口的方式本底生成。</p>
+<p>通过注册表stub发给注册表的请求显然也是需要接收的，由注册中心的server socket接收，skeleton处理。所以说注册表本身是一个服务。</p>
+<p><em><strong>创建远程服务</strong></em></p>
+<p>创建远程对象和创建远程服务可以说是一件事情，new出对象的时候就会把远程服务给起了(也就是为这个服务分配一个端口)，后续创建远程对象的时候是不会进行端口分配的。</p>
+<p><img src="/2026/06/14/rmi/rmi2.png" alt="截图"></p>
+<p><img src="/2026/06/14/rmi/rmi3.png" alt="截图"></p>
+<p>走父类的构造方法</p>
+<p><img src="/2026/06/14/rmi/rmi4.png" alt="截图"></p>
+<p><img src="/2026/06/14/rmi/rmi5.png" alt="截图"></p>
+<p><img src="/2026/06/14/rmi/rmi6.png" alt="截图"></p>
+<p>他就是在把这个远程对象放到随机的端口。看一下这个UnicastServerRef()</p>
+<p><img src="/2026/06/14/rmi/rmi7.png" alt="截图"></p>
+<p><img src="/2026/06/14/rmi/rmi8.png" alt="截图"></p>
+<p><img src="/2026/06/14/rmi/rmi9.png" alt="截图"></p>
+<p><img src="/2026/06/14/rmi/rmi10.png" alt="截图"></p>
+<p>到这里就把值给附上去了。其实就是对LiveRef的层层封装。不要忘记这整个过程是在创建远程对象的时候发生的。他进行了层层封装，目的就是我们只需要new出来远程对象，这个远程对象放哪里以及网络上的问题已经封装好了。总之这个LiveRef就是跟远程对象相对应的。这次看一下exportObject的后续。</p>
+<p><img src="/2026/06/14/rmi/rmi6.png" alt="截图"></p>
+<p><img src="/2026/06/14/rmi/rmi11.png" alt="截图"></p>
+<p>还在调用exportObject()</p>
+<p><img src="/2026/06/14/rmi/rmi12.png" alt="截图"></p>
+<p>创建代理，开头也讲过，我们是使用stub也就是代理来调用远程对象的。看一下怎么创建的。</p>
+<p><img src="/2026/06/14/rmi/rmi13.png" alt="截图"></p>
+<p>获取远程对象的类，然后有一个if，这个if判断的意思就是这个stub已经存在的话就进行处理，这个stub不是已经存在的。</p>
+<p>然后就是生成动态代理的标准流程了。最后返回代理。</p>
+<p><img src="/2026/06/14/rmi/rmi14.png" alt="截图"></p>
+<p>获得stub以后把至今所有的信息放到target里面。然后继续exportObject()</p>
+<p><img src="/2026/06/14/rmi/rmi15.png" alt="截图"></p>
+<p>一直跟进直到这里。这里就是解决网络请求的部分，进listen()</p>
+<p><img src="/2026/06/14/rmi/rmi16.png" alt="截图"></p>
+<p>先从target里把该拿的拿了，然后检查server是不是空的，这个server就是服务端的socket，也就是用来接收stub发过来的网络请求的。</p>
+<p>因为server是空的所以创建。</p>
+<p><img src="/2026/06/14/rmi/rmi17.png" alt="截图"></p>
+<p>可以看到创建server socket的时候给他配了一个端口。</p>
+<p><img src="/2026/06/14/rmi/rmi18.png" alt="截图"></p>
+<p>整完服务端的socket，就要把远程对象给记录下来的。这里有两个表，我们看一下。</p>
+<p><img src="/2026/06/14/rmi/rmi19.png" alt="截图"></p>
+<p>就是把远程对象放进去了，就是为服务端记录远程对象。</p>
+<p>以上就是创建远程服务的过程，他会在new第一个远程对象的时候创建，后续有第二第三个远程对象被new出来的时候不会创建server socket因为server不是空的，最终只会把远程对象记录到内置的表里面。</p>
+<p><img src="/2026/06/14/rmi/rmi30.png" alt="截图"></p>
+<p><em><strong>创建注册中心</strong></em></p>
+<p><img src="/2026/06/14/rmi/rmi20.png" alt="截图"></p>
+<p><img src="/2026/06/14/rmi/rmi21.png" alt="截图"></p>
+<p>注册表实现类就是RegistryImpl，这不就跟new第一个远程对象的时候一样吗？也就是说起远程对象的远程服务和起注册表服务是一样的。</p>
+<p><img src="/2026/06/14/rmi/rmi23.png" alt="截图"></p>
+<p>创建liveref，封装到UnicastServerRef，我们进到setup</p>
+<p><img src="/2026/06/14/rmi/rmi22.png" alt="截图"></p>
+<p>可以看到调用了UnicastServerRef的exportObject，这个跟之前创建远程服务时一样，跟进。</p>
+<p><img src="/2026/06/14/rmi/rmi24.png" alt="截图"></p>
+<p>跟之前一样进去看一下</p>
+<p><img src="/2026/06/14/rmi/rmi25.png" alt="截图"></p>
+<p>这次进到if判断里面了，也就是说jdk里有registryImp的stub。</p>
+<p><img src="/2026/06/14/rmi/rmi26.png" alt="截图"></p>
+<p>通过forname找到这个stub的类，然后创建。</p>
+<p><img src="/2026/06/14/rmi/rmi27.png" alt="截图"></p>
+<p>获得stub以后这次又进到这个if判断里面了，总之就是造skeleton，注册中心还是在用skeleton来进行业务逻辑处理</p>
+<p><img src="/2026/06/14/rmi/rmi28.png" alt="截图"></p>
+<p><img src="/2026/06/14/rmi/rmi29.png" alt="截图"></p>
+<p>可以看到他跟注册中心的stub创造方式是一样的。</p>
+<p>后续的过程跟创建服务端的时候是一样的，也会走到listen，创造server socket(从这里也可以知道注册表是另起的一个服务了，因为跟远程服务的端口是不一样的)，将注册表对象放到内置的表里面。</p>
+<p>到这里也应该认识到了注册表也是一个服务，他跟远程服务是一样的，只不过他放在了固定的端口，且用的是skeleton来解决传过来的网络请求(server socket接收网络请求，skeleton来处理网络请求)。</p>
+<p><em><strong>绑定</strong></em></p>
+<p><img src="/2026/06/14/rmi/rmi31.png" alt="截图"></p>
+<p><img src="/2026/06/14/rmi/rmi32.png" alt="截图"></p>
+<p>bindings是一个hashtable，查一下hashtable有没有这个远程对象，没有就放进去。</p>
+<blockquote>
+<p>有一点要注意的是bindings里存的是stub，你可能会疑问obj明明是一个对象啊，怎么就成stub了呢，代码也没写啊。其实是因为这个bind操作本身是会经过socket的，毕竟注册中心和远程服务是两个独立的服务，而这个替换发生在要出网的时候，问题就是debug的时候跟不进去，也就看不到替换了，所以看似是存的对象，其实存的是stub。</p>
+</blockquote>
+<p><em><strong>客户端请求注册中心</strong></em></p>
+<p><img src="/2026/06/14/rmi/rmi33.png" alt="截图"></p>
+<p>先看一下我们是如何在客户端获取注册中心的</p>
+<p><img src="/2026/06/14/rmi/rmi34.png" alt="截图"></p>
+<p>通过手动传的参数创造liveRef，将liveRef封装，最下面是我们非常熟悉的创建代理。</p>
+<p><img src="/2026/06/14/rmi/rmi35.png" alt="截图"></p>
+<p>老样子进到了这个if判断里面了，因为jdk里有registryImpl的stub。</p>
+<p>最终我们可以知道注册中心的stub是在本地创建的，也知道了这个Registry是一个代理。</p>
+<p>看一下lookup</p>
+<p><img src="/2026/06/14/rmi/rmi36.png" alt="截图"></p>
+<p>先创建一个连接(就socket的那些东西)，序列化我们传进来的字符串，进到invoke()，这个invoke就是用来处理网络请求的，通过字符出串找到远程对象的stub以后对方会传过来，我们接受的时候反序列化。这里可以想到，如果有恶意的注册中心，反序列化stub的时候或许就可以攻击客户端了。然后细看一下invoke()</p>
+<p><img src="/2026/06/14/rmi/rmi37.png" alt="截图"></p>
+<p>进executeCall()</p>
+<p><img src="/2026/06/14/rmi/rmi38.png" alt="截图"></p>
+<p>注册中心发生了异常，就会给客户端发消息，这个消息如果是上述情况的话客户端就会把那个异常给反序列化了，这个反序列化的点比上一个更好，因为invoke方法是所有的stub都会调用的。</p>
+<p><em><strong>客户端请求服务端</strong></em></p>
+<p>看一下sayhello的调用</p>
+<p><img src="/2026/06/14/rmi/rmi39.png" alt="截图"></p>
+<p>动态代理调用方法的时候都会调用到invoke()，最后到invokeRemoteMethod()，跟进</p>
+<p><img src="/2026/06/14/rmi/rmi40.png" alt="截图"></p>
+<p>到invoke()</p>
+<p><img src="/2026/06/14/rmi/rmi41.png" alt="截图"></p>
+<p>图里没有截完，上面就是建立连接，图里的部分就是序列化参数，这个参数就是方法调用是的那个参数，还会调用executeCall()，这个方法的攻击面上面写了。</p>
+<p><img src="/2026/06/14/rmi/rmi42.png" alt="截图"></p>
+<p>这个unmarshalValue()就是反序列化方法的返回值，看一下</p>
+<p><img src="/2026/06/14/rmi/rmi43.png" alt="截图"></p>
+<p>这个点就可以返回值了。对这个返回值的反序列化是这样子的，先讲传过来的字节流反序列化，然后将其强转成对应返回值的类型。所以说可以串恶意字节流，虽然强转的时候会报错，但是反序列化已经完成了，恶意代码就执行完了。</p>
+<p><em><strong>注册中心响应客户度啊</strong></em></p>
+<p>客户端使用注册中心stub发送了消息，注册中心就会接受了，我们知道listen方法监听端口，看一下。</p>
+<p><img src="/2026/06/14/rmi/rmi44.png" alt="截图"></p>
+<p>起另一个线程来处理，进到AccepLoop()，看一下run()</p>
+<p><img src="/2026/06/14/rmi/rmi45.png" alt="截图"></p>
+<p>跟进</p>
+<p><img src="/2026/06/14/rmi/rmi46.png" alt="截图"></p>
+<p>进ConnectionHandler()</p>
+<p><img src="/2026/06/14/rmi/rmi47.png" alt="截图"></p>
+<p>进run0()</p>
+<p><img src="/2026/06/14/rmi/rmi48.png" alt="截图"></p>
+<p>handleMessages()</p>
+<p><img src="/2026/06/14/rmi/rmi49.png" alt="截图"></p>
+<p>默认的Call时，进serviceCall()</p>
+<p><img src="/2026/06/14/rmi/rmi50.png" alt="截图"></p>
+<p>从表里把target拿了</p>
+<p><img src="/2026/06/14/rmi/rmi51.png" alt="截图"></p>
+<p>跟进</p>
+<p><img src="/2026/06/14/rmi/rmi52.png" alt="截图"></p>
+<p>skel不是空的，跟进</p>
+<p><img src="/2026/06/14/rmi/rmi53.png" alt="截图"></p>
+<p>可算是到了skeleton了，跟进</p>
+<p><img src="/2026/06/14/rmi/rmi54.png" alt="截图"></p>
+<p>每一个case对应不同方法的调用，比如bind，lookup，rebind什么的，我们在客户端调用的是lookup就走到了case2，可以看到他会把传过来的远程对象的名字给反序列化了，可以想到这是一个攻击点。</p>
+<p><em><strong>服务端响应客户端</strong></em></p>
+<p>也就是使用远程对象的stub的时候，服务端的响应。前面跟注册中心的响应一样，直到下图</p>
+<p><img src="/2026/06/14/rmi/rmi55.png" alt="截图"></p>
+<p>可以看到skel是空的，之前也写过远程服务是不用skeleton的，继续往下走</p>
+<p><img src="/2026/06/14/rmi/rmi56.png" alt="截图"></p>
+<p>反序列通过stub传的方法的参数，这里就是一个攻击点，这个方法见过几次，还是简单贴一下反序列化的地方吧。如图</p>
+<p><img src="/2026/06/14/rmi/rmi57.png" alt="截图"></p>
+<p><img src="/2026/06/14/rmi/rmi58.png" alt="截图"></p>
+<p>服务端调用方法</p>
+<p><img src="/2026/06/14/rmi/rmi59.png" alt="截图"></p>
+<p>将返回值序列化，准备传给客户端，之前也写过反序列化返回值可以攻击</p>
+<p><em><strong>dgc</strong></em></p>
+<p>我们先看一下dgc是在哪里创建的</p>
+<p><img src="/2026/06/14/rmi/rmi60.png" alt="截图"></p>
+<p>这个部分是之前我们在创建远程服务的时候，把远程对象放进内置的表里面的部分，这段代码调用了DGCImpl的静态变量，所以会进行类的初始话，我们进这个类里面看一下。</p>
+<p><img src="/2026/06/14/rmi/rmi61.png" alt="截图"></p>
+<p>这段代码在静态代码块里面(截图没有截全 )，他这个过程跟注册中心很像，我们可以去创建动态代理的部分看一下</p>
+<p><img src="/2026/06/14/rmi/rmi62.png" alt="截图"></p>
+<p>DGC也进入到了这个if判断里面，也就是说jdk里面是有dgcimp的stub的。</p>
+<p><img src="/2026/06/14/rmi/rmi63.png" alt="截图"></p>
+<p>我们去看一下DGCImpl_Stub，有两个方法一个dirty，一个clean大概就是干净的清理和有点剩余的清理，可以看到调用了invoke()，还有反序列化，可以想到这两个是攻击点。再看一下DGCImpl_Skel</p>
+<p><img src="/2026/06/14/rmi/rmi64.png" alt="截图"></p>
+<p>有两个case应该是对应clean和dirty，这里也进行了反序列化，也是一个攻击点。</p>
+<p>以上就是RMI的全流程了。</p>
+<p>推荐视频:<a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV1L3411a7ax/?spm_id_from=333.1387.upload.video_card.click&vd_source=c4cebc18d34b17376b1b2a473da11100">https://www.bilibili.com/video/BV1L3411a7ax/?spm_id_from=333.1387.upload.video_card.click&amp;vd_source=c4cebc18d34b17376b1b2a473da11100</a></p>
+<p>参考文章:<a target="_blank" rel="noopener" href="https://fynch3r.github.io/Java-RMI%E5%8E%9F%E7%90%86%E5%8F%8A%E5%AE%9E%E6%88%98/">https://fynch3r.github.io/Java-RMI%E5%8E%9F%E7%90%86%E5%8F%8A%E5%AE%9E%E6%88%98/</a></p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="http://ctwabc.github.io/2026/06/14/jndi/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -453,78 +664,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://ctwabc.github.io/2026/06/11/shiro550/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="https://github.com/ctwabc.png">
-      <meta itemprop="name" content="ctwabc">
-      <meta itemprop="description" content="学习笔记">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="ctwabc's Blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2026/06/11/shiro550/" class="post-title-link" itemprop="url">Shiro550</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2026-06-11 20:24:59" itemprop="dateCreated datePublished" datetime="2026-06-11T20:24:59+08:00">2026-06-11</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2026-06-14 00:36:17" itemprop="dateModified" datetime="2026-06-14T00:36:17+08:00">2026-06-14</time>
-              </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p><em><strong>流程分析</strong></em></p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2026/06/11/shiro550/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -596,7 +735,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">13</span>
+          <span class="site-state-item-count">14</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
