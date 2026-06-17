@@ -277,7 +277,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2026/06/14/jndi/" class="post-title-link" itemprop="url">jndi</a>
+            <a href="/2026/06/14/jndi/" class="post-title-link" itemprop="url">JNDI</a>
         </h2>
 
         <div class="post-meta">
@@ -294,7 +294,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2026-06-16 18:16:35" itemprop="dateModified" datetime="2026-06-16T18:16:35+08:00">2026-06-16</time>
+                <time title="修改时间：2026-06-17 15:51:38" itemprop="dateModified" datetime="2026-06-17T15:51:38+08:00">2026-06-17</time>
               </span>
 
           <br>
@@ -303,14 +303,14 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>0</span>
+              <span>2.1k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
                 <i class="far fa-clock"></i>
               </span>
                 <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>1 分钟</span>
+              <span>2 分钟</span>
             </span>
 
         </div>
@@ -322,7 +322,85 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          
+          <p><em><strong>概念</strong></em></p>
+<p>JNDI提供统一的客户端API，并由管理者将JNDI API映射为特定的<strong>命名服务</strong>和<strong>目录服务</strong>，为开发人员查找和访问各种资源提供了统一的通用接口，可以用来定义用户、网络、机器、对象和服务等各种资源。简单来说，开发人员通过合理的使用JNDI，能够让用户通过统一的方式访问获取网络上的各种资源和服务。</p>
+<p><em><strong>命名服务</strong></em></p>
+<p>命名服务，简单来说，就是一种通过名称来查找实际对象的服务。比如我们的RMI协议，可以通过名称来查找并调用具体的远程对象。再比如我们的DNS协议，通过域名来查找具体的IP地址。这些都可以叫做命名服务。</p>
+<p>在命名服务中，有几个重要的概念。</p>
+<ul>
+<li><strong>Bindings</strong>：表示一个名称和对应对象的绑定关系，比如在在 DNS 中域名绑定到对应的 IP，在RMI中远程对象绑定到对应的name,文件系统中文件名绑定到对应的文件。</li>
+<li><strong>Context</strong>：上下文，一个上下文中对应着<strong>一组名称到对象的绑定关系</strong>，我们可以在指定上下文中查找名称对应的对象。比如在文件系统中，一个目录就是一个上下文，可以在该目录中查找文件，其中子目录也可以称为子上下文 (SubContext)。</li>
+<li><strong>References</strong>：在一个实际的名称服务中，有些对象可能无法直接存储在系统内，这时它们便以引用的形式进行存储，可以理解为 C&#x2F;C++ 中的指针。引用中包含了获取实际对象所需的信息，甚至对象的实际状态。比如文件系统中实际根据名称打开的文件是一个整数 fd (file descriptor)，这就是一个引用，内核根据这个引用值去找到磁盘中的对应位置和读写偏移。</li>
+</ul>
+<p><em><strong>目录服务</strong></em></p>
+<p>简单来说，目录服务是命名服务的扩展，除了名称服务中已有的名称到对象的关联信息外，还允许对象拥有属性（Attributes）信息。由此，我们不仅可以根据名称去查找（Lookup）对象(并获取其对应属性)，还可以根据属性值去搜索（Search）对象。</p>
+<p>一些常见的目录服务有：</p>
+<ul>
+<li>LDAP： 轻型目录访问协议</li>
+<li>Active Directory: 为 Windows 域网络设计，包含多个目录服务，比如域名服务、证书服务等；</li>
+<li>其他基于 X.500 (目录服务的标准) 实现的目录服务；</li>
+</ul>
+<p>JDK 中包含了下述内置的命名目录服务:</p>
+<ul>
+<li>RMI: Java Remote Method Invocation，Java 远程方法调用</li>
+<li>LDAP: 轻量级目录访问协议</li>
+<li>CORBA: Common Object Request Broker Architecture，通用对象请求代理架构，用于 COS 名称服务(Common Object Services)</li>
+<li>DNS（域名转换协议）</li>
+</ul>
+<p>可以这样理解，用jndi进行的操作相当于在相对应的命名服务或者是目录服务上进行操作，这个jndi就是统一了对于各种命名服务或目录服务的操作。</p>
+<p><em><strong>JNDI+RMI</strong></em></p>
+<p>一路跟进lookup看一下</p>
+<p><img src="/2026/06/14/jndi/jndi1.png" alt="截图"></p>
+<p><img src="/2026/06/14/jndi/jndi2.png" alt="截图"></p>
+<p><img src="/2026/06/14/jndi/jndi3.png" alt="截图"></p>
+<p><img src="/2026/06/14/jndi/jndi4.png" alt="截图"></p>
+<p>最后可以看到他调用的是RegistryImpl_Stub的lookup方法，也就是说他跟rmi是没有区别的，rmi的所有漏洞他都可以用上。</p>
+<p>下面看一下jndi的利用方法。</p>
+<p><img src="/2026/06/14/jndi/jndi5.png" alt="截图"></p>
+<p>这个操作就是让remoteObj这个名字对应refObj。</p>
+<p>Reference的三个参数是，类名，工厂名，工厂地址，这个类名就是我们实际要加载的类。</p>
+<p>下面我们看一下rebind方法</p>
+<p><img src="/2026/06/14/jndi/jndi6.png" alt="截图"></p>
+<p>obj被encode了，看一下encodeObject()</p>
+<p><img src="/2026/06/14/jndi/jndi7.png" alt="截图"></p>
+<p>obj是reference就包装成ReferenceWrapper()</p>
+<p>下面看一下lookup的过程</p>
+<p><img src="/2026/06/14/jndi/jndi8.png" alt="截图"></p>
+<p>接收的obj是ReferenceWrapper所以要decode</p>
+<p><img src="/2026/06/14/jndi/jndi9.png" alt="截图"></p>
+<p>跟进</p>
+<p><img src="/2026/06/14/jndi/jndi10.png" alt="截图"></p>
+<p>跟进</p>
+<p><img src="/2026/06/14/jndi/jndi15.png" alt="截图"></p>
+<p>跟进loadClass</p>
+<p><img src="/2026/06/14/jndi/jndi11.png" alt="截图"></p>
+<p>用className找一下肯定是找不到的</p>
+<p><img src="/2026/06/14/jndi/jndi12.png" alt="截图"></p>
+<p>然后用codebase加载，codebase就是reference里面写的那个地址，跟进loadClass()</p>
+<p><img src="/2026/06/14/jndi/jndi13.png" alt="截图"></p>
+<p>用了URLClassLoader()，他可以出网加载类。跟进</p>
+<p><img src="/2026/06/14/jndi/jndi14.png" alt="截图"></p>
+<p>这次就可以加载了，而且这个forName的参数里有true也就是说是会初始化的。这样我们就可以执行我们的恶意代码了。</p>
+<p>而且也可以知道类的初始化不是在RegistryContext执行的，也就是说其他的协议也可以利用这个漏洞。</p>
+<p><em><strong>JNDI+LDAP</strong></em></p>
+<p>起一个LDAP服务，跟之前RMI一样用Reference帮一下就好了，然后看一下lookup的过程</p>
+<p><img src="/2026/06/14/jndi/jndi22.png" alt="截图"></p>
+<p>一直跟进lookup就好了</p>
+<p><img src="/2026/06/14/jndi/jndi16.png" alt="截图"></p>
+<p>会走到LdapCtx</p>
+<p><img src="/2026/06/14/jndi/jndi17.png" alt="截图"></p>
+<p>在这个方法里面会走到这里decodeObject跟进</p>
+<p>![<img src="/2026/06/14/jndi/jndi18.png" alt="截图"></p>
+<p>这一长串的if判断是在根据获得的atters进行操作，如果说序列化数据就反序列化，如果是远程对像就decode远程对象，如果是Reference就decodeReference。</p>
+<p><img src="/2026/06/14/jndi/jndi19.png" alt="截图"></p>
+<p>解析玩reference以后走到这里，跟进</p>
+<p><img src="/2026/06/14/jndi/jndi20.png" alt="截图"></p>
+<p>跟进</p>
+<p><img src="/2026/06/14/jndi/jndi21.png" alt="截图"></p>
+<p>用名字在本地找一下，找不到，然后用codebase，总之跟RMI一模一样。</p>
+<p>推荐视频:<a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV1P54y1Z7Lf/?spm_id_from=333.1387.upload.video_card.click&vd_source=c4cebc18d34b17376b1b2a473da11100">https://www.bilibili.com/video/BV1P54y1Z7Lf/?spm_id_from=333.1387.upload.video_card.click&amp;vd_source=c4cebc18d34b17376b1b2a473da11100</a></p>
+<p>参考文章:<a target="_blank" rel="noopener" href="https://goodapple.top/archives/696">https://goodapple.top/archives/696</a></p>
+
       
     </div>
 
@@ -714,12 +792,12 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-area"></i>
     </span>
-    <span title="站点总字数">20k</span>
+    <span title="站点总字数">23k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">19 分钟</span>
+    <span title="站点阅读时长">21 分钟</span>
 </div>
   <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
   </div><div class="custom-footer">
