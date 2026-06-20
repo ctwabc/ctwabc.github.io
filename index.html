@@ -181,6 +181,177 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://ctwabc.github.io/2026/06/20/el/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://github.com/ctwabc.png">
+      <meta itemprop="name" content="ctwabc">
+      <meta itemprop="description" content="学习笔记">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="ctwabc's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2026/06/20/el/" class="post-title-link" itemprop="url">el</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2026-06-20 13:39:22 / 修改时间：15:12:27" itemprop="dateCreated datePublished" datetime="2026-06-20T13:39:22+08:00">2026-06-20</time>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>0</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://ctwabc.github.io/2026/06/19/memoryshell/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://github.com/ctwabc.png">
+      <meta itemprop="name" content="ctwabc">
+      <meta itemprop="description" content="学习笔记">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="ctwabc's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2026/06/19/memoryshell/" class="post-title-link" itemprop="url">内存马</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2026-06-19 17:28:41 / 修改时间：17:31:06" itemprop="dateCreated datePublished" datetime="2026-06-19T17:28:41+08:00">2026-06-19</time>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>2.3k</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p><em><strong>tomcat内存马</strong></em></p>
+<p>因为在tomcat中资源的分配加载都跟standardcontext有关，所以说内存马就是找到standardcontext，通过standardcontext将恶意的listener，filter，servlet，valve放进去。</p>
+<p>1.listener型：</p>
+<p>有各种不同的listener，其中ServletRequestListener无疑是最好用的。因为它监听的是ServletRequest，访问web网站的任意位置都会触发这个监听器。</p>
+<p>listener存储在<em>applicationEventListenersList</em>，调用<em>standardcontext.addApplicationEventListenersList</em>就好了。因为是<em>tomcat+jsp</em>所以说这里有一个通用的方式去获取<em>standardcontext</em></p>
+<p>ServletContext servletContext &#x3D; request.getServletContext();</p>
+<p>Field applicationContextField &#x3D; servletContext.getClass().getDeclaredField(“context”);</p>
+<p>applicationContextField.setAccessible(true);</p>
+<p>ApplicationContext applicationContext &#x3D; (ApplicationContext) applicationContextField.get(servletContext);</p>
+<p>Field stantardContextField &#x3D; applicationContext.getClass().getDeclaredField(“context”);</p>
+<p>stantardContextField.setAccessible(true);</p>
+<p>StandardContext context &#x3D; (StandardContext) stantardContextField.get(applicationContext);</p>
+<p>2.filter型:</p>
+<p>首先需要对filter的调用流程需要一些了解。</p>
+<p>filter.doFilter-&gt;ApplicationFilterChain.internalDoFilter-&gt;filter.dofilter</p>
+<p>tomcat的filterchain是在每一次的请求中重新组装的</p>
+<p>在ApplicationFilterChain中</p>
+<p>从ApplicationFilterConfig获取filterconfig从filterconfig获取filter</p>
+<p>这是filter的调用流程</p>
+<p>现在需要关心的是filter是怎么放进去的</p>
+<p>关键就是把filterconfig放到ApplicationFilterChain里面</p>
+<p>ApplicationFilterFactory.createFilterChain在这个方法里面有filterChain.addFilter(filterConfig)</p>
+<p>现在就是需要走到这里了。</p>
+<p>这里涉及到几个概念</p>
+<p>filtermaps:我们都知道filter是过滤器，既然是过滤器，那就需要知道在访问哪些地方的时候调用哪个过滤器，他就是干这个工作的。</p>
+<p>filterconfig:对filter的封装，除了filter还有别的一些数据，他是使用filterdef创建的</p>
+<p>filterdef:对于filter的静态定义，用于创建filter。里面记录了 Filter 的名字（filterName）、Filter 对应的实现类（filterClass），以及初始化参数（initParams）</p>
+<p>dispatcher:决定了请求以什么方式到达的时候会调用。</p>
+<p><strong>REQUEST（最常用）：</strong> 只有当客户端<strong>直接发送 HTTP 请求</strong>访问这个 URL 时，才触发 Filter。</p>
+<p><strong>FORWARD：</strong> 当后端代码通过 request.getRequestDispatcher(“&#x2F;target”).forward(request, response) 进行<strong>内部转发</strong>时，才触发 Filter。</p>
+<p><strong>INCLUDE：</strong> 当页面通过 include 包含其他页面时触发。</p>
+<p><strong>ERROR：</strong> 当系统发生错误、跳转到错误处理页面（404&#x2F;500）时触发。</p>
+<p><strong>ASYNC：</strong> 异步请求时触发。</p>
+<p>1.遍历filtermaps获得filtermap，将与这次请求的dispatcher 类型以及url路径相匹配的filterconfig从filterconfigs中拿出来，放入filterchain。</p>
+<p>2.遍历filtermaps获得filtermap，将与这次请求的dispatcher 类型以及servlet名字相匹配的filterconfig从filterconfigs中拿出来，放入filterchain。</p>
+<p>所以说我们得先把filtermap放入filtermaps中再把filterconfig放入filterconfigs中，而filterconfig需要filterdef。这个filterdef也需要放在context中，主要是为了对账，防止检测出没有filterdef但是有filterconfig这种情况。</p>
+<p>3.servlet型：</p>
+<p>4.valve型:</p>
+<p>pipeline有添加valve的方法。</p>
+<p>pipeline可以从每一个小容器中获取（Engine，host，context，wrapper）</p>
+<p><em><strong>Spring内存马</strong></em></p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="http://ctwabc.github.io/2026/06/18/spel/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -212,7 +383,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2026-06-19 17:14:24" itemprop="dateModified" datetime="2026-06-19T17:14:24+08:00">2026-06-19</time>
+                <time title="修改时间：2026-06-20 17:00:58" itemprop="dateModified" datetime="2026-06-20T17:00:58+08:00">2026-06-20</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -230,7 +401,7 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>941</span>
+              <span>2k</span>
             </span>
 
         </div>
@@ -423,174 +594,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://ctwabc.github.io/2026/06/14/rmi/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="https://github.com/ctwabc.png">
-      <meta itemprop="name" content="ctwabc">
-      <meta itemprop="description" content="学习笔记">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="ctwabc's Blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2026/06/14/rmi/" class="post-title-link" itemprop="url">rmi</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2026-06-14 19:46:36" itemprop="dateCreated datePublished" datetime="2026-06-14T19:46:36+08:00">2026-06-14</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2026-06-19 17:14:24" itemprop="dateModified" datetime="2026-06-19T17:14:24+08:00">2026-06-19</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Java%E5%AE%89%E5%85%A8/" itemprop="url" rel="index"><span itemprop="name">Java安全</span></a>
-                </span>
-            </span>
-
-          <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>3.9k</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p><img src="/2026/06/14/rmi/rmi1.png" alt="截图"></p>
-<p>RMI就是有客户端，服务端。客户端想要使用服务端的对象，RMI就帮助实现了这点。远程对象一直是在服务端运行的。客户端要调用，就要经过网络，那就需要解决ip，端口，指定的对象。</p>
-          <!--noindex-->
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://ctwabc.github.io/2026/06/14/jndi/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="https://github.com/ctwabc.png">
-      <meta itemprop="name" content="ctwabc">
-      <meta itemprop="description" content="学习笔记">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="ctwabc's Blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2026/06/14/jndi/" class="post-title-link" itemprop="url">JNDI</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2026-06-14 17:22:59" itemprop="dateCreated datePublished" datetime="2026-06-14T17:22:59+08:00">2026-06-14</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2026-06-19 17:14:24" itemprop="dateModified" datetime="2026-06-19T17:14:24+08:00">2026-06-19</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Java%E5%AE%89%E5%85%A8/" itemprop="url" rel="index"><span itemprop="name">Java安全</span></a>
-                </span>
-            </span>
-
-          <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>2.1k</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p><em><strong>概念</strong></em></p>
-<p>JNDI提供统一的客户端API，并由管理者将JNDI API映射为特定的<strong>命名服务</strong>和<strong>目录服务</strong>，为开发人员查找和访问各种资源提供了统一的通用接口，可以用来定义用户、网络、机器、对象和服务等各种资源。简单来说，开发人员通过合理的使用JNDI，能够让用户通过统一的方式访问获取网络上的各种资源和服务。</p>
-          <!--noindex-->
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -662,7 +665,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">17</span>
+          <span class="site-state-item-count">19</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -722,7 +725,7 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-area"></i>
     </span>
-    <span title="站点总字数">25k</span>
+    <span title="站点总字数">28k</span>
 </div>
   <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
   </div><div class="custom-footer">
