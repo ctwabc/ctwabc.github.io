@@ -204,9 +204,24 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2026-06-19 17:28:41 / 修改时间：17:31:06" itemprop="dateCreated datePublished" datetime="2026-06-19T17:28:41+08:00">2026-06-19</time>
+              <time title="创建时间：2026-06-19 17:28:41" itemprop="dateCreated datePublished" datetime="2026-06-19T17:28:41+08:00">2026-06-19</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-06-26 21:20:31" itemprop="dateModified" datetime="2026-06-26T21:20:31+08:00">2026-06-26</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java%E5%AE%89%E5%85%A8/" itemprop="url" rel="index"><span itemprop="name">Java安全</span></a>
+                </span>
             </span>
 
           <br>
@@ -229,46 +244,9 @@
       
           <p><em><strong>tomcat内存马</strong></em></p>
 <p>因为在tomcat中资源的分配加载都跟standardcontext有关，所以说内存马就是找到standardcontext，通过standardcontext将恶意的listener，filter，servlet，valve放进去。</p>
-<p>1.listener型：</p>
-<p>有各种不同的listener，其中ServletRequestListener无疑是最好用的。因为它监听的是ServletRequest，访问web网站的任意位置都会触发这个监听器。</p>
-<p>listener存储在<em>applicationEventListenersList</em>，调用<em>standardcontext.addApplicationEventListenersList</em>就好了。因为是<em>tomcat+jsp</em>所以说这里有一个通用的方式去获取<em>standardcontext</em></p>
-<p>ServletContext servletContext &#x3D; request.getServletContext();</p>
-<p>Field applicationContextField &#x3D; servletContext.getClass().getDeclaredField(“context”);</p>
-<p>applicationContextField.setAccessible(true);</p>
-<p>ApplicationContext applicationContext &#x3D; (ApplicationContext) applicationContextField.get(servletContext);</p>
-<p>Field stantardContextField &#x3D; applicationContext.getClass().getDeclaredField(“context”);</p>
-<p>stantardContextField.setAccessible(true);</p>
-<p>StandardContext context &#x3D; (StandardContext) stantardContextField.get(applicationContext);</p>
-<p>2.filter型:</p>
-<p>首先需要对filter的调用流程需要一些了解。</p>
-<p>filter.doFilter-&gt;ApplicationFilterChain.internalDoFilter-&gt;filter.dofilter</p>
-<p>tomcat的filterchain是在每一次的请求中重新组装的</p>
-<p>在ApplicationFilterChain中</p>
-<p>从ApplicationFilterConfig获取filterconfig从filterconfig获取filter</p>
-<p>这是filter的调用流程</p>
-<p>现在需要关心的是filter是怎么放进去的</p>
-<p>关键就是把filterconfig放到ApplicationFilterChain里面</p>
-<p>ApplicationFilterFactory.createFilterChain在这个方法里面有filterChain.addFilter(filterConfig)</p>
-<p>现在就是需要走到这里了。</p>
-<p>这里涉及到几个概念</p>
-<p>filtermaps:我们都知道filter是过滤器，既然是过滤器，那就需要知道在访问哪些地方的时候调用哪个过滤器，他就是干这个工作的。</p>
-<p>filterconfig:对filter的封装，除了filter还有别的一些数据，他是使用filterdef创建的</p>
-<p>filterdef:对于filter的静态定义，用于创建filter。里面记录了 Filter 的名字（filterName）、Filter 对应的实现类（filterClass），以及初始化参数（initParams）</p>
-<p>dispatcher:决定了请求以什么方式到达的时候会调用。</p>
-<p><strong>REQUEST（最常用）：</strong> 只有当客户端<strong>直接发送 HTTP 请求</strong>访问这个 URL 时，才触发 Filter。</p>
-<p><strong>FORWARD：</strong> 当后端代码通过 request.getRequestDispatcher(“&#x2F;target”).forward(request, response) 进行<strong>内部转发</strong>时，才触发 Filter。</p>
-<p><strong>INCLUDE：</strong> 当页面通过 include 包含其他页面时触发。</p>
-<p><strong>ERROR：</strong> 当系统发生错误、跳转到错误处理页面（404&#x2F;500）时触发。</p>
-<p><strong>ASYNC：</strong> 异步请求时触发。</p>
-<p>1.遍历filtermaps获得filtermap，将与这次请求的dispatcher 类型以及url路径相匹配的filterconfig从filterconfigs中拿出来，放入filterchain。</p>
-<p>2.遍历filtermaps获得filtermap，将与这次请求的dispatcher 类型以及servlet名字相匹配的filterconfig从filterconfigs中拿出来，放入filterchain。</p>
-<p>所以说我们得先把filtermap放入filtermaps中再把filterconfig放入filterconfigs中，而filterconfig需要filterdef。这个filterdef也需要放在context中，主要是为了对账，防止检测出没有filterdef但是有filterconfig这种情况。</p>
-<p>3.servlet型：</p>
-<p>4.valve型:</p>
-<p>pipeline有添加valve的方法。</p>
-<p>pipeline可以从每一个小容器中获取（Engine，host，context，wrapper）</p>
-<p><em><strong>Spring内存马</strong></em></p>
-
+          <!--noindex-->
+          <!--/noindex-->
+        
       
     </div>
 
@@ -401,7 +379,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2026-06-19 17:14:24" itemprop="dateModified" datetime="2026-06-19T17:14:24+08:00">2026-06-19</time>
+                <time title="修改时间：2026-06-26 21:20:49" itemprop="dateModified" datetime="2026-06-26T21:20:49+08:00">2026-06-26</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -431,7 +409,9 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          
+          <span id="more"></span>
+
+
       
     </div>
 
