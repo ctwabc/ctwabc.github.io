@@ -31,7 +31,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="http://ctwabc.github.io/2026/06/11/sql/sql1.png">
 <meta property="article:published_time" content="2026-06-11T11:12:54.000Z">
-<meta property="article:modified_time" content="2026-06-19T09:14:24.872Z">
+<meta property="article:modified_time" content="2026-07-03T12:16:44.217Z">
 <meta property="article:author" content="ctwabc">
 <meta property="article:tag" content="Web安全">
 <meta name="twitter:card" content="summary">
@@ -216,7 +216,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2026-06-19 17:14:24" itemprop="dateModified" datetime="2026-06-19T17:14:24+08:00">2026-06-19</time>
+                <time title="修改时间：2026-07-03 20:16:44" itemprop="dateModified" datetime="2026-07-03T20:16:44+08:00">2026-07-03</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -234,7 +234,7 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>5k</span>
+              <span>5.6k</span>
             </span>
 
         </div>
@@ -366,6 +366,20 @@
 <p>3.特殊编码绕过</p>
 <p>4.两个空格 Tab</p>
 <p>5.注释 &#x2F;**&#x2F;像这样的空注释</p>
+<p><em><strong>JDBC预编译</strong></em></p>
+<p>mysql中的预编译是这样的</p>
+<p><code>PREPARE my_plan FROM &#39;SELECT * FROM users WHERE username = ? AND password = ?&#39;;</code></p>
+<p>只对这条语句的结构进行语法解析</p>
+<p><code>EXECUTE my_plan USING &#39;admin&#39;, &#39;123456&#39;;</code></p>
+<p>此时传过来的参数只会当做字面量去处理</p>
+<p>JDBC有两种预编译方式，服务器端预编译和客户端预编译</p>
+<p>服务器端预编译就相当于mysql预编译。</p>
+<p>客户端预编译不一样，他相当于进行了字符转义，不过这个转义非常严格所以没什么太大问题。不过如果使用的不是UTF-8而是使用GBK的话就有宽字节注入的问题了。</p>
+<p>攻击者输入：<code>%df%27</code>（<code>%27</code> 是单引号 <code>&#39;</code>）。</p>
+<p>客户端驱动进行转义，在单引号前加反斜杠 <code>%5c</code>，字符串变成了：<code>%df%5c%27</code>。</p>
+<p>数据库（GBK 编码）在解析时，发现 <code>%df%5c</code> 符合 GBK 双字节汉字的编码范围，于是把这两个字节组合在一起，解析成了一个汉字（“運”字）。</p>
+<p><strong>结果：</strong> 反斜杠 <code>%5c</code> 被这个汉字“吃掉”了，后面的单引号 <code>%27</code> 成功逃逸，重新变成了闭合 SQL 语句的有效单引号，导致 SQL 注入成功。</p>
+<p>不过现代的 JDBC 驱动（如较新版的 mysql-connector-j）能感知连接编码，避免宽字节注入</p>
 <p>参考文章: <a target="_blank" rel="noopener" href="https://drun1baby.top/2022/03/22/%E4%BB%8E0%E5%88%B01%E5%AE%8C%E5%85%A8%E6%8E%8C%E6%8F%A1-SQL-%E6%B3%A8%E5%85%A5/">https://drun1baby.top/2022/03/22/%E4%BB%8E0%E5%88%B01%E5%AE%8C%E5%85%A8%E6%8E%8C%E6%8F%A1-SQL-%E6%B3%A8%E5%85%A5/</a></p>
 <p><a target="_blank" rel="noopener" href="https://windeskybb.work/archives/67cd1c1b-3998-4182-be62-a4fc6aca43f3">https://windeskybb.work/archives/67cd1c1b-3998-4182-be62-a4fc6aca43f3</a></p>
 
@@ -467,7 +481,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">25</span>
+          <span class="site-state-item-count">26</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -527,7 +541,7 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-area"></i>
     </span>
-    <span title="站点总字数">60k</span>
+    <span title="站点总字数">68k</span>
 </div>
   <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
   </div><div class="custom-footer">
