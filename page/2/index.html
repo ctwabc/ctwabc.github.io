@@ -212,7 +212,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2026-06-30 15:10:20" itemprop="dateModified" datetime="2026-06-30T15:10:20+08:00">2026-06-30</time>
+                <time title="修改时间：2026-08-09 15:31:19" itemprop="dateModified" datetime="2026-08-09T15:31:19+08:00">2026-08-09</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -242,36 +242,11 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <span id="more"></span>
-
-<p><em><strong>流程</strong></em></p>
+          <p><em><strong>流程</strong></em></p>
 <p><img src="/2026/06/22/jdkserial/jdk1.png"></p>
-<p>enbleOverride默认是false，跟进</p>
-<p><img src="/2026/06/22/jdkserial/jdk2.png">Java 原生反序列化数据流的开头固定是魔数和版本号 <strong><code>AC ED 00 05</code></strong>，紧随其后的就是<code>tc</code>，<code>tc</code>指代了反序列化数据的数据类型。115就是java对象。</p>
-<p><img src="/2026/06/22/jdkserial/jdk3.png"></p>
-<p>跟进readOrdinaryObject()</p>
-<p><img src="/2026/06/22/jdkserial/jdk4.png"></p>
-<p>跟进</p>
-<p><img src="/2026/06/22/jdkserial/jdk5.png"></p>
-<p>这次会读第二个字节，这第二个字节机会简单描述这个对象是什么样的类别。</p>
-<p>有四种情况</p>
-<ul>
-<li>第一种 对这个类没有描述</li>
-<li>第二种 这个类已经加载过了，去缓存表里读解析过的类</li>
-<li>第三种 这是个动态代理类</li>
-<li>第四种 就是最常见的情况，就是说这个类是正常的java类</li>
-</ul>
-<p>跟进</p>
-<p><img src="/2026/06/22/jdkserial/jdk6.png"></p>
-<p>readClassDescriptor()这个方法读的就是第二个字节后面的字节，这些字节包含了这个类的各种信息。然后走到resolveClass()，他就会根据类的信息去加载。跟进</p>
-<p><img src="/2026/06/22/jdkserial/jdk7.png"></p>
-<p>可以看到forName的类加载器是通过latestUserDefinedLoader()获取，他会获取当前线程的调用栈中，最近一次出现的、由用户自定义的（非系统&#x2F;核心类库的）类加载器。总的来说就是能够正确的获取类加载器，例如在tomcat中他能获取到webappclassloader。值得一提的是forName指定的类加载器是AppClassLoader的话还是会走双亲委派。也就是说就算是forName他在类加时走的还是类加载器的逻辑，不会说因为forName的源代码使用C&#x2F;C++所以就不走双亲委派了。所以之前Shiro550不能加载数组，就是因为重写了resolveClass走的不是Class.forName()。</p>
-<p><img src="/2026/06/22/jdkserial/jdk8.png"></p>
-<p>类加载完会到readOrdinaryObject，可以看到后续实例化了对象，然后跟进到readSerialData</p>
-<p><img src="/2026/06/22/jdkserial/jdk9.png"></p>
-<p>这里就会调用反序列化对象的readObject了，当然这个类得重写readObject方法。然后就会给对象填充数据了。</p>
-<p>参考文章:<a target="_blank" rel="noopener" href="https://www.cnblogs.com/nice0e3/p/14127885.html">https://www.cnblogs.com/nice0e3/p/14127885.html</a></p>
-
+          <!--noindex-->
+          <!--/noindex-->
+        
       
     </div>
 
