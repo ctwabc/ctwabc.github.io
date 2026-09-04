@@ -189,9 +189,9 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
     if (keywords.length === 1 && keywords[0] === '') {
-      resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x"></i></div>';
+      resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-2x"></i></div>';
     } else if (resultItems.length === 0) {
-      resultContent.innerHTML = '<div id="no-result"><i class="far fa-frown fa-5x"></i></div>';
+      resultContent.innerHTML = '<div id="no-result"><i class="far fa-frown fa-2x"></i></div>';
     } else {
       resultItems.sort((resultLeft, resultRight) => {
         if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
@@ -227,7 +227,7 @@ document.addEventListener('DOMContentLoaded', () => {
           return data;
         });
         // Remove loading animation
-        document.getElementById('no-result').innerHTML = '<i class="fa fa-search fa-5x"></i>';
+        document.getElementById('no-result').innerHTML = '<i class="fa fa-search fa-2x"></i>';
         inputEventFunction();
       });
   };
@@ -250,7 +250,6 @@ document.addEventListener('DOMContentLoaded', () => {
   // Handle and trigger popup window
   document.querySelectorAll('.popup-trigger').forEach(element => {
     element.addEventListener('click', () => {
-      document.body.style.overflow = 'hidden';
       document.querySelector('.search-pop-overlay').classList.add('search-active');
       input.focus();
       if (!isfetched) fetchData();
@@ -259,7 +258,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Monitor main search box
   const onPopupClose = () => {
-    document.body.style.overflow = '';
     document.querySelector('.search-pop-overlay').classList.remove('search-active');
   };
 
