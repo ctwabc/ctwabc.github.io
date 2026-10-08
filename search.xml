@@ -2048,4 +2048,98 @@
         <category>Java安全</category>
       </categories>
   </entry>
+  <entry>
+    <title>文件上传</title>
+    <url>/2026/10/05/upload/</url>
+    <content><![CDATA[<h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>做的是这个<a href="https://github.com/c0ny1/upload-labs">https://github.com/c0ny1/upload-labs</a></p>
+<p><strong>Pass-01</strong></p>
+<p>前端JS检查上传文件，用浏览器的DevTools关闭JavaScript。</p>
+<p><strong>Pass-02</strong></p>
+<p>后端检查数据包的MIME，也就是下面这张图</p>
+<p><img src="/2026/10/05/upload/upload1.png"></p>
+<p>改成这样合法的<code>image/png</code>啥的就可以了</p>
+<p><strong>Pass-03</strong></p>
+<p>后端的黑明单检测，这个黑明单不够大，可以用<code>.php5</code>这种等效的文件扩展名绕过，不过这个靶场的配置只会把<code>.php</code>文件交给PHP解释器，所以还得用<code>.htaccess</code>，不过我感觉用意不是这个，应该是上传个<code>.php5</code>就好了</p>
+<p><strong>Pass-04</strong></p>
+<p>后端使用更大的黑明单，像.php5的不能用了。<code>.htaccess</code>这是Apache用的目录级配置文件，在处理相应目录的文件的时候会读取这个配置文件，这个配置文件里可以写下这种命令<code>AddType application/x-httpd-php .jpg</code>这会把<code>.jpg</code>文件交给PHP处理器</p>
+<p><strong>Pass-05</strong></p>
+<p>跟上一关比起来黑明单多了个.htaccess，少了转换文件扩展名为小写的步骤，而且黑名单里没有<code>.PHP</code></p>
+<p><strong>Pass-06</strong></p>
+<p>黑明单，上传<code>.php </code>(文件扩展名后面有个空格)。windows系统中文件落地的时候会去掉文件扩展名中的空格，所以跟上面的<code>.PHP</code>不一样，在windows中就算服务器只会把<code>.php</code>文件交给PHP解释器，还是能够使用<code>.php </code>的webshell。</p>
+<p><strong>Pass-07</strong></p>
+<p>黑明单，上传<code>.php.</code>。windows系统中文件落地的时候会去掉文件扩展名中的<code>.</code></p>
+<p><strong>Pass-08</strong></p>
+<p>黑明单，上传<code>.php::$DATA</code>。虽说还是会去掉<code>::$DATA</code>可是跟上面两个原理不一样，上面两个是非法字符裁剪，而这个是windows特有的标记，windows的文件都自带这个<code>::$DATA</code>只不过这次是显视写了出来而已，所以这个解析路径的时候就被去掉了。</p>
+<p><strong>Pass-09</strong></p>
+<p>黑明单，上传<code>.php. .</code>。后端会去掉最后的<code>.</code>和<code> </code>以后再跟黑明单匹配。</p>
+<p><strong>Pass-10</strong></p>
+<p>黑明单，上传<code>.pphphp</code>。后端会从文件扩展名中去掉黑明单里的词</p>
+<p><strong>pass-11</strong></p>
+<blockquote>
+<p>PHP&lt;5.3.4</p>
+</blockquote>
+<p>白名单，可以控制文件保存路径，不检测文件内容，所以可以上传合法文件扩展名的文件，文件内容是<code>webshell</code>，因为可以控制文件保存路径，保存文件的位置可以控制为PHP文件。而这个文件保存路径是通过字符串拼接实现的，在C语言中<code>空字符</code>代表字符串的结束，PHP的底层由C语言实现，所以可以用这个<code>空字符</code>来截断字符串。空字符的十六进制是<code>00</code>，在这关中是通过URL获取保存路径所以要对<code>00</code>进行URL编码。<code>../upload/shell.php%00</code>这样文件落地的时候就是PHP文件了。</p>
+<p><strong>Pass-12</strong></p>
+<p>跟上一关只有一处区别，文件保存路径是从<code>multipart/form-data 的请求体</code>中获取的，对于从这里获取的数据不会解码，所以要真的写入<code>0x00</code>这个字节，yakit中用的这个<code>&#123;&#123;hexd(00)&#125;&#125;</code></p>
+<p><strong>Pass-13</strong></p>
+<p>不检查文件扩展名，不过不能存放到PHP文件，因为他会根据文件内容选取扩展名，检查文件内容，只检查文件的前两个字节，前两个字节能对应上合法文件的内容就好了。</p>
+<table>
+<thead>
+<tr>
+<th>类型</th>
+<th>前两字节</th>
+<th>十进制</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>jpg</td>
+<td><code>FF D8</code></td>
+<td>255, 216</td>
+</tr>
+<tr>
+<td>png</td>
+<td><code>89 50</code></td>
+<td>137, 80</td>
+</tr>
+<tr>
+<td>gif</td>
+<td><code>47 49</code></td>
+<td>71, 73</td>
+</tr>
+</tbody></table>
+<p>不能用文本编辑器直接写FFD8因为这会被理解为字面意思，我用的<code>printf</code></p>
+<p><strong>Pass-14</strong></p>
+<p>用了这个函数<code>getimagesize()</code>这会真的去解析整个图片，所以必须得是图片，不过读完图片的数据就不会检查后续部分了，所以只要在最后添加webshell就好了。</p>
+<p><strong>Pass-15</strong></p>
+<p><code>exif_imagetype()</code>，读取的文件的签名，也就是说JPEG读3字节，GIF读6字节，PNG读8字节。跟第13关没什么区别</p>
+<p><strong>Pass-16</strong></p>
+<p>重新生成图片，这会读取传的图片的数据，以此生成图片，这时只会读取跟图片有关的数据，也就是说像之前那样在最后添加webshell不行了，因为他们不算图片数据(长宽高什么的)。思路就是向图片数据中添加webshell。图片为了节省空间会使用调色板来存储颜色的信息，然后使用索引来对应每一种颜色，每一种颜色需要三字节(红、绿、蓝)，这三字节是连续的，而且通过索引顺序排列。所以往这个调色板写webshell就好了，重新生成图片时调色板的数据的顺序是不会变的(用GD的时候)。还有一点就是要用上所有的跟webshell对应的调色板的颜色，要不然重新生成图片的时候没有用上的颜色就会从调色板中去除。</p>
+<p><strong>Pass-17</strong></p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="variable">$ext_arr</span> = <span class="keyword">array</span>(<span class="string">&#x27;jpg&#x27;</span>,<span class="string">&#x27;png&#x27;</span>,<span class="string">&#x27;gif&#x27;</span>);</span><br><span class="line"><span class="variable">$file_name</span>  = <span class="variable">$_FILES</span>[<span class="string">&#x27;upload_file&#x27;</span>][<span class="string">&#x27;name&#x27;</span>];</span><br><span class="line"><span class="variable">$file_ext</span>   = <span class="title function_ invoke__">substr</span>(<span class="variable">$file_name</span>, <span class="title function_ invoke__">strrpos</span>(<span class="variable">$file_name</span>,<span class="string">&quot;.&quot;</span>)+<span class="number">1</span>);</span><br><span class="line"><span class="variable">$upload_file</span> = UPLOAD_PATH . <span class="string">&#x27;/&#x27;</span> . <span class="variable">$file_name</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span>(<span class="title function_ invoke__">move_uploaded_file</span>(<span class="variable">$temp_file</span>, <span class="variable">$upload_file</span>))&#123;     <span class="comment">// ① 先按原名落地</span></span><br><span class="line">    <span class="keyword">if</span>(<span class="title function_ invoke__">in_array</span>(<span class="variable">$file_ext</span>,<span class="variable">$ext_arr</span>))&#123;                 <span class="comment">// ② 再检查后缀</span></span><br><span class="line">        <span class="variable">$img_path</span> = UPLOAD_PATH.<span class="string">&#x27;/&#x27;</span>.<span class="title function_ invoke__">rand</span>(<span class="number">10</span>,<span class="number">99</span>).<span class="title function_ invoke__">date</span>(<span class="string">&quot;YmdHis&quot;</span>).<span class="string">&quot;.&quot;</span>.<span class="variable">$file_ext</span>;</span><br><span class="line">        <span class="title function_ invoke__">rename</span>(<span class="variable">$upload_file</span>, <span class="variable">$img_path</span>);              <span class="comment">// 合格 → 改名</span></span><br><span class="line">        <span class="variable">$is_upload</span> = <span class="literal">true</span>;</span><br><span class="line">    &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">        <span class="variable">$msg</span> = <span class="string">&quot;只允许上传.jpg|.png|.gif类型文件！&quot;</span>;</span><br><span class="line">        <span class="title function_ invoke__">unlink</span>(<span class="variable">$upload_file</span>);                         <span class="comment">// ③ 不合格 → 删除</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以看到总工是三个步骤1.文件落地 2.检查后缀 3.不合格的话删除 从文件落地到删除是有timing的，为了持久化往落地的文件里写下载webshell的代码就好了。</p>
+<p><strong>Pass-18</strong></p>
+<p><strong>Pass-19</strong></p>
+<p>黑明单，用<code>pathinfo()</code>获取的扩展名，而且数据的传输位置在字段值里面，这时<code>\n</code>不回成为换行从而导致发送的是<code>.php</code>，而linux允许文件名有<code>\n</code>，windows不允许。不过这要像之前空字符阶段一样要这样写<code>.php&#123;&#123;hexd(0a)&#125;&#125;</code>。</p>
+<p><strong>Pass-20</strong></p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="variable">$is_upload</span> = <span class="literal">false</span>;</span><br><span class="line"><span class="variable">$msg</span> = <span class="literal">null</span>;</span><br><span class="line"><span class="keyword">if</span>(!<span class="keyword">empty</span>(<span class="variable">$_FILES</span>[<span class="string">&#x27;upload_file&#x27;</span>]))&#123;</span><br><span class="line">    <span class="comment">//检查MIME</span></span><br><span class="line">    <span class="variable">$allow_type</span> = <span class="keyword">array</span>(<span class="string">&#x27;image/jpeg&#x27;</span>,<span class="string">&#x27;image/png&#x27;</span>,<span class="string">&#x27;image/gif&#x27;</span>);</span><br><span class="line">    <span class="keyword">if</span>(!<span class="title function_ invoke__">in_array</span>(<span class="variable">$_FILES</span>[<span class="string">&#x27;upload_file&#x27;</span>][<span class="string">&#x27;type&#x27;</span>],<span class="variable">$allow_type</span>))&#123;</span><br><span class="line">        <span class="variable">$msg</span> = <span class="string">&quot;禁止上传该类型文件!&quot;</span>;</span><br><span class="line">    &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">        <span class="comment">//检查文件名</span></span><br><span class="line">        <span class="variable">$file</span> = <span class="keyword">empty</span>(<span class="variable">$_POST</span>[<span class="string">&#x27;save_name&#x27;</span>]) ? <span class="variable">$_FILES</span>[<span class="string">&#x27;upload_file&#x27;</span>][<span class="string">&#x27;name&#x27;</span>] : <span class="variable">$_POST</span>[<span class="string">&#x27;save_name&#x27;</span>];</span><br><span class="line">        <span class="keyword">if</span> (!<span class="title function_ invoke__">is_array</span>(<span class="variable">$file</span>)) &#123;</span><br><span class="line">            <span class="variable">$file</span> = <span class="title function_ invoke__">explode</span>(<span class="string">&#x27;.&#x27;</span>, <span class="title function_ invoke__">strtolower</span>(<span class="variable">$file</span>));</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="variable">$ext</span> = <span class="title function_ invoke__">end</span>(<span class="variable">$file</span>);</span><br><span class="line">        <span class="variable">$allow_suffix</span> = <span class="keyword">array</span>(<span class="string">&#x27;jpg&#x27;</span>,<span class="string">&#x27;png&#x27;</span>,<span class="string">&#x27;gif&#x27;</span>);</span><br><span class="line">        <span class="keyword">if</span> (!<span class="title function_ invoke__">in_array</span>(<span class="variable">$ext</span>, <span class="variable">$allow_suffix</span>)) &#123;</span><br><span class="line">            <span class="variable">$msg</span> = <span class="string">&quot;禁止上传该后缀文件!&quot;</span>;</span><br><span class="line">        &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">            <span class="variable">$file_name</span> = <span class="title function_ invoke__">reset</span>(<span class="variable">$file</span>) . <span class="string">&#x27;.&#x27;</span> . <span class="variable">$file</span>[<span class="title function_ invoke__">count</span>(<span class="variable">$file</span>) - <span class="number">1</span>];</span><br><span class="line">            <span class="variable">$temp_file</span> = <span class="variable">$_FILES</span>[<span class="string">&#x27;upload_file&#x27;</span>][<span class="string">&#x27;tmp_name&#x27;</span>];</span><br><span class="line">            <span class="variable">$img_path</span> = UPLOAD_PATH . <span class="string">&#x27;/&#x27;</span> .<span class="variable">$file_name</span>;</span><br><span class="line">            <span class="keyword">if</span> (<span class="title function_ invoke__">move_uploaded_file</span>(<span class="variable">$temp_file</span>, <span class="variable">$img_path</span>)) &#123;</span><br><span class="line">                <span class="variable">$msg</span> = <span class="string">&quot;文件上传成功！&quot;</span>;</span><br><span class="line">                <span class="variable">$is_upload</span> = <span class="literal">true</span>;</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="variable">$msg</span> = <span class="string">&quot;文件上传失败！&quot;</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;<span class="keyword">else</span>&#123;</span><br><span class="line">    <span class="variable">$msg</span> = <span class="string">&quot;请选择要上传的文件！&quot;</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>一直都是对字符串的处理，这次的绕过方法就是将字符串变成数组来分割逻辑。<code>end($file)</code> <code>reset($file)</code> <code>$file[count($file) - 1]</code>，这三个方法会截取字符串。</p>
+<p><code>end($file)</code>会获取按插入顺序的最后一个字符串，什么是插入顺序呢?在这一关中会这样发送数据</p>
+<p>Content-Disposition: form-data; name&#x3D;”save_name[0]”</p>
+<p>shell</p>
+<p>Content-Disposition: form-data; name&#x3D;”save_name[2]”</p>
+<p>php</p>
+<p>Content-Disposition: form-data; name&#x3D;”save_name[1]”</p>
+<p>jpg</p>
+<p>也就是说虽然jpg对应的下标是1，但是最后到达的所以end()会获取jpg，这就绕过黑明单了。</p>
+<p><code>reset($file)</code>获取第一个元素也就是<code>shell</code></p>
+<p><code>$file[count($file) - 1]</code>这个count指的是元素个数所以在这里是3，count-1&#x3D;2，这样他就指向php了，落地时的文件名就成shell.php了。正常情况下<code>$file[count($file) - 1]</code> <code>end($file)</code>应该指向同一个元素，因为他们两找元素的逻辑不一样，利用这个实现了错位。</p>
+<p><strong>防御</strong></p>
+<p>白名单更好，文件落地的目录设置为不可执行。</p>
+<p><strong>总结</strong></p>
+<p><img src="/2026/10/05/upload/sum_up.png"></p>
+<p>这个图太好了</p>
+]]></content>
+  </entry>
 </search>
