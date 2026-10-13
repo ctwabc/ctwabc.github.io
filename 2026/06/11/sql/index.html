@@ -24,14 +24,14 @@
 
   <meta name="description" content="总的来说就是字符串的拼接字符串，还有一点比较重要的是AND是优先于OR的。">
 <meta property="og:type" content="article">
-<meta property="og:title" content="sql">
+<meta property="og:title" content="SQL注入">
 <meta property="og:url" content="http://ctwabc.github.io/2026/06/11/sql/index.html">
 <meta property="og:site_name" content="ctwabc&#39;s Blog">
 <meta property="og:description" content="总的来说就是字符串的拼接字符串，还有一点比较重要的是AND是优先于OR的。">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="http://ctwabc.github.io/2026/06/11/sql/sql1.png">
 <meta property="article:published_time" content="2026-06-11T11:12:54.000Z">
-<meta property="article:modified_time" content="2026-09-09T08:00:02.573Z">
+<meta property="article:modified_time" content="2026-10-13T15:26:06.729Z">
 <meta property="article:author" content="ctwabc">
 <meta property="article:tag" content="Web安全">
 <meta name="twitter:card" content="summary">
@@ -78,7 +78,7 @@
 <meta property="og:image" content="https://github.com/ctwabc.png">
 <meta name="twitter:card" content="summary">
 
-  <title>sql | ctwabc's Blog</title>
+  <title>SQL注入 | ctwabc's Blog</title>
   
 
 
@@ -227,7 +227,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          sql<a href="https://github.com/user-name/repo-name/tree/branch-name/subdirectory-name_posts/sql.md" class="post-edit-link" title="编辑" rel="noopener" target="_blank"><i class="fa fa-pencil-alt"></i></a>
+          SQL注入<a href="https://github.com/user-name/repo-name/tree/branch-name/subdirectory-name_posts/sql.md" class="post-edit-link" title="编辑" rel="noopener" target="_blank"><i class="fa fa-pencil-alt"></i></a>
         </h1>
 
         <div class="post-meta">
@@ -244,7 +244,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2026-09-09 16:00:02" itemprop="dateModified" datetime="2026-09-09T16:00:02+08:00">2026-09-09</time>
+                <time title="修改时间：2026-10-13 23:26:06" itemprop="dateModified" datetime="2026-10-13T23:26:06+08:00">2026-10-13</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -262,7 +262,7 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>5.7k</span>
+              <span>6.7k</span>
             </span>
 
         </div>
@@ -277,12 +277,24 @@
         <p>总的来说就是字符串的拼接字符串，还有一点比较重要的是AND是优先于OR的。</p>
 <span id="more"></span>
 
-
 <p><em><strong>测试有没有sql注入</strong></em></p>
-<p><code>’ </code>报错说明有三个<code>‘ </code>可以字符串拼接</p>
-<p><code>‘ and 1=1 </code>正常 and前面得是true</p>
-<p><code>‘ and 1=2 </code>异常 and前面得是true</p>
-<p>这样说明页面可控，就可能有sql注入漏洞</p>
+<p>输入<code>&#39;</code>报错，说明有奇数个<code>&#39;</code>，用<code>&#39;&#39;</code>包裹的</p>
+<p>输入<code>&quot;</code>报错，说明有奇数个<code>&quot;</code>，用<code>&quot;&quot;</code>包裹的</p>
+<p>还会有<code>()</code>这种情况</p>
+<h3 id="判断是字符型还是数字型"><a href="#判断是字符型还是数字型" class="headerlink" title="判断是字符型还是数字型"></a>判断是字符型还是数字型</h3><p><strong>字符型</strong></p>
+<p><code>SELECT * FROM users WHERE id=&#39;$input&#39;;</code></p>
+<p>我们的输入只会被视为字符串</p>
+<p><strong>数字型</strong></p>
+<p><code>SELECT * FROM users WHERE id=$input;</code></p>
+<p>输入什么就是什么，不再被强制转换成字符串</p>
+<p><strong>判断</strong></p>
+<p>在下面的例子中有id&#x3D;1的值，id是整数类型</p>
+<p>输入<code>1 and 1=1 </code></p>
+<p>字符型：<code>SELECT * FROM users WHERE id=&#39;1 and 1=1&#39;;</code> 在别的数据库中会报错，但是MySql会将这个字符串转换成整数，它会从左边开始读取连续的数字字符，没有了就截断，在这个例子中就成<code>1</code>了，返回id为1的数据，不报错。</p>
+<p>数字型： <code>SELECT * FROM users WHERE id=1 and 1=1;</code> <code>id=1 and 1=1</code>为true返回id为1的数据，数字型时and被解析了。不过这样以来在MySql中就不能光靠这个<code>1 and 1=1</code>判断了</p>
+<p>输入<code>1 and 1=2</code></p>
+<p>字符型：<code>SELECT * FROM users WHERE id=&#39;1 and 1=2&#39;;</code> 还是被转换成了1，返回id为1的数据。</p>
+<p>数字型： <code>SELECT * FROM users WHERE id=1 and 1=2;</code> <code>id=1 and 1=2</code>为false不返回任何数据。这下反应不同了，这样就能判断出是字符型还是数字型了。</p>
 <p>万能密码:<code>1&#39; or &#39;1&#39; = &#39;1</code></p>
 <p>union select联合查询:</p>
 <p><code>select first_name from user_system_data union select login_count from user_data;</code></p>
@@ -301,7 +313,10 @@
 <p><strong>database()</strong>：获取当前数据库名。</p>
 <p><strong>user()</strong>：获取当前数据库用户名。</p>
 <p><strong>version()</strong>：获取数据库版本。</p>
-<p><code>SELECT id, title, content FROM articles WHERE id = 1 UNION SELECT 1, database(), version()-- -</code></p>
+<blockquote>
+<p>最好是不要让union前面部分有结果，因为我们想要看到的是unionselect后面部分的数据，这样能减少干扰。像下面这样输入id&#x3D;-1，防止前面的select语句返回结果</p>
+</blockquote>
+<p><code>SELECT id, title, content FROM articles WHERE id = -1 UNION SELECT 1, database(), version()-- -</code></p>
 <p>group_concat():联合查询的时候如果只显示一行的话就可以用这个函数，他会列指定的列里数据全部以一行的形式展示出来（其实不是全部由大小限制）。</p>
 <p>concat():主要用处是：<strong>把多个列的数据或者字符串，首尾相连地拼成一个大字符串。</strong></p>
 <p>网页通常只有一个显示位，黑客如果用了 UNION SELECT，一次只能看一个字段。如果黑客既想看用户名，又想看密码，难道要查两次吗？</p>
@@ -320,23 +335,25 @@
 </ul>
 <p>在这张地图里，有两个核心字段需要认清：</p>
 <ul>
-<li>table_schema：代表这张表属于哪个<strong>数据库</strong>。</li>
+<li>table_schema：代表<strong>数据库</strong>。</li>
 <li>table_name：代表这张表的<strong>表名</strong>。</li>
+<li>column_name：代表表里的<strong>字段</strong>。</li>
 </ul>
 <p>如果我们在普通的数据库命令行里，想查出 security 这个数据库里有哪些表，我们会写这样一句标准的 SQL：</p>
 <p><code>SELECT table_name FROM information_schema.tables WHERE table_schema = &#39;security&#39;;</code></p>
 <p>联合查询中的应用:</p>
 <p><code>-1&#39; UNION SELECT 1, group_concat(table_name), 3 FROM information_schema.tables WHERE table_schema = database()-- - </code></p>
-<p><em><strong>sql盲注</strong></em></p>
-<p>盲注就是不会让你看到你查询的信息。</p>
+<p><code>-1&#39; UNION SELECT 1, group_concat(column_name), 3 FROM information_schema.columns WHERE table_name = table_name -- - </code></p>
+<h3 id="sql盲注"><a href="#sql盲注" class="headerlink" title="sql盲注"></a>sql盲注</h3><p>盲注就是不会让你看到你查询的信息。</p>
 <p>SUBSTRING(字符串, 开始位置, 截取长度)</p>
-<p>布尔型：</p>
+<p><strong>布尔型</strong></p>
 <p>虽然不会显示数据但会显示是否正常。</p>
 <p>所以说我们可以将要查询的一个字母一个字母的爆破，爆破对了就会显示正常，错了就显示失败了，因为用的是AND不要忘了AND的前面部分得是true。</p>
-<p><code>SELECT * FROM users WHERE id = &#39;1&#39; AND ascii(substr(database(),1,1)) &gt; 100 --+&#39;</code></p>
+<p><code>SELECT * FROM users WHERE id = &#39;1&#39; AND ascii(substr(database(),1,1)) &gt; 100 --+</code></p>
+<p><code>?id=1&#39; and ascii(substr((select group_concat(table_name) from information_schema.tables where table_schema=database()),1,1))&gt;100 --+</code></p>
 <p>可以通过二分发爆破出数据库的第一个字母，以此类推。and前面部分保证是正确的。</p>
 <p>ascii就是把它转换成ascii码，这样能避免使用<code>‘</code>（不用ascii的话就得跟字母比较就得写成‘a了），防火墙可能会把’给挡掉。</p>
-<p>时间型:</p>
+<p><strong>时间型</strong></p>
 <p>他的回答不会因为是否正确而改变的话，可以这样写：</p>
 <p>问数据库：如果数据库名字的第一个字母是 ‘s’，你就给我睡 5 秒，否则返回 0</p>
 <p><code>?id=1&#39; AND IF(substr(database(),1,1)=&#39;s&#39;, sleep(5), 0) --+</code></p>
@@ -347,12 +364,16 @@
 <p><strong>利用了特定函数的逻辑漏洞：</strong> 数据库中有些函数，当接收到不符合规范的参数时，会把<strong>这个参数的内容</strong>直接放进报错信息里弹出来。</p>
 <p>updatexml(参数1, 参数2, 参数3):其中<strong>第二个参数</strong>要求必须是一个合法的 <strong>XPath 格式路径</strong>（类似于文件夹路径，比如 &#x2F;root&#x2F;user)</p>
 <p>– 故意制造路径错误的 Payload,塞进一个<strong>绝对不符合 XPath 路径规范的特殊字符</strong>（比如波浪号 ~），紧接着在后面拼接上想偷的数据（如 database()）。</p>
+<blockquote>
+<p>MySql虽然有”短路”行为，但是对于常量表达式会先执行常量表达式，这就对AND、OR前面的值无所谓了。</p>
+<p>对于常量表达式的定义，可以理解为没有出现字段就算常量表达式。其中有个特殊情况是子查询，子查询如果有表的话算常量表达式。对于sleep()和rand()这种非确定性函数不算常量表达式。</p>
+</blockquote>
 <p><code>?id=1&#39; AND updatexml(1, concat(&#39;~&#39;, database()), 1) --+</code></p>
 <p>数据库会这样回答:ERROR 1105 (HY000): XPATH syntax error: ‘~security’</p>
 <p><code>?id=1&#39; AND updatexml(1, concat(&#39;~&#39;, (SELECT table_name FROM information_schema.tables WHERE table_schema=database() LIMIT 0,1)), 1) --+</code>可以这么用</p>
 <p><strong>updatexml 报错注入，报错的回显最多为32位</strong></p>
 <p>extractvalue(XML_document，xpath_string)这个也一样</p>
-<p>1 or (extractvalue(1,concat(‘～’,(这里填写sql语句))))</p>
+<p>1 and extractvalue(1,concat(‘～’,(这里填写sql语句)))</p>
 <p><em><strong>带外sql注入</strong></em></p>
 <p>当网站做到了极致的防御：网页上<strong>不显示任何数据</strong>（无法 Union），<strong>不显示任何报错</strong>（无法报错注入），甚至还加了<strong>严格的频率限制</strong>（一旦你用盲注高频猜解，IP立刻被拉黑）。</p>
 <p>这时候，黑客就会利用<strong>带外通道</strong>：让受害服务器的数据库<strong>自己主动联网，把数据发送到黑客掌控的另一台外部服务器上</strong>。</p>
@@ -370,23 +391,19 @@
 <li><strong>第二步：询问 .com 顶级域名服务器</strong> DNS 问：“哪里能找到 hacker.com？” .com 服务器查了查档案（黑客注册域名时的记录），回答：“这个域名被黑客买下了，他自己搭了一台<strong>权威 DNS 服务器</strong>来管理，IP 是 X.X.X.X。你去问他吧！”</li>
 <li><strong>第三步：致命的一步，流量直接进入黑客的服务器</strong> 全球的 DNS 系统于是转头去问黑客的这台服务器（X.X.X.X）：“喂，你家主人买的 hacker.com 下面，有一个叫 <strong>security</strong> 的子域名，它的 IP 是多少？”</li>
 </ol>
-<p>http标头注入</p>
-<p><strong>场景：</strong> 很多网站为了做数据统计，会记录每一个访问者的浏览器版本。</p>
+<h3 id="HTTP标头注入"><a href="#HTTP标头注入" class="headerlink" title="HTTP标头注入"></a>HTTP标头注入</h3><p><strong>场景：</strong> 很多网站为了做数据统计，会记录每一个访问者的浏览器版本。</p>
 <p>User-Agent 标头注入</p>
 <p>后端代码写成了这样:</p>
 <p><img src="/2026/06/11/sql/sql1.png" alt="截图"></p>
 <p>User-Agent: ‘ AND updatexml(1, concat(‘~’, database()), 1) AND ‘1’&#x3D;’1</p>
 <p>INSERT INTO login_log (user_agent, ip) VALUES (‘’ AND updatexml(1, concat(‘~’, database()), 1) AND ‘1’&#x3D;’1’, ‘127.0.0.1’)</p>
-<p>X-Forwarded-For 或 Client-IP 标头注入（伪造 IP 地址）</p>
-<p><strong>场景：</strong> 很多网站有防刷机制、或者登录日志系统，需要记录用户的真实 IP。 因为有很多用户使用代理服务器，程序员会去读取 HTTP 头部专门记录代理路径的字段——X-Forwarded-For（简称 XFF）。</p>
+<h3 id="X-Forwarded-For-或-Client-IP-标头注入（伪造-IP-地址）"><a href="#X-Forwarded-For-或-Client-IP-标头注入（伪造-IP-地址）" class="headerlink" title="X-Forwarded-For 或 Client-IP 标头注入（伪造 IP 地址）"></a>X-Forwarded-For 或 Client-IP 标头注入（伪造 IP 地址）</h3><p><strong>场景：</strong> 很多网站有防刷机制、或者登录日志系统，需要记录用户的真实 IP。 因为有很多用户使用代理服务器，程序员会去读取 HTTP 头部专门记录代理路径的字段——X-Forwarded-For（简称 XFF）。</p>
 <p>其实就是更改标头字段，写正常sql注入语句就好了。</p>
-<p>Cookie 标头注入（劫持身份令牌）</p>
-<p><strong>场景：</strong> 网站为了维持你的登录状态，会给浏览器发一串 Cookie。很多时候，后端在验证你的权限或者记录浏览历史时，会去数据库里查这个 Cookie。</p>
+<h3 id="Cookie-标头注入（劫持身份令牌）"><a href="#Cookie-标头注入（劫持身份令牌）" class="headerlink" title="Cookie 标头注入（劫持身份令牌）"></a>Cookie 标头注入（劫持身份令牌）</h3><p><strong>场景：</strong> 网站为了维持你的登录状态，会给浏览器发一串 Cookie。很多时候，后端在验证你的权限或者记录浏览历史时，会去数据库里查这个 Cookie。</p>
 <p>像这样</p>
 <p>SELECT * FROM sessions WHERE session_id &#x3D; ‘用户请求里的Cookie’</p>
 <p>Cookie: sess_id&#x3D;abc’ AND sleep(5) – - 网站突然卡了5秒就说明可以注入了</p>
-<p>Referer 标头注入（追踪来源网页）</p>
-<p><strong>场景：</strong> 网站想统计用户是从哪个外部链接跳过来的（比如是从百度还是从谷歌），就会读取 Referer 标头，并存入数据库。</p>
+<h3 id="Referer-标头注入（追踪来源网页）"><a href="#Referer-标头注入（追踪来源网页）" class="headerlink" title="Referer 标头注入（追踪来源网页）"></a>Referer 标头注入（追踪来源网页）</h3><p><strong>场景：</strong> 网站想统计用户是从哪个外部链接跳过来的（比如是从百度还是从谷歌），就会读取 Referer 标头，并存入数据库。</p>
 <p>具体注入具体分析</p>
 <p>一些绕过方法:</p>
 <p>1.大小写绕过uNiOn啥的</p>
@@ -494,6 +511,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%A4%E6%96%AD%E6%98%AF%E5%AD%97%E7%AC%A6%E5%9E%8B%E8%BF%98%E6%98%AF%E6%95%B0%E5%AD%97%E5%9E%8B"><span class="nav-number">1.</span> <span class="nav-text">判断是字符型还是数字型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#sql%E7%9B%B2%E6%B3%A8"><span class="nav-number">2.</span> <span class="nav-text">sql盲注</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#HTTP%E6%A0%87%E5%A4%B4%E6%B3%A8%E5%85%A5"><span class="nav-number">3.</span> <span class="nav-text">HTTP标头注入</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#X-Forwarded-For-%E6%88%96-Client-IP-%E6%A0%87%E5%A4%B4%E6%B3%A8%E5%85%A5%EF%BC%88%E4%BC%AA%E9%80%A0-IP-%E5%9C%B0%E5%9D%80%EF%BC%89"><span class="nav-number">4.</span> <span class="nav-text">X-Forwarded-For 或 Client-IP 标头注入（伪造 IP 地址）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Cookie-%E6%A0%87%E5%A4%B4%E6%B3%A8%E5%85%A5%EF%BC%88%E5%8A%AB%E6%8C%81%E8%BA%AB%E4%BB%BD%E4%BB%A4%E7%89%8C%EF%BC%89"><span class="nav-number">5.</span> <span class="nav-text">Cookie 标头注入（劫持身份令牌）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Referer-%E6%A0%87%E5%A4%B4%E6%B3%A8%E5%85%A5%EF%BC%88%E8%BF%BD%E8%B8%AA%E6%9D%A5%E6%BA%90%E7%BD%91%E9%A1%B5%EF%BC%89"><span class="nav-number">6.</span> <span class="nav-text">Referer 标头注入（追踪来源网页）</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -509,7 +527,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">33</span>
+          <span class="site-state-item-count">34</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -569,7 +587,7 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-area"></i>
     </span>
-    <span title="站点总字数">120k</span>
+    <span title="站点总字数">121k</span>
 </div>
   <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
   </div><div class="custom-footer">
