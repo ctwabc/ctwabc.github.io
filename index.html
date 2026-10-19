@@ -209,6 +209,93 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://ctwabc.github.io/2026/10/17/injectmemshell/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://github.com/ctwabc.png">
+      <meta itemprop="name" content="ctwabc">
+      <meta itemprop="description" content="学习笔记">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="ctwabc's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2026/10/17/injectmemshell/" class="post-title-link" itemprop="url">内存马注入</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2026-10-17 20:15:04" itemprop="dateCreated datePublished" datetime="2026-10-17T20:15:04+08:00">2026-10-17</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-10-18 15:07:50" itemprop="dateModified" datetime="2026-10-18T15:07:50+08:00">2026-10-18</time>
+              </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>3k</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>之前学的是通过JSP文件注入内存马，不过这样的话还是会有文件落地，下面学一些别的方式。</p>
+<h3 id="反序列化注入Tomcat内存马"><a href="#反序列化注入Tomcat内存马" class="headerlink" title="反序列化注入Tomcat内存马"></a>反序列化注入Tomcat内存马</h3><p>注入内存马其实就是动态注册组件，而想要注册就需要StandardContext，之前JSP中可以轻易的获取Request从而获取到StandardContext，但现在的情况是我们不再使用JSP，所以我们不能够直接获取到Requst。所以在这个条件下获取到StandardContext，就相当于解决了反序列化注入内存马的问题。</p>
+<p><em><strong>通过ThreadLocal获取Request</strong></em></p>
+<p><img src="/2026/10/17/injectmemshell/injectmemshell1.png"></p>
+<p><img src="/2026/10/17/injectmemshell/injectmemshell2.png"></p>
+<p>在ApplicationFilterChain中有两个静态熟悉lastServiceRequest和lastServiceResponse，而且在internalDoFilter中会将当前的request和response设置到相应的属性当中，不过这需要WRAP_SAME_OBJECT这个开关是开着的，默认情况下它是关着的。因为这个开关是关着的这两个属性为null。</p>
+<p>现在问题就变成了开启WRAP_SAME_OBJECT这个开关、为两个属性创建对象。这两件事做完了以后就可以通过反射从这两个属性中获取Request和Response了。但是这种方式有个缺点，就是只能在一次service()被调用的期间才能从这两个属性中获取，因为service()结束后就会清除request和response(这个清除不是说销毁这两个对象，其实是重制这两个对象，这会把之前连个属性存车的设为null)，这也就要求我们反序列化的点在service中。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="type">Field</span> <span class="variable">WRAP_SAME_OBJECT_FIELD</span> <span class="operator">=</span> Class.forName(<span class="string">&quot;org.apache.catalina.core.ApplicationDispatcher&quot;</span>).getDeclaredField(<span class="string">&quot;WRAP_SAME_OBJECT&quot;</span>);</span><br><span class="line">            <span class="type">Field</span> <span class="variable">lastServicedRequestField</span> <span class="operator">=</span> ApplicationFilterChain.class.getDeclaredField(<span class="string">&quot;lastServicedRequest&quot;</span>);</span><br><span class="line">            <span class="type">Field</span> <span class="variable">lastServicedResponseField</span> <span class="operator">=</span> ApplicationFilterChain.class.getDeclaredField(<span class="string">&quot;lastServicedResponse&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">//使用modifiersField反射修改final型变量</span></span><br><span class="line">        java.lang.reflect.<span class="type">Field</span> <span class="variable">modifiersField</span> <span class="operator">=</span> Field.class.getDeclaredField(<span class="string">&quot;modifiers&quot;</span>);</span><br><span class="line">        modifiersField.setAccessible(<span class="literal">true</span>);</span><br><span class="line">        modifiersField.setInt(WRAP_SAME_OBJECT_FIELD, WRAP_SAME_OBJECT_FIELD.getModifiers() &amp; ~Modifier.FINAL);</span><br><span class="line">        modifiersField.setInt(lastServicedRequestField, lastServicedRequestField.getModifiers() &amp; ~Modifier.FINAL);</span><br><span class="line">        modifiersField.setInt(lastServicedResponseField, lastServicedResponseField.getModifiers() &amp; ~Modifier.FINAL);</span><br><span class="line">        WRAP_SAME_OBJECT_FIELD.setAccessible(<span class="literal">true</span>);</span><br><span class="line">        lastServicedRequestField.setAccessible(<span class="literal">true</span>);</span><br><span class="line">        lastServicedResponseField.setAccessible(<span class="literal">true</span>);</span><br><span class="line"> </span><br><span class="line">        <span class="comment">//将变量WRAP_SAME_OBJECT_FIELD设置为true，并初始化lastServicedRequest和lastServicedResponse变量</span></span><br><span class="line">            WRAP_SAME_OBJECT_FIELD.setBoolean(<span class="literal">null</span>,<span class="literal">true</span>);</span><br><span class="line">            lastServicedRequestField.set(<span class="literal">null</span>, <span class="keyword">new</span> <span class="title class_">ThreadLocal</span>&lt;&gt;());</span><br><span class="line">            lastServicedResponseField.set(<span class="literal">null</span>, <span class="keyword">new</span> <span class="title class_">ThreadLocal</span>&lt;&gt;());</span><br></pre></td></tr></table></figure>
+
+<p><em><strong>通过类加载器获取</strong></em></p>
+<p>因为WebappClassLoaderBase要从webapp的资源树里加载东西——<code>WEB-INF/classes</code> 里的类、<code>WEB-INF/lib</code> 里的 jar、静态资源扫描，全都得通过一个「资源根」抽象来访问。所以类加载器必须持有 <code>WebResourceRoot</code>，而在这个资源根中又存放着Context。而别的类加载器没有这个资源根所以不能获取到Context。现在的问题就是怎么获取这个类加载器，我们可以通过获取线程上下文的类加载器(TCCL)来获取。既然如此就需要知道什么时候TCCL会变成WebappClassLoaderBase。StandardWrapperValve.invoke()在这个时候就被切换了，也就是还没到filter链TCCL就是我们想要的了。那什么时候会变成别的类加载器呢？总的来说过滤链和Servlet的工作结束了就被切成别的了，这就比之前那个范围更大了。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//tomcat8.0.x 8.5.0 – 8.5.77  9.0.0.M1 – 9.0.60</span></span><br><span class="line"><span class="type">WebappClassLoaderBase</span> <span class="variable">cl</span> <span class="operator">=</span>(WebappClassLoaderBase)Thread.currentThread().getContextClassLoader();</span><br><span class="line"><span class="type">StandardContext</span> <span class="variable">standardContext</span> <span class="operator">=</span> (StandardContext) webappClassLoaderBase.getResources().getContext();</span><br></pre></td></tr></table></figure>
+
+<p>还有一个好处就是没有用到反射，不过这个方式在新版的tomcat中不能用，因为getResources()返回的是null，不过这个resource字段还在所以可以通过反射获取。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//tomcat8.5.78 – 8.5.99 9.0.62 – 9.0.123 10.0.x / 10.1.x / 11.x</span></span><br><span class="line"><span class="type">WebappClassLoaderBase</span> <span class="variable">cl</span> <span class="operator">=</span>(WebappClassLoaderBase)Thread.currentThread().getContextClassLoader();</span><br><span class="line"><span class="type">Field</span> <span class="variable">resourcesField</span> <span class="operator">=</span> WebappClassLoaderBase.class.getDeclaredField(<span class="string">&quot;resources&quot;</span>);</span><br><span class="line">resourcesField.setAccessible(<span class="literal">true</span>);</span><br><span class="line"><span class="type">StandardContext</span> <span class="variable">context</span> <span class="operator">=</span> (StandardContext) ((WebResourceRoot) resourcesField.get(cl)).getContext();</span><br></pre></td></tr></table></figure>
+
+<h3 id="反序列化注入Spring内存马"><a href="#反序列化注入Spring内存马" class="headerlink" title="反序列化注入Spring内存马"></a>反序列化注入Spring内存马</h3>
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="http://ctwabc.github.io/2026/10/12/sqlilabs/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -464,7 +551,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2026-09-27 15:27:32" itemprop="dateModified" datetime="2026-09-27T15:27:32+08:00">2026-09-27</time>
+                <time title="修改时间：2026-10-14 22:43:38" itemprop="dateModified" datetime="2026-10-14T22:43:38+08:00">2026-10-14</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -595,90 +682,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://ctwabc.github.io/2026/09/03/hessian/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="https://github.com/ctwabc.png">
-      <meta itemprop="name" content="ctwabc">
-      <meta itemprop="description" content="学习笔记">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="ctwabc's Blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2026/09/03/hessian/" class="post-title-link" itemprop="url">Hessian</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2026-09-03 19:11:20" itemprop="dateCreated datePublished" datetime="2026-09-03T19:11:20+08:00">2026-09-03</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2026-09-04 21:01:08" itemprop="dateModified" datetime="2026-09-04T21:01:08+08:00">2026-09-04</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Java%E5%AE%89%E5%85%A8/" itemprop="url" rel="index"><span itemprop="name">Java安全</span></a>
-                </span>
-            </span>
-
-          <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>11k</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p><em><strong>流程分析</strong></em></p>
-<p>跟我之前接触的fastjson，jackson最大的不同之处就是反序列化的时候不使用Getter和Setter，Hessian是通过反射赋值的方式实现的。</p>
-          <!--noindex-->
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -750,7 +753,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">34</span>
+          <span class="site-state-item-count">35</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -810,7 +813,7 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-area"></i>
     </span>
-    <span title="站点总字数">121k</span>
+    <span title="站点总字数">124k</span>
 </div>
   <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
   </div><div class="custom-footer">

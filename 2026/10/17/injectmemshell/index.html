@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.2">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Inter:300,300italic,400,400italic,700,700italic|Noto Sans SC:300,300italic,400,400italic,700,700italic|Noto Serif SC:300,300italic,400,400italic,700,700italic|JetBrains Mono:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"ctwabc.github.io","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":true,"color":"#4A90D9","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="前言之前学的是通过JSP文件注入内存马，不过这样的话还是会有文件落地，下面学一些别的方式。 反序列化注入Tomcat内存马注入内存马其实就是动态注册组件，而想要注册就需要StandardContext，之前JSP中可以轻易的获取Request从而获取到StandardContext，但现在的情况是我们不再使用JSP，所以我们不能够直接获取到Requst。所以在这个条件下获取到StandardCon">
+<meta property="og:type" content="article">
+<meta property="og:title" content="内存马注入">
+<meta property="og:url" content="http://ctwabc.github.io/2026/10/17/injectmemshell/index.html">
+<meta property="og:site_name" content="ctwabc&#39;s Blog">
+<meta property="og:description" content="前言之前学的是通过JSP文件注入内存马，不过这样的话还是会有文件落地，下面学一些别的方式。 反序列化注入Tomcat内存马注入内存马其实就是动态注册组件，而想要注册就需要StandardContext，之前JSP中可以轻易的获取Request从而获取到StandardContext，但现在的情况是我们不再使用JSP，所以我们不能够直接获取到Requst。所以在这个条件下获取到StandardCon">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://ctwabc.github.io/2026/10/17/injectmemshell/injectmemshell1.png">
+<meta property="og:image" content="http://ctwabc.github.io/2026/10/17/injectmemshell/injectmemshell2.png">
+<meta property="article:published_time" content="2026-10-17T12:15:04.000Z">
+<meta property="article:modified_time" content="2026-10-18T07:07:50.037Z">
+<meta property="article:author" content="ctwabc">
+<meta property="article:tag" content="Web安全">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://ctwabc.github.io/2026/10/17/injectmemshell/injectmemshell1.png">
+
+<link rel="canonical" href="http://ctwabc.github.io/2026/10/17/injectmemshell/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+
+<style>
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: -2;
+    /* Fallback gradient when wallpaper API fails */
+    background: linear-gradient(135deg, #e8f0fe 0%, #f3e8ff 25%, #fce4ec 50%, #e8f5e9 75%, #e3f2fd 100%);
+    background-size: 400% 400%;
+    animation: gradientShift 20s ease infinite;
+  }
+
+  @keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+</style>
+
+
+<meta property="og:image" content="https://github.com/ctwabc.png">
+<meta name="twitter:card" content="summary">
+
+  <title>内存马注入 | ctwabc's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">ctwabc's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">学习笔记</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-2x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://ctwabc.github.io/2026/10/17/injectmemshell/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://github.com/ctwabc.png">
+      <meta itemprop="name" content="ctwabc">
+      <meta itemprop="description" content="学习笔记">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="ctwabc's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          内存马注入<a href="https://github.com/user-name/repo-name/tree/branch-name/subdirectory-name_posts/injectmemshell.md" class="post-edit-link" title="编辑" rel="noopener" target="_blank"><i class="fa fa-pencil-alt"></i></a>
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2026-10-17 20:15:04" itemprop="dateCreated datePublished" datetime="2026-10-17T20:15:04+08:00">2026-10-17</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-10-18 15:07:50" itemprop="dateModified" datetime="2026-10-18T15:07:50+08:00">2026-10-18</time>
+              </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>3k</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>之前学的是通过JSP文件注入内存马，不过这样的话还是会有文件落地，下面学一些别的方式。</p>
+<h3 id="反序列化注入Tomcat内存马"><a href="#反序列化注入Tomcat内存马" class="headerlink" title="反序列化注入Tomcat内存马"></a>反序列化注入Tomcat内存马</h3><p>注入内存马其实就是动态注册组件，而想要注册就需要StandardContext，之前JSP中可以轻易的获取Request从而获取到StandardContext，但现在的情况是我们不再使用JSP，所以我们不能够直接获取到Requst。所以在这个条件下获取到StandardContext，就相当于解决了反序列化注入内存马的问题。</p>
+<p><em><strong>通过ThreadLocal获取Request</strong></em></p>
+<p><img src="/2026/10/17/injectmemshell/injectmemshell1.png"></p>
+<p><img src="/2026/10/17/injectmemshell/injectmemshell2.png"></p>
+<p>在ApplicationFilterChain中有两个静态熟悉lastServiceRequest和lastServiceResponse，而且在internalDoFilter中会将当前的request和response设置到相应的属性当中，不过这需要WRAP_SAME_OBJECT这个开关是开着的，默认情况下它是关着的。因为这个开关是关着的这两个属性为null。</p>
+<p>现在问题就变成了开启WRAP_SAME_OBJECT这个开关、为两个属性创建对象。这两件事做完了以后就可以通过反射从这两个属性中获取Request和Response了。但是这种方式有个缺点，就是只能在一次service()被调用的期间才能从这两个属性中获取，因为service()结束后就会清除request和response(这个清除不是说销毁这两个对象，其实是重制这两个对象，这会把之前连个属性存车的设为null)，这也就要求我们反序列化的点在service中。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="type">Field</span> <span class="variable">WRAP_SAME_OBJECT_FIELD</span> <span class="operator">=</span> Class.forName(<span class="string">&quot;org.apache.catalina.core.ApplicationDispatcher&quot;</span>).getDeclaredField(<span class="string">&quot;WRAP_SAME_OBJECT&quot;</span>);</span><br><span class="line">            <span class="type">Field</span> <span class="variable">lastServicedRequestField</span> <span class="operator">=</span> ApplicationFilterChain.class.getDeclaredField(<span class="string">&quot;lastServicedRequest&quot;</span>);</span><br><span class="line">            <span class="type">Field</span> <span class="variable">lastServicedResponseField</span> <span class="operator">=</span> ApplicationFilterChain.class.getDeclaredField(<span class="string">&quot;lastServicedResponse&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">//使用modifiersField反射修改final型变量</span></span><br><span class="line">        java.lang.reflect.<span class="type">Field</span> <span class="variable">modifiersField</span> <span class="operator">=</span> Field.class.getDeclaredField(<span class="string">&quot;modifiers&quot;</span>);</span><br><span class="line">        modifiersField.setAccessible(<span class="literal">true</span>);</span><br><span class="line">        modifiersField.setInt(WRAP_SAME_OBJECT_FIELD, WRAP_SAME_OBJECT_FIELD.getModifiers() &amp; ~Modifier.FINAL);</span><br><span class="line">        modifiersField.setInt(lastServicedRequestField, lastServicedRequestField.getModifiers() &amp; ~Modifier.FINAL);</span><br><span class="line">        modifiersField.setInt(lastServicedResponseField, lastServicedResponseField.getModifiers() &amp; ~Modifier.FINAL);</span><br><span class="line">        WRAP_SAME_OBJECT_FIELD.setAccessible(<span class="literal">true</span>);</span><br><span class="line">        lastServicedRequestField.setAccessible(<span class="literal">true</span>);</span><br><span class="line">        lastServicedResponseField.setAccessible(<span class="literal">true</span>);</span><br><span class="line"> </span><br><span class="line">        <span class="comment">//将变量WRAP_SAME_OBJECT_FIELD设置为true，并初始化lastServicedRequest和lastServicedResponse变量</span></span><br><span class="line">            WRAP_SAME_OBJECT_FIELD.setBoolean(<span class="literal">null</span>,<span class="literal">true</span>);</span><br><span class="line">            lastServicedRequestField.set(<span class="literal">null</span>, <span class="keyword">new</span> <span class="title class_">ThreadLocal</span>&lt;&gt;());</span><br><span class="line">            lastServicedResponseField.set(<span class="literal">null</span>, <span class="keyword">new</span> <span class="title class_">ThreadLocal</span>&lt;&gt;());</span><br></pre></td></tr></table></figure>
+
+<p><em><strong>通过类加载器获取</strong></em></p>
+<p>因为WebappClassLoaderBase要从webapp的资源树里加载东西——<code>WEB-INF/classes</code> 里的类、<code>WEB-INF/lib</code> 里的 jar、静态资源扫描，全都得通过一个「资源根」抽象来访问。所以类加载器必须持有 <code>WebResourceRoot</code>，而在这个资源根中又存放着Context。而别的类加载器没有这个资源根所以不能获取到Context。现在的问题就是怎么获取这个类加载器，我们可以通过获取线程上下文的类加载器(TCCL)来获取。既然如此就需要知道什么时候TCCL会变成WebappClassLoaderBase。StandardWrapperValve.invoke()在这个时候就被切换了，也就是还没到filter链TCCL就是我们想要的了。那什么时候会变成别的类加载器呢？总的来说过滤链和Servlet的工作结束了就被切成别的了，这就比之前那个范围更大了。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//tomcat8.0.x 8.5.0 – 8.5.77  9.0.0.M1 – 9.0.60</span></span><br><span class="line"><span class="type">WebappClassLoaderBase</span> <span class="variable">cl</span> <span class="operator">=</span>(WebappClassLoaderBase)Thread.currentThread().getContextClassLoader();</span><br><span class="line"><span class="type">StandardContext</span> <span class="variable">standardContext</span> <span class="operator">=</span> (StandardContext) webappClassLoaderBase.getResources().getContext();</span><br></pre></td></tr></table></figure>
+
+<p>还有一个好处就是没有用到反射，不过这个方式在新版的tomcat中不能用，因为getResources()返回的是null，不过这个resource字段还在所以可以通过反射获取。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//tomcat8.5.78 – 8.5.99 9.0.62 – 9.0.123 10.0.x / 10.1.x / 11.x</span></span><br><span class="line"><span class="type">WebappClassLoaderBase</span> <span class="variable">cl</span> <span class="operator">=</span>(WebappClassLoaderBase)Thread.currentThread().getContextClassLoader();</span><br><span class="line"><span class="type">Field</span> <span class="variable">resourcesField</span> <span class="operator">=</span> WebappClassLoaderBase.class.getDeclaredField(<span class="string">&quot;resources&quot;</span>);</span><br><span class="line">resourcesField.setAccessible(<span class="literal">true</span>);</span><br><span class="line"><span class="type">StandardContext</span> <span class="variable">context</span> <span class="operator">=</span> (StandardContext) ((WebResourceRoot) resourcesField.get(cl)).getContext();</span><br></pre></td></tr></table></figure>
+
+<h3 id="反序列化注入Spring内存马"><a href="#反序列化注入Spring内存马" class="headerlink" title="反序列化注入Spring内存马"></a>反序列化注入Spring内存马</h3>
+    </div>
+
+    
+    
+    
+<div style="margin-top: 48px; padding-top: 24px; border-top: 1px solid rgba(128,128,128,0.15); text-align: center; color: #999; font-size: 0.88em;">
+  <p>感谢阅读 🙏 如果这篇文章对你有帮助，欢迎分享给更多人。</p>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2026/10/12/sqlilabs/" rel="prev" title="sqlilabs">
+      <i class="fa fa-chevron-left"></i> sqlilabs
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%B3%A8%E5%85%A5Tomcat%E5%86%85%E5%AD%98%E9%A9%AC"><span class="nav-number">1.1.</span> <span class="nav-text">反序列化注入Tomcat内存马</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%B3%A8%E5%85%A5Spring%E5%86%85%E5%AD%98%E9%A9%AC"><span class="nav-number">1.2.</span> <span class="nav-text">反序列化注入Spring内存马</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="ctwabc"
+      src="https://github.com/ctwabc.png">
+  <p class="site-author-name" itemprop="name">ctwabc</p>
+  <div class="site-description" itemprop="description">学习笔记</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">35</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">分类</span>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+  <div class="sidebar-button motion-element"><i class="fa fa-comment"></i>
+    Chat
+  </a>
+  </div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/ctwabc" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ctwabc" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+
+<div class="sidebar-github-link">
+  <a href="https://github.com/ctwabc" target="_blank" rel="noopener">
+    <i class="fab fa-github"></i> Star on GitHub
+  </a>
+</div>
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ctwabc</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">124k</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div><div class="custom-footer">
+  <span>用代码记录世界，用安全守护代码  ·  <i class="fa fa-coffee"></i>  用心写作</span>
+</div>
+
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+<script src="/js/bookmark.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+<script>
+(function() {
+  // Wallpaper fallback: if the image fails to load, keep the gradient
+  var bgImg = new Image();
+  bgImg.src = 'https://api.paugram.com/wallpaper/';
+  bgImg.onload = function() {
+    document.body.style.backgroundImage = 'url(https://api.paugram.com/wallpaper/)';
+  };
+
+  // Smooth scroll for anchor links
+  document.querySelectorAll('a[href^="#"]').forEach(function(anchor) {
+    anchor.addEventListener('click', function(e) {
+      var target = document.querySelector(this.getAttribute('href'));
+      if (target) {
+        e.preventDefault();
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  });
+
+  // Intersection Observer for scroll-triggered fade-in
+  if ('IntersectionObserver' in window) {
+    var observer = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          entry.target.style.opacity = '1';
+          entry.target.style.transform = 'translateY(0)';
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.post-block').forEach(function(el) {
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(20px)';
+      el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+      observer.observe(el);
+    });
+  }
+
+})();
+</script>
+
+</body>
+</html>
